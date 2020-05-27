@@ -1,0 +1,37 @@
+{
+	"version": "2.0.0",
+	"tasks": [{
+			"label": "connect",
+			"type": "npm",
+			"script": "connect",
+			"problemMatcher": [],
+			"detail": "adb connect 192.168.1.101:5555",
+			"presentation": {
+				"echo": true,
+				"reveal": "silent",
+				"focus": false,
+				"panel": "new",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"auto": true
+		},
+		{
+			"label": "npm: start-reset",
+			"type": "npm",
+			"script": "start-reset",
+			"problemMatcher": [],
+			"detail": "react-native start --reset-cache",
+			"dependsOn": ["connect"],
+			"auto": true
+		},
+		{
+			"type": "npm",
+			"script": "android",
+			"problemMatcher": [],
+			"label": "npm: android",
+			"detail": "adb reverse tcp:8097 tcp:8097 && react-native run-android",
+			"auto": true
+		}
+	]
+}

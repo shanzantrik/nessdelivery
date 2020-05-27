@@ -1,0 +1,61 @@
+{
+	"name": "ECommerce",
+	"version": "0.0.1",
+	"private": true,
+	"scripts": {
+		"android": "adb reverse tcp:8097 tcp:8097 && react-native run-android",
+		"ios": "react-native run-ios",
+		"clean": "cd android && gradlew clean && cd ..",
+		"start": "react-native start --port 8081",
+		"start-reset": "react-native start --reset-cache --port 8081",
+		"clear": "npm cache clear --force",
+		"test": "jest",
+		"lint": "eslint .",
+		"connect": "adb connect 192.168.1.101:5555",
+		"connect-reverse": "adb reverse tcp:8097 tcp:8097",
+		"build": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/",
+		"release-build": "cd android && gradlew assembleRelease"
+	},
+	"dependencies": {
+		"@react-native-community/masked-view": "^0.1.10",
+		"@react-navigation/drawer": "^5.8.0",
+		"@react-navigation/native": "^5.4.2",
+		"@react-navigation/stack": "^5.3.9",
+		"axios": "^0.19.2",
+		"prop-types": "^15.7.2",
+		"react": "16.11.0",
+		"react-native": "0.62.2",
+		"react-native-dropdown-menu": "^2.0.0",
+		"react-native-elements": "^2.0.0",
+		"react-native-extra-dimensions-android": "^1.2.5",
+		"react-native-gesture-handler": "^1.6.1",
+		"react-native-reanimated": "^1.9.0",
+		"react-native-responsive-screen": "github:akshay2796/react-native-responsive-screen",
+		"react-native-safe-area-context": "^2.0.0",
+		"react-native-screens": "^2.8.0",
+		"react-native-snap-carousel": "^3.9.0",
+		"react-native-vector-icons": "^6.6.0"
+	},
+	"devDependencies": {
+		"@babel/core": "^7.9.0",
+		"@babel/plugin-transform-spread": "^7.8.3",
+		"@babel/runtime": "^7.9.2",
+		"@react-native-community/bob": "^0.10.1",
+		"@react-native-community/eslint-config": "^1.1.0",
+		"@types/react": "^16.9.34",
+		"@types/react-native": "^0.62.2",
+		"babel-jest": "^25.4.0",
+		"babel-plugin-react-native-classname-to-style": "^1.2.2",
+		"babel-plugin-react-native-platform-specific-extensions": "^1.1.1",
+		"babel-plugin-react-native-stylename-to-style": "^0.13.0",
+		"eslint": "^6.8.0",
+		"eslint-config-prettier": "^6.11.0",
+		"jest": "^25.4.0",
+		"metro-react-native-babel-preset": "^0.59.0",
+		"react-test-renderer": "16.11.0",
+		"typescript": "^3.8.3"
+	},
+	"jest": {
+		"preset": "react-native"
+	}
+}
