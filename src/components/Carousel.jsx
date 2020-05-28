@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
+import {
+	widthPercentageToDP as wp,
+	heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 
 export default function CarouselComponent({ data, containerStyle }) {
 	var _carousel = React.createRef();
-	const sliderWidth = 300,
-		itemWidth = 300;
+	const sliderWidth = wp(100),
+		itemWidth = wp(100);
 	const [activeSlide, setActiveSlide] = useState(1);
 	const _renderItem = ({ item, index }) => {
 		return (
@@ -35,8 +39,6 @@ export default function CarouselComponent({ data, containerStyle }) {
 					autoplayInterval={3000}
 					onSnapToItem={(index) => setActiveSlide(index)}
 				/>
-			</View>
-			<View>
 				<Pagination
 					dotsLength={data.length}
 					activeDotIndex={activeSlide}
@@ -59,19 +61,15 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		marginTop: 10,
 	},
-	slide: {
-		width: 300,
-		height: 300,
-	},
 	carouselContainer: {
-		width: 320,
-		aspectRatio: 324 / 181,
+		width: wp(100),
+		height: hp(30),
 		alignItems: 'center',
 		justifyContent: 'center',
 	},
 	image: {
 		width: '100%',
-		resizeMode: 'contain',
+		height: '100%',
 	},
 	title: {
 		fontSize: 14,
@@ -82,6 +80,7 @@ const styles = StyleSheet.create({
 		borderRadius: 4,
 	},
 	paginationContainer: {
+		bottom: '10%',
 		paddingVertical: 15,
 	},
 });

@@ -11,12 +11,14 @@ import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { Fonts } from '../constants';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { CategoryArray } from '../static';
+import { SearchBar } from 'react-native-elements';
 
 export default function Search() {
 	let data = ['Banana', 'Mango', 'Pear'];
 	const [selectedCategory, setSelectedCategory] = useState(
 		'Shop from category'
 	);
+	const [searchText, setSearchText] = useState('');
 	return (
 		<View style={styles.container}>
 			<TouchableOpacity>
@@ -39,12 +41,14 @@ export default function Search() {
 							setSelectedCategory(itemValue)
 						}
 						mode={'dropdown'}>
-						<Picker.Item
-							label={'Shop from category'}
-							value={'Shop from category'}
-						/>
+						<Picker.Item label={'Category'} value={'Category'} />
 						{CategoryArray.map((item) => {
-							return <Picker.Item label={item} value={item} />;
+							return (
+								<Picker.Item
+									label={item.label}
+									value={item.value}
+								/>
+							);
 						})}
 					</Picker>
 				</View>
@@ -55,19 +59,11 @@ export default function Search() {
 					alignItems: 'center',
 					justifyContent: 'center',
 				}}>
-				<TextInput
-					style={{
-						borderColor: 'gray',
-						borderWidth: 1,
-						borderRadius: 8,
-						paddingLeft: 30,
-						fontSize: 12,
-					}}
-					placeholder={'Search for products, brands and more'}
+				<SearchBar
+					placeholder="Search for products, brands and more"
+					value={searchText}
+					onChangeText={(text) => setSearchText(text)}
 				/>
-				<View style={styles.searchIconContainer}>
-					<Icon name="search" style={styles.searchIcon} />
-				</View>
 			</View>
 		</View>
 	);

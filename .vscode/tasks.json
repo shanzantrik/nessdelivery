@@ -14,7 +14,6 @@
 				"showReuseMessage": true,
 				"clear": false
 			},
-			"auto": true
 		},
 		{
 			"label": "npm: start-reset",
@@ -23,7 +22,6 @@
 			"problemMatcher": [],
 			"detail": "react-native start --reset-cache",
 			"dependsOn": ["connect"],
-			"auto": true
 		},
 		{
 			"type": "npm",
@@ -31,7 +29,6 @@
 			"problemMatcher": [],
 			"label": "npm: android",
 			"detail": "adb reverse tcp:8097 tcp:8097 && react-native run-android",
-			"auto": true
 		}
 	]
 }

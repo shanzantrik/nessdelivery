@@ -1,6 +1,7 @@
 import CircularCategories from './CircularCategories';
 import CategoriesFlatList from './CategoriesFlatList';
 import CircularFlatList from './CircularFlatList';
+import CategoriesSimple from './CategoriesSimple';
 import CategoryItem from './CategoryItem';
 import Header from './Header';
 import Carousel from './Carousel';
@@ -11,6 +12,7 @@ export {
 	CircularCategories,
 	CircularFlatList,
 	CategoriesFlatList,
+	CategoriesSimple,
 	CategoryItem,
 	Header,
 	Carousel,

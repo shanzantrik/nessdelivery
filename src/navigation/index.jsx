@@ -1,23 +1,55 @@
 import React from 'react';
 import { HomepageToolbar } from '../components';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import {
+	createStackNavigator,
+	CardStyleInterpolators,
+} from '@react-navigation/stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 
 //HomeStack Screens
-import { HomePage } from '../pages';
+import { SplashScreen, Login, Signup, HomePage } from '../pages';
 
 const HomeStack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
+const config = {
+	animation: 'spring',
+	config: {
+		stiffness: 1000,
+		damping: 500,
+		mass: 3,
+		overshootClamping: true,
+		restDisplacementThreshold: 0.01,
+		restSpeedThreshold: 0.01,
+	},
+};
+
 function HomeStackNavigation({ navigation }) {
 	return (
 		<HomeStack.Navigator
+			initialRouteName="SplashScreen"
 			screenOptions={{
 				cardStyle: {
 					backgroundColor: 'white',
 				},
+				transitionSpec: {
+					open: config,
+					close: config,
+				},
+				cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
 			}}>
+			<HomeStack.Screen
+				name="SplashScreen"
+				component={SplashScreen}
+				options={{ headerShown: false }}
+			/>
+			<HomeStack.Screen
+				name="Login"
+				component={Login}
+				options={{ headerShown: false }}
+			/>
+			<HomeStack.Screen name="Signup" component={Signup} />
 			<HomeStack.Screen
 				name="Homepage"
 				component={HomePage}

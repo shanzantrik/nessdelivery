@@ -1,3 +1,6 @@
 import HomePage from './Homepage';
+import SplashScreen from './SplashScreen';
+import Login from './Login';
+import Signup from './Signup';
 
-export { HomePage };
+export { SplashScreen, Login, Signup, HomePage };

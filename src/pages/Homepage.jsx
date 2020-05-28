@@ -5,6 +5,7 @@ import {
 	Carousel,
 	CircularFlatList,
 	Search,
+	CategoriesSimple,
 } from '../components';
 import {
 	VegProducts,
@@ -62,7 +63,7 @@ export default function Homepage() {
 							</Text>
 						</Text>
 					</View>
-					<CircularFlatList
+					<CategoriesSimple
 						data={CircularCategoriesData}
 						title={'Categories'}
 					/>

@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 	},
 	image: {
-		height: '62%',
+		height: '68%',
 		aspectRatio: 400 / 250,
 		resizeMode: 'contain',
 	},
@@ -109,14 +109,14 @@ const styles = StyleSheet.create({
 	discountTextContainer: {
 		position: 'absolute',
 		right: 5,
-		bottom: 25,
+		bottom: 15,
 		backgroundColor: '#88cf45',
 		paddingHorizontal: 6,
 		paddingVertical: 4,
 		borderRadius: 10,
 	},
 	discountText: {
-		fontSize: 10,
+		fontSize: 12,
 		color: 'white',
 		fontFamily: Fonts.semiBold,
 	},
