@@ -9,38 +9,44 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Fonts, Colors } from '../constants';
+import Search from './Search';
 
 export default function HomepageToolbar(props) {
-	const { navigation } = props;
+	const { navigation, searchBar } = props;
 	return (
 		<View style={styles.container}>
-			<View style={styles.flexRow}>
-				<TouchableOpacity onPress={() => navigation.openDrawer()}>
-					<View style={styles.drawerContainer}>
-						<Icon name="bars" style={styles.drawer} />
-					</View>
-				</TouchableOpacity>
+			<View style={styles.headerContainer}>
 				<View style={styles.flexRow}>
-					<Image
-						source={require('../assets/logos/logo.png')}
-						style={styles.logo}
-					/>
+					<TouchableOpacity onPress={() => navigation.openDrawer()}>
+						<View style={styles.drawerContainer}>
+							<Icon name="bars" style={styles.drawer} />
+						</View>
+					</TouchableOpacity>
+					<View style={styles.flexRow}>
+						<Image
+							source={require('../assets/logos/logo.png')}
+							style={styles.logo}
+						/>
+					</View>
+				</View>
+				<View style={styles.flexRow}>
+					<TouchableOpacity>
+						<Icon name="bell" style={styles.search} />
+					</TouchableOpacity>
+					<TouchableOpacity>
+						<Icon name="shopping-cart" style={styles.search} />
+					</TouchableOpacity>
 				</View>
 			</View>
-			<View style={styles.flexRow}>
-				<TouchableOpacity>
-					<Icon name="bell" style={styles.search} />
-				</TouchableOpacity>
-				<TouchableOpacity>
-					<Icon name="shopping-cart" style={styles.search} />
-				</TouchableOpacity>
+			<View style={searchBar === false && { display: 'none' }}>
+				<Search />
 			</View>
 		</View>
 	);
 }
 
 const styles = StyleSheet.create({
-	container: {
+	headerContainer: {
 		flexDirection: 'row',
 		height: 50,
 		alignItems: 'center',

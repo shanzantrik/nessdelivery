@@ -11,27 +11,43 @@ import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import LinearGradient from 'react-native-linear-gradient';
 import { Header, CircularCategories } from './index';
 import PropTypes from 'prop-types';
+import { Colors } from '../constants';
 
-export default function CategoriesSimple({ data, title, containerStyle }) {
+export default function CategoriesSimple({
+	data,
+	title,
+	containerStyle,
+	navigation,
+}) {
 	const _renderCircularItem = ({ item, index }) => {
 		return (
-			<TouchableOpacity>
+			<TouchableOpacity
+				style={{
+					height: '100%',
+					width: wp(100) / (data.length / 2) - 4,
+				}}
+				onPress={() =>
+					navigation.navigate('SubCategories', {
+						data: item.title,
+					})
+				}>
 				<View
 					style={{
-						borderColor: '#f953c6',
+						height: 40,
+						borderColor: '#ff0000',
 						borderWidth: 2,
 						borderRadius: 10,
 						margin: 4,
+						alignItems: 'center',
+						justifyContent: 'center',
 					}}>
 					<Text
 						style={{
-							width: '100%',
-							color: '#b91d73',
-							borderRadius: 10,
-							margin: 1,
-							padding: 5,
-							paddingHorizontal: 8,
-						}}>
+							color: Colors.black,
+							paddingHorizontal: 2,
+						}}
+						adjustsFontSizeToFit={true}
+						numberOfLines={1}>
 						{item.title}
 					</Text>
 				</View>
@@ -40,10 +56,8 @@ export default function CategoriesSimple({ data, title, containerStyle }) {
 	};
 	const _keyExtractor = ({ item, index }) => index;
 	return (
-		<ScrollView
-			contentContainerStyle={[{ width: wp(100) }, containerStyle]}
-			horizontal>
-			<View>
+		<View style={[{ width: wp(100) }, containerStyle]}>
+			<ScrollView horizontal showsHorizontalScrollIndicator={false}>
 				<FlatList
 					style={styles.container}
 					data={data}
@@ -52,8 +66,8 @@ export default function CategoriesSimple({ data, title, containerStyle }) {
 					showsHorizontalScrollIndicator={false}
 					numColumns={data.length / 2}
 				/>
-			</View>
-		</ScrollView>
+			</ScrollView>
+		</View>
 	);
 }
 

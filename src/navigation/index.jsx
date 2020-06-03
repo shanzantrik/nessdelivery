@@ -6,9 +6,21 @@ import {
 	CardStyleInterpolators,
 } from '@react-navigation/stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 
 //HomeStack Screens
-import { SplashScreen, Login, Signup, HomePage } from '../pages';
+import {
+	SplashScreen,
+	Login,
+	Signup,
+	OTPScreen,
+	HomePage,
+	SubCategories,
+	ProductList,
+	CategoriesModal,
+	ProductDetail,
+} from '../pages';
+import { Image } from 'react-native';
 
 const HomeStack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -28,7 +40,7 @@ const config = {
 function HomeStackNavigation({ navigation }) {
 	return (
 		<HomeStack.Navigator
-			initialRouteName="SplashScreen"
+			initialRouteName="ProductDetail"
 			screenOptions={{
 				cardStyle: {
 					backgroundColor: 'white',
@@ -51,11 +63,56 @@ function HomeStackNavigation({ navigation }) {
 			/>
 			<HomeStack.Screen name="Signup" component={Signup} />
 			<HomeStack.Screen
+				name="OTPScreen"
+				component={OTPScreen}
+				options={{ headerShown: false }}
+			/>
+			<HomeStack.Screen
+				name="SubCategories"
+				component={SubCategories}
+				options={{
+					header: (props) => (
+						<HomepageToolbar {...props} navigation={navigation} />
+					),
+				}}
+			/>
+			<HomeStack.Screen
+				name="ProductList"
+				component={ProductList}
+				options={{
+					header: (props) => (
+						<HomepageToolbar {...props} navigation={navigation} />
+					),
+				}}
+			/>
+			<HomeStack.Screen
 				name="Homepage"
 				component={HomePage}
 				options={{
 					header: (props) => (
 						<HomepageToolbar {...props} navigation={navigation} />
+					),
+				}}
+			/>
+			<HomeStack.Screen
+				name="CategoriesModal"
+				component={CategoriesModal}
+				options={{
+					headerShown: false,
+					cardStyleInterpolator:
+						CardStyleInterpolators.forModalPresentationIOS,
+				}}
+			/>
+			<HomeStack.Screen
+				name="ProductDetail"
+				component={ProductDetail}
+				options={{
+					header: (props) => (
+						<HomepageToolbar
+							{...props}
+							navigation={navigation}
+							searchBar={false}
+						/>
 					),
 				}}
 			/>
@@ -65,32 +122,62 @@ function HomeStackNavigation({ navigation }) {
 
 function DrawerNavigator() {
 	return (
-		<Drawer.Navigator initialRouteName="Home">
-			<Drawer.Screen name="Home" component={HomeStackNavigation} />
-			<Drawer.Screen name="Shop" component={HomeStackNavigation} />
-			<Drawer.Screen name="About" component={HomeStackNavigation} />
-			<Drawer.Screen name="Veg Items" component={HomeStackNavigation} />
-			<Drawer.Screen name="Sea Food" component={HomeStackNavigation} />
+		<Drawer.Navigator initialRouteName="Home" drawerType="front">
+			<Drawer.Screen name="Profile" component={HomeStackNavigation} />
 			<Drawer.Screen
-				name="Chicken Items"
+				name="Home"
 				component={HomeStackNavigation}
-			/>
-			<Drawer.Screen name="Pork Items" component={HomeStackNavigation} />
-			<Drawer.Screen
-				name="Mithun Items"
-				component={HomeStackNavigation}
+				options={{
+					drawerIcon: ({ focused, color }) => (
+						<Icon name="home" color={color} size={20} />
+					),
+				}}
 			/>
 			<Drawer.Screen
-				name="Paneer Items"
+				name="Wishlist"
 				component={HomeStackNavigation}
+				options={{
+					drawerIcon: ({ focused, color }) => (
+						<Icon name="home" color={color} size={20} />
+					),
+				}}
 			/>
 			<Drawer.Screen
-				name="Cheese & Chream"
+				name="My Orders"
 				component={HomeStackNavigation}
+				options={{
+					drawerIcon: ({ focused, color }) => (
+						<Icon name="shopping-cart" color={color} size={20} />
+					),
+				}}
 			/>
-			<Drawer.Screen name="Ice Cream" component={HomeStackNavigation} />
-			<Drawer.Screen name="My Orders" component={HomeStackNavigation} />
-			<Drawer.Screen name="Logout" component={HomeStackNavigation} />
+			<Drawer.Screen
+				name="Login"
+				component={HomeStackNavigation}
+				options={{
+					drawerIcon: ({ focused, color }) => (
+						<Icon name="home" color={color} size={20} />
+					),
+				}}
+			/>
+			<Drawer.Screen
+				name="Register"
+				component={HomeStackNavigation}
+				options={{
+					drawerIcon: ({ focused, color }) => (
+						<Icon name="home" color={color} size={20} />
+					),
+				}}
+			/>
+			<Drawer.Screen
+				name="Logout"
+				component={HomeStackNavigation}
+				options={{
+					drawerIcon: ({ focused, color }) => (
+						<Icon name="home" color={color} size={20} />
+					),
+				}}
+			/>
 		</Drawer.Navigator>
 	);
 }

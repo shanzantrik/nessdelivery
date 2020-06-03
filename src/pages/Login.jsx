@@ -55,7 +55,7 @@ export default function Login({ navigation }) {
 					marginBottom: hp(5),
 				}}>
 				<LinearGradient
-					colors={['#f953c6', '#b91d73']}
+					colors={['#DA22FF', '#9733EE']}
 					start={{ x: 0.0, y: 1.0 }}
 					end={{ x: 1.0, y: 1.0 }}
 					style={{ wdith: wp(100) }}>
@@ -94,7 +94,7 @@ export default function Login({ navigation }) {
 								style={{
 									color: Colors.white,
 									fontSize: 16,
-									fontFamily: Fonts.semiBold,
+									fontFamily: Fonts.bold,
 									textAlign: 'center',
 								}}>
 								Please Login using your{'\n'} existing account
@@ -147,13 +147,17 @@ export default function Login({ navigation }) {
 				<Text style={styles.forgotText}>Forgot Password?</Text>
 			</TouchableOpacity>
 			<LinearGradient
-				colors={['#f953c6', '#b91d73']}
+				colors={['#DA22FF', '#9733EE']}
 				start={{ x: 0.0, y: 1.0 }}
 				end={{ x: 1.0, y: 1.0 }}
 				style={{ borderRadius: 32, marginTop: 20 }}>
 				<TouchableOpacity
 					style={styles.signInContainer}
-					onPress={() => navigation.navigate('Homepage')}
+					onPress={() =>
+						navigation.navigate('OTPScreen', {
+							phone: phone,
+						})
+					}
 					onPressIn={() => setSignInFocused(true)}
 					onPressOut={() => setSignInFocused(false)}>
 					<View style={styles.signInView}>
@@ -163,10 +167,10 @@ export default function Login({ navigation }) {
 								{
 									color: signInFocused
 										? '#ffffff'
-										: '#f953c6',
+										: '#9733EE',
 								},
 							]}>
-							{password.length === 0 ? 'Send OTP' : 'Sign In'}
+							Sign In
 						</Text>
 					</View>
 				</TouchableOpacity>
@@ -230,7 +234,7 @@ const styles = StyleSheet.create({
 	},
 	signIn: {
 		fontSize: 16,
-		fontFamily: Fonts.semiBold,
+		fontFamily: Fonts.bold,
 		color: '#f953c6',
 		textTransform: 'uppercase',
 	},
@@ -238,7 +242,7 @@ const styles = StyleSheet.create({
 		position: 'absolute',
 		left: 0,
 		fontSize: 14,
-		fontFamily: Fonts.semiBold,
+		fontFamily: Fonts.bold,
 		color: '#f953c6',
 	},
 	forgotContainer: {

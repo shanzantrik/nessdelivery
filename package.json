@@ -17,7 +17,9 @@
 		"release-build": "cd android && gradlew assembleRelease"
 	},
 	"dependencies": {
+		"@react-native-community/art": "^1.2.0",
 		"@react-native-community/masked-view": "^0.1.10",
+		"@react-native-community/picker": "^1.6.1",
 		"@react-navigation/drawer": "^5.8.0",
 		"@react-navigation/native": "^5.4.2",
 		"@react-navigation/stack": "^5.3.9",
@@ -34,6 +36,7 @@
 		"react-native-otp-textinput": "0.0.7",
 		"react-native-permissions": "^2.1.5",
 		"react-native-picker-select": "^7.0.0",
+		"react-native-progress": "^4.1.2",
 		"react-native-reanimated": "^1.9.0",
 		"react-native-responsive-screen": "github:akshay2796/react-native-responsive-screen",
 		"react-native-safe-area-context": "^2.0.0",

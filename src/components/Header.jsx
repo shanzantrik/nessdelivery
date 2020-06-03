@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
 	titleStyle: {
 		fontSize: 16,
 		color: 'black',
-		fontFamily: Fonts.semiBold,
+		fontFamily: Fonts.bold,
 		textTransform: 'uppercase',
 	},
 	viewAllContainerStyle: {

@@ -73,8 +73,9 @@ const styles = StyleSheet.create({
 	container: {
 		alignItems: 'center',
 		margin: 8,
-		backgroundColor: '#fff',
+		marginBottom: 16,
 		borderRadius: 10,
+		...Shadow.dark,
 	},
 	imageContainer: {
 		width: '100%',

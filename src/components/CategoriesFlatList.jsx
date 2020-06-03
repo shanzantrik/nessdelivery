@@ -3,6 +3,7 @@ import { View, FlatList, StyleSheet } from 'react-native';
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { Header, CategoryItem } from './index';
 import PropTypes from 'prop-types';
+import { Shadow } from '../constants';
 
 export default function CategoriesFlatList({ data, title, containerStyle }) {
 	const _renderCircularItem = ({ item, index }) => {
@@ -47,7 +48,7 @@ const styles = StyleSheet.create({
 		marginHorizontal: 8,
 	},
 	circularContainerStyle: {
-		height: wp(45),
+		height: wp(55),
 		width: wp(35),
 	},
 	circularImageStyle: {

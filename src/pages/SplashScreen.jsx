@@ -92,7 +92,7 @@ export default function SplashScreen({ navigation }) {
 	return (
 		<View style={styles.container}>
 			<LinearGradient
-				colors={['#f953c6', '#b91d73']}
+				colors={['#DA22FF', '#9733EE']}
 				start={{ x: 0.0, y: 1.0 }}
 				end={{ x: 1.0, y: 1.0 }}
 				style={{
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
 	},
 	signIn: {
 		fontSize: 16,
-		fontFamily: Fonts.semiBold,
+		fontFamily: Fonts.bold,
 		color: '#f953c6',
 		textTransform: 'uppercase',
 	},

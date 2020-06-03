@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { ScrollView, View, Text, Image, StyleSheet } from 'react-native';
+import {
+	ScrollView,
+	View,
+	Text,
+	Image,
+	StyleSheet,
+	Modal,
+	TouchableOpacity,
+} from 'react-native';
 import {
 	CategoriesFlatList,
 	Carousel,
@@ -25,12 +33,14 @@ const borderProps = {
 	borderWidth: 1,
 };
 
-export default function Homepage() {
+export default function Homepage({ navigation }) {
 	return (
 		<View style={{ flex: 1 }}>
 			<ScrollView contentContainerStyle={styles.container}>
+				{/* <Search
+					onPress={() => navigation.navigate('CategoriesModal')}
+				/> */}
 				<View style={{ alignItems: 'center' }}>
-					<Search />
 					<View
 						style={{
 							width: wp(100),
@@ -50,13 +60,13 @@ export default function Homepage() {
 						<Text
 							style={{
 								fontSize: 14,
-								fontFamily: Fonts.semiBold,
+								fontFamily: Fonts.bold,
 							}}>
 							Deliver To:
 							<Text
 								style={{
 									fontSize: 14,
-									fontFamily: Fonts.semiBold,
+									fontFamily: Fonts.bold,
 								}}>
 								{' '}
 								Location Here
@@ -66,6 +76,7 @@ export default function Homepage() {
 					<CategoriesSimple
 						data={CircularCategoriesData}
 						title={'Categories'}
+						navigation={navigation}
 					/>
 					<Carousel data={CarouselData} />
 					<CategoriesFlatList
