@@ -9,7 +9,7 @@ const RatingData = [
 		rating: 1,
 		title: 'Fries not fresh',
 		body:
-			'I very much like eating french fries, but after using this product, I simply cannot eat fries anymore. Fuck you McCain',
+			'I very much like eating french fries, but after using this product, I simply cannot eat fries anymore. Not so good',
 		name: 'Sunny',
 		location: 'Delhi',
 		time: '1 week ago',
