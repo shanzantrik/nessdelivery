@@ -188,7 +188,7 @@ export default function RatingsAndReviews({}) {
 								style={{
 									fontSize: 25,
 									fontFamily: Fonts.semiBold,
-									color: '#689f39',
+									color: Colors.greenText,
 									marginEnd: 5,
 								}}>
 								4.2
@@ -198,7 +198,7 @@ export default function RatingsAndReviews({}) {
 								style={{
 									fontSize: 12,
 									fontFamily: Fonts.primary,
-									color: '#689f39',
+									color: Colors.greenText,
 									alignSelf: 'flex-end',
 									paddingBottom: 5,
 								}}
@@ -250,7 +250,7 @@ export default function RatingsAndReviews({}) {
 							thickness={6}
 							borderColor={'#00000000'}
 							progress={0.86}
-							color={'#689f39'}
+							color={Colors.greenText}
 							unfilledColor={'#689f3933'}
 							strokeCap={'round'}
 							showsText={true}
@@ -284,7 +284,7 @@ export default function RatingsAndReviews({}) {
 							thickness={6}
 							borderColor={'#00000000'}
 							progress={0.86}
-							color={'#689f39'}
+							color={Colors.greenText}
 							unfilledColor={'#689f3933'}
 							strokeCap={'round'}
 							showsText={true}
@@ -318,7 +318,7 @@ export default function RatingsAndReviews({}) {
 							thickness={6}
 							borderColor={'#00000000'}
 							progress={0.82}
-							color={'#689f39'}
+							color={Colors.greenText}
 							unfilledColor={'#689f3933'}
 							strokeCap={'round'}
 							showsText={true}
@@ -350,6 +350,7 @@ export default function RatingsAndReviews({}) {
 			<FlatList
 				data={RatingData}
 				renderItem={(object) => <RenderReviews {...object} />}
+				keyExtractor={({ index, item }) => index + item}
 				ItemSeparatorComponent={() => (
 					<View style={{ height: 1, backgroundColor: '#999999' }} />
 				)}

@@ -7,6 +7,9 @@ import SubCategories from './SubCategories';
 import ProductList from './ProductList';
 import CategoriesModal from './CategoriesModal';
 import ProductDetail from './ProductDetail';
+import Cart from './Cart';
+import Payment from './Payment';
+import CardPage from './CardPage';
 
 export {
 	SplashScreen,
@@ -18,4 +21,7 @@ export {
 	ProductList,
 	CategoriesModal,
 	ProductDetail,
+	Cart,
+	Payment,
+	CardPage,
 };

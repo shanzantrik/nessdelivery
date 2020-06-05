@@ -8,6 +8,7 @@ export default {
 	greenPrimary: '#88cf45',
 	greenText: '#689f39',
 	greenSecondary: '#ccecb1',
+	greenBackground: '#e9f2e1',
 	redPrimary: '#ff0000',
 	redSecondary: '#fab8bf',
 };

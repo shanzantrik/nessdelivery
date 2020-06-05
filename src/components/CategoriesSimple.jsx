@@ -54,7 +54,7 @@ export default function CategoriesSimple({
 			</TouchableOpacity>
 		);
 	};
-	const _keyExtractor = ({ item, index }) => index;
+	const _keyExtractor = ({ item, index }) => index + item;
 	return (
 		<View style={[{ width: wp(100) }, containerStyle]}>
 			<ScrollView horizontal showsHorizontalScrollIndicator={false}>

@@ -34,21 +34,9 @@ export default function SubCategories({ navigation, route }) {
 			selected === 'None' ? false : selected === item.title
 		);
 
-		const height = new Animated.Value(0);
-
 		const showSubCategories = () => {
-			const endValue = height === 100 ? 0 : 100;
-			Animated.timing(height, {
-				toValue: endValue,
-				duration: 3000,
-				easing: Easing.ease,
-			}).start();
+			toggleExpanded(!isExpanded);
 		};
-
-		let heightAnimation = height.interpolate({
-			inputRange: [0, 100],
-			outputRange: [0, 100],
-		});
 
 		const _renderSubCategories = ({ index, item }) => {
 			return (
@@ -151,22 +139,19 @@ export default function SubCategories({ navigation, route }) {
 							/>
 						</View>
 					</View>
-					<Animated.View
+					<View
 						style={[
 							styles.subCategories,
-							!isExpanded && {
-								height:
-									heightAnimation === 0
-										? 0
-										: concat(heightAnimation, '%'),
-							},
+							!isExpanded && { height: 0 },
 						]}>
 						<FlatList
 							data={item.subCategories}
 							renderItem={_renderSubCategories}
+							keyExtractor={({ index, item }) => index + item}
+							listKey={(item, index) => 'D' + index.toString()}
 							numColumns={2}
 						/>
-					</Animated.View>
+					</View>
 				</View>
 			</TouchableWithoutFeedback>
 		);
@@ -183,6 +168,7 @@ export default function SubCategories({ navigation, route }) {
 				renderItem={(object) => (
 					<_renderItem {...object} selected={data} />
 				)}
+				keyExtractor={({ index, item }) => index + item}
 				contentContainerStyle={styles.flatListContainer}
 				ItemSeparatorComponent={() => (
 					<View

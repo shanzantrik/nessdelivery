@@ -89,6 +89,7 @@ export default function AboutProduct({ data }) {
 					borderBottomColor: '#999999',
 					borderBottomWidth: 1,
 				}}
+				keyExtractor={({ index, item }) => index + item}
 				renderItem={(object) => <RenderItem {...object} />}
 				ItemSeparatorComponent={() => (
 					<View

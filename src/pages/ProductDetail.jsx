@@ -10,16 +10,22 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { Colors, Fonts } from '../constants';
-import { PackSizes, AboutProduct, RatingsAndReviews } from '../components';
+import {
+	PackSizes,
+	AboutProduct,
+	RatingsAndReviews,
+	AddButton,
+} from '../components';
 
 const product = {
 	brand: 'McCain',
-	title: 'French Fries, 1Kg Pouch',
+	weight: 1,
+	title: 'French Fries',
 	imageFront: require('../assets/homepage/french_fries_front.png'),
 	imageBack: require('../assets/homepage/french_fries_back.png'),
 	price: 412,
 	oldPrice: 490,
-	discount: 16,
+	discount: '16% off',
 	rating: 4.3,
 	ratingAndReviews: '17783 Ratings and 107 Reviews',
 	about: [
@@ -47,76 +53,10 @@ const product = {
 };
 
 export default function ProductDetail({ navigation, route }) {
-	const Buttons = () => {
-		return (
-			<View style={{ flexDirection: 'row', width: wp(100) }}>
-				<TouchableOpacity
-					style={{
-						flex: 1,
-					}}>
-					<View
-						style={{
-							paddingVertical: 20,
-							flexDirection: 'row',
-							backgroundColor: '#4a4a4a',
-							alignItems: 'center',
-							justifyContent: 'center',
-						}}>
-						<Icon
-							name="bookmark"
-							style={{
-								fontSize: 18,
-								color: Colors.white,
-								marginEnd: 10,
-							}}
-						/>
-						<Text
-							style={{
-								fontSize: 15,
-								fontFamily: Fonts.semiBold,
-								textAlign: 'center',
-								color: Colors.white,
-								textTransform: 'uppercase',
-							}}>
-							Save for Later
-						</Text>
-					</View>
-				</TouchableOpacity>
-				<TouchableOpacity
-					style={{
-						flex: 1,
-					}}>
-					<View
-						style={{
-							paddingVertical: 20,
-							flexDirection: 'row',
-							backgroundColor: '#ea5f62',
-							alignItems: 'center',
-							justifyContent: 'center',
-						}}>
-						<Icon
-							name="shopping-basket"
-							style={{
-								fontSize: 18,
-								color: Colors.white,
-								marginEnd: 10,
-							}}
-						/>
-						<Text
-							style={{
-								fontSize: 15,
-								fontFamily: Fonts.semiBold,
-								textAlign: 'center',
-								color: Colors.white,
-								textTransform: 'uppercase',
-							}}>
-							Add to Basket
-						</Text>
-					</View>
-				</TouchableOpacity>
-			</View>
-		);
-	};
+	const [weight, setWeight] = useState(product.weight);
+	const [price, setPrice] = useState(product.price);
+	const [oldPrice, setOldPrice] = useState(product.oldPrice);
+	const [discount, setDiscount] = useState(product.discount);
 
 	const [selectedImage, setSelectedImage] = useState(product.imageFront);
 	return (
@@ -133,7 +73,7 @@ export default function ProductDetail({ navigation, route }) {
 								width: '30%',
 								borderRadius: 5,
 								borderWidth: 1,
-								borderColor: '#689f39',
+								borderColor: Colors.greenText,
 								marginBottom: 5,
 							}}>
 							<Text
@@ -154,7 +94,7 @@ export default function ProductDetail({ navigation, route }) {
 									fontSize: 16,
 									fontFamily: Fonts.semiBold,
 								}}>
-								{product.title}
+								{product.title}, {weight} Kg Pouch
 							</Text>
 						</View>
 						<View
@@ -170,7 +110,7 @@ export default function ProductDetail({ navigation, route }) {
 									fontSize: 14,
 									fontFamily: Fonts.bold,
 								}}>
-								Rs {product.price}
+								Rs {price}
 							</Text>
 							<Text
 								style={{
@@ -179,7 +119,7 @@ export default function ProductDetail({ navigation, route }) {
 									color: '#ff0000e6',
 									textDecorationLine: 'line-through',
 								}}>
-								MRP: Rs {product.oldPrice}
+								MRP: Rs {oldPrice}
 							</Text>
 							<View
 								style={{
@@ -193,7 +133,7 @@ export default function ProductDetail({ navigation, route }) {
 										marginVertical: 2,
 										color: Colors.white,
 									}}>
-									{product.discount}% off
+									{discount}
 								</Text>
 							</View>
 						</View>
@@ -296,7 +236,12 @@ export default function ProductDetail({ navigation, route }) {
 							</TouchableOpacity>
 						</View>
 					</View>
-					<PackSizes />
+					<PackSizes
+						setWeight={setWeight}
+						setPrice={setPrice}
+						setOldPrice={setOldPrice}
+						setDiscount={setDiscount}
+					/>
 					<View
 						style={{
 							borderColor: '#999999',
@@ -329,10 +274,12 @@ export default function ProductDetail({ navigation, route }) {
 						</View>
 					</View>
 					<AboutProduct data={product.about} />
-					<Buttons />
 					<RatingsAndReviews />
 				</View>
 			</ScrollView>
+			<View style={{ position: 'absolute', bottom: 0 }}>
+				<AddButton />
+			</View>
 		</View>
 	);
 }
@@ -358,12 +305,12 @@ const styles = StyleSheet.create({
 		fontSize: 12,
 		fontFamily: Fonts.semiBold,
 		marginEnd: 4,
-		color: '#689f39',
+		color: Colors.greenText,
 	},
 	ratingStar: {
 		fontSize: 10,
 		fontFamily: Fonts.semiBold,
-		color: '#689f39',
+		color: Colors.greenText,
 	},
 	ratingCountContainer: {
 		flexDirection: 'row',

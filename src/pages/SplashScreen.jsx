@@ -8,6 +8,7 @@ import {
 	StyleSheet,
 	Easing,
 	Animated,
+	ToastAndroid,
 } from 'react-native';
 import {
 	widthPercentageToDP as wp,
@@ -16,7 +17,9 @@ import {
 import { Colors, Fonts, Shadow } from '../constants';
 import { check, PERMISSIONS, RESULTS, request } from 'react-native-permissions';
 import LinearGradient from 'react-native-linear-gradient';
-import { concat } from 'react-native-reanimated';
+import Geolocation from '@react-native-community/geolocation';
+import GeoFencing from 'react-native-geo-fencing';
+import GEOFENCE from '../assets/map.json';
 
 export default function SplashScreen({ navigation }) {
 	useEffect(() => {
@@ -29,19 +32,52 @@ export default function SplashScreen({ navigation }) {
 			})
 		).start();
 	});
-	const runAnimation = () => {
-		Animated.timing(spinValue, {
-			toValue: 1,
-			duration: 3000,
-			easing: Easing.linear,
-		}).start(() => runAnimation());
-	};
+
 	const spinValue = new Animated.Value(0);
 
 	const spin = spinValue.interpolate({
 		inputRange: [0, 1],
 		outputRange: ['0deg', '360deg'],
 	});
+
+	const checkGeofencing = () => {
+		Geolocation.getCurrentPosition(
+			//Will give you the current location
+			(position) => {
+				let point = {
+					lat: position.coords.latitude,
+					lng: position.coords.longitude,
+				};
+				//getting the Latitude from the location json
+
+				GeoFencing.containsLocation(
+					point,
+					GEOFENCE.features[0].geometry.coordinates
+				)
+					.then(() => {
+						console.log('Point is within geofence');
+						ToastAndroid.show(
+							'Point is within geofence',
+							ToastAndroid.LONG
+						);
+					})
+					.catch(() => {
+						console.log('Point is not within geofence');
+						ToastAndroid.show(
+							'Point is not within geofence',
+							ToastAndroid.LONG
+						);
+					});
+			},
+			(error) => alert(error.message),
+			{
+				enableHighAccuracy: true,
+				timeout: 20000,
+				maximumAge: 1000,
+			}
+		);
+		// navigation.navigate('Homepage');
+	};
 
 	const checkLocationPermission = () => {
 		check(
@@ -63,7 +99,7 @@ export default function SplashScreen({ navigation }) {
 						requestLocationPermission();
 						break;
 					case RESULTS.GRANTED:
-						navigation.navigate('Login');
+						checkGeofencing();
 						break;
 					case RESULTS.BLOCKED:
 						console.log(
@@ -84,7 +120,7 @@ export default function SplashScreen({ navigation }) {
 				: PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION
 		)
 			.then((result) => {
-				navigation.navigate('Login');
+				checkGeofencing();
 			})
 			.catch((error) => console.log(error));
 	};
@@ -141,7 +177,7 @@ export default function SplashScreen({ navigation }) {
 					style={{ borderRadius: 32, marginVertical: 20 }}>
 					<TouchableOpacity
 						style={styles.signInContainer}
-						onPress={() => navigation.navigate('Login')}>
+						onPress={() => checkLocationPermission()}>
 						<View style={styles.signInView}>
 							<Text style={[styles.signIn, { color: '#7F7FD5' }]}>
 								Continue

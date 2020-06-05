@@ -1,37 +1,49 @@
 import React, { useState } from 'react';
 import {
+	Animated,
+	Easing,
 	View,
 	Text,
 	Image,
 	StyleSheet,
 	FlatList,
 	TouchableOpacity,
-	Easing,
 	TouchableWithoutFeedback,
 } from 'react-native';
-import {
-	widthPercentageToDP as wp,
-	heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
-import { Colors, Fonts, Shadow } from '../constants';
-import { AddButton } from '../components';
 import Icon from 'react-native-vector-icons/FontAwesome5';
-import { Picker } from '@react-native-community/picker';
-import Animated from 'react-native-reanimated';
-const borderProps = {
-	borderWidth: 2,
-	borderColor: 'black',
-};
+import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
+import { Fonts, Colors } from '../constants';
 
-export default function ProductList({ navigation, route }) {
-	const { data } = route.params;
+const cartData = [
+	{
+		brand: 'McCain',
+		title: 'French Fries',
+		image: require('../assets/homepage/french_fries.png'),
+		weight: 10,
+		price: 200,
+		oldPrice: 150,
+		quantity: 2,
+	},
+	{
+		brand: 'Delicious',
+		title: 'Chicken Salami',
+		image: require('../assets/sub_categories/salami.jpg'),
+		weight: 1,
+		price: 250,
+		oldPrice: 300,
+		quantity: 3,
+	},
+];
 
+export default function Card({ navigation }) {
+	const [cart, setCart] = useState(cartData);
 	const ProductItem = ({ item, index }) => {
 		const [heartChecked, heartToggle] = useState(false);
-		const [btnEnabled, btnToggle] = useState(false);
-		const [count, setCount] = useState(0);
-		const countTimer = new Animated.Value(10);
-		const [selectedQuantity, setSelectedQuantity] = useState(1000);
+		const [count, setCount] = useState(item.quantity);
+
+		if (cart.length === 0) {
+			console.log('Cart is empty!');
+		}
 
 		const countAnimation = () => {
 			Animated.timing(countAnimation, {
@@ -42,48 +54,39 @@ export default function ProductList({ navigation, route }) {
 		};
 
 		const AddButton = () => {
-			if (btnEnabled) {
-				return (
-					<Animated.View style={styles.itemCounterContainer}>
-						<TouchableOpacity
-							style={{ flex: 1 }}
-							onPress={() => {
-								if (count === 1) {
-									btnToggle(!btnEnabled);
-								}
-								setCount(count - 1);
-							}}>
-							<View style={styles.countContainer}>
-								<Text style={styles.count}>−</Text>
-							</View>
-						</TouchableOpacity>
-						<Animated.View style={styles.countTextContainer}>
-							<Animated.Text style={styles.countText}>
-								{count}
-							</Animated.Text>
-						</Animated.View>
-						<TouchableOpacity
-							style={{ flex: 1 }}
-							onPress={() => setCount(count + 1)}>
-							<Animated.View style={styles.countContainer}>
-								<Text style={styles.count}>+</Text>
-							</Animated.View>
-						</TouchableOpacity>
-					</Animated.View>
-				);
-			} else {
-				return (
+			return (
+				<Animated.View style={styles.itemCounterContainer}>
 					<TouchableOpacity
+						style={{ flex: 1 }}
 						onPress={() => {
-							setCount(count + 1);
-							btnToggle(!btnEnabled);
+							if (count === 1) {
+								setCart(cart.splice(index, 1));
+								setCount(count - 1);
+								console.log(cart.splice(index, 1));
+							} else {
+								setCount(count - 1);
+							}
+							console.log('Index: ' + index);
+							console.log('Count: ' + count);
 						}}>
-						<View style={styles.addBtnContainer}>
-							<Text style={styles.addBtnText}>Add</Text>
+						<View style={styles.countContainer}>
+							<Text style={styles.count}>−</Text>
 						</View>
 					</TouchableOpacity>
-				);
-			}
+					<Animated.View style={styles.countTextContainer}>
+						<Animated.Text style={styles.countText}>
+							{count}
+						</Animated.Text>
+					</Animated.View>
+					<TouchableOpacity
+						style={{ flex: 1 }}
+						onPress={() => setCount(count + 1)}>
+						<Animated.View style={styles.countContainer}>
+							<Text style={styles.count}>+</Text>
+						</Animated.View>
+					</TouchableOpacity>
+				</Animated.View>
+			);
 		};
 		return (
 			<View style={styles.cardContainer}>
@@ -104,28 +107,8 @@ export default function ProductList({ navigation, route }) {
 							<Text style={styles.title}>{item.title}</Text>
 						</View>
 					</TouchableWithoutFeedback>
-					<View style={styles.rating}>
-						<View style={styles.ratingContainer}>
-							<Text style={styles.ratingText}>4.3</Text>
-							<Icon name="star" solid style={styles.ratingStar} />
-						</View>
-						<View style={styles.ratingCountContainer}>
-							<Text style={styles.ratingCount}>7782 Rating</Text>
-						</View>
-					</View>
 					<View style={styles.pickerContainer}>
-						<Picker
-							selectedValue={selectedQuantity}
-							onValueChange={(value) =>
-								setSelectedQuantity(value)
-							}
-							mode="dropdown"
-							style={styles.picker}
-							itemStyle={styles.pickerItem}>
-							<Picker.Item label={'1 KG'} value={1000} />
-							<Picker.Item label={'500 GM'} value={500} />
-							<Picker.Item label={'250 GM'} value={250} />
-						</Picker>
+						<Text style={styles.weightText}>{item.weight} Kg</Text>
 					</View>
 					<View>
 						<Text style={styles.oldPrice}>
@@ -162,45 +145,84 @@ export default function ProductList({ navigation, route }) {
 			</View>
 		);
 	};
-
-	return (
-		<View style={styles.container}>
-			<View
-				style={{
-					flexDirection: 'row',
-					alignItems: 'center',
-					justifyContent: 'space-between',
-					marginHorizontal: 20,
-					paddingVertical: 10,
-				}}>
+	if (cart.length !== 0) {
+		return (
+			<View style={styles.container}>
+				<FlatList
+					data={cart}
+					renderItem={(object) => <ProductItem {...object} />}
+					ItemSeparatorComponent={() => (
+						<View
+							style={{ backgroundColor: '#999999', height: 1 }}
+						/>
+					)}
+				/>
 				<View
 					style={{
-						marginTop: 10,
 						width: '100%',
-						alignItems: 'flex-end',
-						paddingEnd: 10,
+						height: 70,
+						paddingHorizontal: 40,
+						flexDirection: 'row',
+						alignItems: 'center',
+						justifyContent: 'space-between',
+						position: 'absolute',
+						bottom: 0,
+						backgroundColor: '#36474f',
 					}}>
-					<Icon name="filter" style={styles.filterIcon} />
+					<View>
+						<Text
+							style={{
+								fontSize: 14,
+								fontFamily: Fonts.primary,
+								color: Colors.white,
+							}}>
+							Rs 200
+						</Text>
+						<Text
+							style={{
+								fontSize: 14,
+								fontFamily: Fonts.primary,
+								color: '#90c336',
+							}}>
+							Saved Rs 20
+						</Text>
+					</View>
+					<TouchableOpacity
+						activeOpacity={0.6}
+						onPress={() => navigation.navigate('Payment')}>
+						<View
+							style={{
+								width: '100%',
+								height: '60%',
+								paddingVertical: 10,
+								paddingHorizontal: 20,
+								backgroundColor: '#e66067',
+								borderRadius: 5,
+							}}>
+							<Text
+								style={{
+									textAlign: 'center',
+									fontSize: 16,
+									fontFamily: Fonts.semiBold,
+									color: Colors.white,
+									textTransform: 'uppercase',
+								}}>
+								Checkout
+							</Text>
+						</View>
+					</TouchableOpacity>
 				</View>
 			</View>
-			<FlatList
-				data={data}
-				renderItem={(object) => <ProductItem {...object} />}
-				keyExtractor={({ index, item }) => index + item}
-				contentContainerStyle={styles.flatListContainer}
-				ItemSeparatorComponent={(leadingItem, section) => (
-					<View
-						style={{
-							width: '100%',
-							height: 1,
-							backgroundColor: 'gray',
-						}}
-					/>
-				)}
-			/>
-			<AddButton />
-		</View>
-	);
+		);
+	} else {
+		return (
+			<View style={{ alignItems: 'center', marginTop: 20 }}>
+				<Text style={{ fontSize: 20, fontFamily: Fonts.semiBold }}>
+					Cart is Empty
+				</Text>
+			</View>
+		);
+	}
 }
 
 const styles = StyleSheet.create({
@@ -235,6 +257,7 @@ const styles = StyleSheet.create({
 	image: {
 		height: 100,
 		width: 100,
+		resizeMode: 'contain',
 	},
 	rating: {
 		flexDirection: 'row',
@@ -268,8 +291,6 @@ const styles = StyleSheet.create({
 		textAlignVertical: 'bottom',
 	},
 	pickerContainer: {
-		borderWidth: 1,
-		borderColor: '#8d8d8d',
 		width: '70%',
 		marginVertical: 6,
 	},
@@ -351,6 +372,10 @@ const styles = StyleSheet.create({
 	countText: {
 		fontSize: 12,
 		textAlign: 'center',
+		fontFamily: Fonts.semiBold,
+	},
+	weightText: {
+		fontSize: 16,
 		fontFamily: Fonts.semiBold,
 	},
 });

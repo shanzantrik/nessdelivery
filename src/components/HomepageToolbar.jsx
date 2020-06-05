@@ -11,8 +11,7 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Fonts, Colors } from '../constants';
 import Search from './Search';
 
-export default function HomepageToolbar(props) {
-	const { navigation, searchBar } = props;
+export default function HomepageToolbar({ navigation, searchBar }) {
 	return (
 		<View style={styles.container}>
 			<View style={styles.headerContainer}>
@@ -33,7 +32,8 @@ export default function HomepageToolbar(props) {
 					<TouchableOpacity>
 						<Icon name="bell" style={styles.search} />
 					</TouchableOpacity>
-					<TouchableOpacity>
+					<TouchableOpacity
+						onPress={() => navigation.navigate('Cart')}>
 						<Icon name="shopping-cart" style={styles.search} />
 					</TouchableOpacity>
 				</View>

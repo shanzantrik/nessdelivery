@@ -27,7 +27,12 @@ export default function Search() {
 					})
 				}>
 				<View style={styles.categoriesTextContainer}>
-					<Text style={styles.categoriesText}>{title}</Text>
+					<Text
+						style={styles.categoriesText}
+						numberOfLines={1}
+						adjustsFontSizeToFit={true}>
+						{title}
+					</Text>
 				</View>
 			</TouchableOpacity>
 			<View style={styles.searchBarMainContainer}>

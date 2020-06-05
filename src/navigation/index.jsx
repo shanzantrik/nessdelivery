@@ -19,8 +19,10 @@ import {
 	ProductList,
 	CategoriesModal,
 	ProductDetail,
+	Cart,
+	Payment,
+	CardPage,
 } from '../pages';
-import { Image } from 'react-native';
 
 const HomeStack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -40,7 +42,7 @@ const config = {
 function HomeStackNavigation({ navigation }) {
 	return (
 		<HomeStack.Navigator
-			initialRouteName="ProductDetail"
+			initialRouteName="SplashScreen"
 			screenOptions={{
 				cardStyle: {
 					backgroundColor: 'white',
@@ -71,27 +73,21 @@ function HomeStackNavigation({ navigation }) {
 				name="SubCategories"
 				component={SubCategories}
 				options={{
-					header: (props) => (
-						<HomepageToolbar {...props} navigation={navigation} />
-					),
+					header: (props) => <HomepageToolbar {...props} />,
 				}}
 			/>
 			<HomeStack.Screen
 				name="ProductList"
 				component={ProductList}
 				options={{
-					header: (props) => (
-						<HomepageToolbar {...props} navigation={navigation} />
-					),
+					header: (props) => <HomepageToolbar {...props} />,
 				}}
 			/>
 			<HomeStack.Screen
 				name="Homepage"
 				component={HomePage}
 				options={{
-					header: (props) => (
-						<HomepageToolbar {...props} navigation={navigation} />
-					),
+					header: (props) => <HomepageToolbar {...props} />,
 				}}
 			/>
 			<HomeStack.Screen
@@ -116,6 +112,33 @@ function HomeStackNavigation({ navigation }) {
 					),
 				}}
 			/>
+			<HomeStack.Screen
+				name="Cart"
+				component={Cart}
+				options={{
+					headerTitle: 'Your Cart',
+				}}
+			/>
+			<HomeStack.Screen
+				name="Payment"
+				component={Payment}
+				options={{
+					headerTitle: 'Payment',
+					cardStyle: {
+						backgroundColor: '#eff0f4',
+					},
+				}}
+			/>
+			<HomeStack.Screen
+				name="CardPage"
+				component={CardPage}
+				options={{
+					headerTitle: 'Add Card',
+					cardStyle: {
+						backgroundColor: '#eff0f4',
+					},
+				}}
+			/>
 		</HomeStack.Navigator>
 	);
 }
@@ -123,7 +146,15 @@ function HomeStackNavigation({ navigation }) {
 function DrawerNavigator() {
 	return (
 		<Drawer.Navigator initialRouteName="Home" drawerType="front">
-			<Drawer.Screen name="Profile" component={HomeStackNavigation} />
+			<Drawer.Screen
+				name="Profile"
+				component={HomeStackNavigation}
+				options={{
+					drawerIcon: ({ focused, color }) => (
+						<Icon name="user" color={color} size={20} solid />
+					),
+				}}
+			/>
 			<Drawer.Screen
 				name="Home"
 				component={HomeStackNavigation}
@@ -138,7 +169,7 @@ function DrawerNavigator() {
 				component={HomeStackNavigation}
 				options={{
 					drawerIcon: ({ focused, color }) => (
-						<Icon name="home" color={color} size={20} />
+						<Icon name="heart" color={color} size={20} solid />
 					),
 				}}
 			/>
@@ -156,7 +187,7 @@ function DrawerNavigator() {
 				component={HomeStackNavigation}
 				options={{
 					drawerIcon: ({ focused, color }) => (
-						<Icon name="home" color={color} size={20} />
+						<Icon name="sign-in-alt" color={color} size={20} />
 					),
 				}}
 			/>
@@ -165,7 +196,7 @@ function DrawerNavigator() {
 				component={HomeStackNavigation}
 				options={{
 					drawerIcon: ({ focused, color }) => (
-						<Icon name="home" color={color} size={20} />
+						<Icon name="link" color={color} size={20} solid />
 					),
 				}}
 			/>
@@ -174,7 +205,7 @@ function DrawerNavigator() {
 				component={HomeStackNavigation}
 				options={{
 					drawerIcon: ({ focused, color }) => (
-						<Icon name="home" color={color} size={20} />
+						<Icon name="sign-out-alt" color={color} size={20} />
 					),
 				}}
 			/>

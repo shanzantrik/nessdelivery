@@ -17,7 +17,7 @@ export default function CircularFlatList({ data, title, containerStyle }) {
 			/>
 		);
 	};
-	const _keyExtractor = ({ item, index }) => index;
+	const _keyExtractor = ({ item, index }) => index + item;
 	return (
 		<View style={[{ width: wp(100) }, containerStyle]}>
 			<Header title={title} />

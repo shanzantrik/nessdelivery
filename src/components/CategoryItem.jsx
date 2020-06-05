@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Image, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import PropTypes from 'prop-types';
 import { Fonts, Shadow } from '../constants';
+import { useNavigation } from '@react-navigation/native';
+import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 
 const borderProps = {
 	borderColor: 'black',
@@ -9,6 +11,7 @@ const borderProps = {
 };
 
 export default function CategoryItem(props) {
+	const navigation = useNavigation();
 	const {
 		containerStyle,
 		imageContainerStyle,
@@ -26,7 +29,8 @@ export default function CategoryItem(props) {
 		discountTextStyle,
 	} = props;
 	return (
-		<TouchableOpacity>
+		<TouchableWithoutFeedback
+			onPress={() => navigation.navigate('ProductDetail')}>
 			<View
 				style={[
 					styles.container,
@@ -55,7 +59,7 @@ export default function CategoryItem(props) {
 					</Text>
 				</View>
 			</View>
-		</TouchableOpacity>
+		</TouchableWithoutFeedback>
 	);
 }
 

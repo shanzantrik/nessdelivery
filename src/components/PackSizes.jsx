@@ -35,7 +35,13 @@ const packs = [
 	},
 ];
 
-export default function PackSizes({ data }) {
+export default function PackSizes({
+	data,
+	setWeight,
+	setPrice,
+	setOldPrice,
+	setDiscount,
+}) {
 	const compare = (a, b) => {
 		let comparison = 0;
 		if (a.weight > b.weight) {
@@ -47,17 +53,25 @@ export default function PackSizes({ data }) {
 		return comparison * -1; // Multiplying it with -1 reverses the sorting order
 	};
 
+	const [current, setCurrent] = useState(packs[0].weight);
+
 	const RenderPack = ({ index, item }) => {
-		const [current, setCurrent] = useState(packs[0].weight);
-		const [selected, setSelected] = useState(current === item.weight);
+		const [selected] = useState(current === item.weight);
 		return (
-			<TouchableOpacity onPress={() => setCurrent(item.weight)}>
+			<TouchableOpacity
+				onPress={() => {
+					setCurrent(item.weight);
+					setWeight(item.weight);
+					setPrice(item.price);
+					setOldPrice(item.oldPrice);
+					setDiscount(item.discount);
+				}}>
 				<View
 					style={{
 						flexDirection: 'row',
 						alignItems: 'center',
 						justifyContent: 'space-between',
-						borderColor: selected ? '#69c1d3' : 'black',
+						borderColor: selected ? '#69c1d3' : Colors.black,
 						borderWidth: 1,
 						borderRadius: 7,
 						padding: 20,
@@ -155,6 +169,7 @@ export default function PackSizes({ data }) {
 			<FlatList
 				data={packs.sort(compare)}
 				renderItem={(object) => <RenderPack {...object} />}
+				keyExtractor={({ index, item }) => index + item}
 			/>
 		</View>
 	);

@@ -30,6 +30,28 @@ export const CircularCategoriesData = [
 		title: 'Chicken',
 		image: require('../assets/homepage/chicken.png'),
 		backgroundColor: '#ffffff',
+		subCategories: [
+			{
+				title: 'Crispy Nuggets',
+				image: require('../assets/sub_categories/crispy_nuggets.jpg'),
+			},
+			{
+				title: 'Salami',
+				image: require('../assets/sub_categories/salami.jpg'),
+			},
+			{
+				title: 'Chicken Wings',
+				image: require('../assets/sub_categories/wings.jpg'),
+			},
+			{
+				title: 'Chicken Nuggets',
+				image: require('../assets/sub_categories/nuggets.jpg'),
+			},
+			{
+				title: 'Chicken Popcorn',
+				image: require('../assets/sub_categories/popcorn.jpg'),
+			},
+		],
 	},
 	{
 		title: 'Pork',
