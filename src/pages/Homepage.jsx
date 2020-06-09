@@ -33,13 +33,11 @@ const borderProps = {
 	borderWidth: 1,
 };
 
-export default function Homepage({ navigation }) {
+export default function Homepage({ navigation, route }) {
+	const { location, locationAvailable } = route.params;
 	return (
 		<View style={{ flex: 1 }}>
 			<ScrollView contentContainerStyle={styles.container}>
-				{/* <Search
-					onPress={() => navigation.navigate('CategoriesModal')}
-				/> */}
 				<View style={{ alignItems: 'center' }}>
 					<View
 						style={{
@@ -57,21 +55,31 @@ export default function Homepage({ navigation }) {
 								marginEnd: 10,
 							}}
 						/>
-						<Text
-							style={{
-								fontSize: 14,
-								fontFamily: Fonts.bold,
-							}}>
-							Deliver To:
+						{locationAvailable ? (
 							<Text
 								style={{
 									fontSize: 14,
 									fontFamily: Fonts.bold,
 								}}>
-								{' '}
-								Location Here
+								Deliver To:
+								<Text
+									style={{
+										fontSize: 14,
+										fontFamily: Fonts.bold,
+										marginStart: 10,
+									}}>
+									{location}
+								</Text>
 							</Text>
-						</Text>
+						) : (
+							<Text
+								style={{
+									fontSize: 14,
+									fontFamily: Fonts.bold,
+								}}>
+								{location}
+							</Text>
+						)}
 					</View>
 					<CategoriesSimple
 						data={CircularCategoriesData}

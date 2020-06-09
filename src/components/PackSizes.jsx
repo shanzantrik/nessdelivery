@@ -169,7 +169,7 @@ export default function PackSizes({
 			<FlatList
 				data={packs.sort(compare)}
 				renderItem={(object) => <RenderPack {...object} />}
-				keyExtractor={({ index, item }) => index + item}
+				keyExtractor={(index, item) => index.toString()}
 			/>
 		</View>
 	);

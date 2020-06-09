@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
 	View,
 	Text,
@@ -9,6 +9,8 @@ import {
 	Easing,
 	Animated,
 	ToastAndroid,
+	Modal,
+	ActivityIndicator,
 } from 'react-native';
 import {
 	widthPercentageToDP as wp,
@@ -17,11 +19,15 @@ import {
 import { Colors, Fonts, Shadow } from '../constants';
 import { check, PERMISSIONS, RESULTS, request } from 'react-native-permissions';
 import LinearGradient from 'react-native-linear-gradient';
-import Geolocation from '@react-native-community/geolocation';
+import Geolocation from 'react-native-geolocation-service';
 import GeoFencing from 'react-native-geo-fencing';
+import Geocoder from 'react-native-geocoding';
 import GEOFENCE from '../assets/map.json';
+import axios from 'axios';
+import API from '../API';
 
 export default function SplashScreen({ navigation }) {
+	const [loading, setLoading] = useState(false);
 	useEffect(() => {
 		Animated.loop(
 			Animated.timing(spinValue, {
@@ -31,6 +37,21 @@ export default function SplashScreen({ navigation }) {
 				useNativeDriver: true,
 			})
 		).start();
+
+		// API.get('/product/categories')
+		// 	.then((res) => console.log(res))
+		// 	.catch((err) => console.log(err));
+
+		axios
+			.get('/wp-json/wc/v3/products/categories', {
+				baseURL: 'https://nessfrozenhub.in',
+				auth: {
+					username: 'ck_e1ede8d97da3048865e2e0e9da37cf2f602e8d86',
+					password: 'cs_d3bf68b259d0e7de5b682638d352400631a018cb',
+				},
+			})
+			.then((res) => console.log(res))
+			.catch((err) => console.log(err));
 	});
 
 	const spinValue = new Animated.Value(0);
@@ -39,6 +60,30 @@ export default function SplashScreen({ navigation }) {
 		inputRange: [0, 1],
 		outputRange: ['0deg', '360deg'],
 	});
+
+	const getLocationName = (lat, lng) => {
+		Geocoder.init('AIzaSyDg1r3zd1vVKya0U63g1vacakzhR7DhblA');
+
+		Geocoder.from(lat, lng)
+			.then((json) => {
+				var addressComponent =
+					json.results[0].address_components[0].long_name;
+
+				setLoading(false);
+				console.log('Set Loading to False');
+
+				navigation.navigate('Homepage', {
+					location: addressComponent,
+					locationAvailale: true,
+				});
+			})
+
+			.catch((error) => {
+				console.warn(error);
+				setLoading(false);
+				console.log('Set Loading to False --> Error in Geocoding API');
+			});
+	};
 
 	const checkGeofencing = () => {
 		Geolocation.getCurrentPosition(
@@ -55,21 +100,38 @@ export default function SplashScreen({ navigation }) {
 					GEOFENCE.features[0].geometry.coordinates
 				)
 					.then(() => {
-						console.log('Point is within geofence');
+						console.log("Welcome to Ness's Frozen Delivery");
 						ToastAndroid.show(
-							'Point is within geofence',
+							"Welcome to Ness's Frozen Delivery",
 							ToastAndroid.LONG
 						);
+
+						getLocationName(point.lat, point.lng);
 					})
 					.catch(() => {
-						console.log('Point is not within geofence');
+						console.log(
+							'Your location is not within the delivery area\n\nPlease check back later'
+						);
 						ToastAndroid.show(
-							'Point is not within geofence',
+							'Your location is not within the delivery area\n\nPlease check back later',
 							ToastAndroid.LONG
 						);
+
+						setLoading(false);
+						console.log('Set Loading to False');
+
+						navigation.navigate('Homepage', {
+							location: 'Not Available in your location',
+							locationAvailable: false,
+						});
 					});
 			},
-			(error) => alert(error.message),
+			(error) => {
+				alert(error.message);
+
+				setLoading(false);
+				console.log('Set Loading to False');
+			},
 			{
 				enableHighAccuracy: true,
 				timeout: 20000,
@@ -80,6 +142,8 @@ export default function SplashScreen({ navigation }) {
 	};
 
 	const checkLocationPermission = () => {
+		setLoading(true);
+		console.log('Set Loading to True');
 		check(
 			Platform.OS === 'ios'
 				? PERMISSIONS.IOS.LOCATION_ALWAYS
@@ -91,10 +155,17 @@ export default function SplashScreen({ navigation }) {
 						console.log(
 							'This feature is not available (on this device / in this context)'
 						);
+
+						setLoading(false);
+						console.log('Set Loading to False');
 						break;
 					case RESULTS.DENIED:
 						console.log(
 							'The permission has not been requested / is denied but requestable'
+						);
+						ToastAndroid.show(
+							'Location Permission is Required',
+							ToastAndroid.LONG
 						);
 						requestLocationPermission();
 						break;
@@ -105,11 +176,20 @@ export default function SplashScreen({ navigation }) {
 						console.log(
 							'The permission is denied and not requestable anymore'
 						);
+						ToastAndroid.show(
+							'Location permission is required\n\nPlease enable it by going into app settings',
+							ToastAndroid.LONG
+						);
+						setLoading(false);
+						console.log('Set Loading to False');
 						break;
 				}
 			})
 			.catch((error) => {
 				console.log(error);
+
+				setLoading(false);
+				console.log('Set Loading to False');
 			});
 	};
 
@@ -177,7 +257,12 @@ export default function SplashScreen({ navigation }) {
 					style={{ borderRadius: 32, marginVertical: 20 }}>
 					<TouchableOpacity
 						style={styles.signInContainer}
-						onPress={() => checkLocationPermission()}>
+						onPress={() =>
+							navigation.navigate('Homepage', {
+								locationAvailable: true,
+								location: 'Gardanibagh, Patna',
+							})
+						}>
 						<View style={styles.signInView}>
 							<Text style={[styles.signIn, { color: '#7F7FD5' }]}>
 								Continue
@@ -186,6 +271,30 @@ export default function SplashScreen({ navigation }) {
 					</TouchableOpacity>
 				</LinearGradient>
 			</LinearGradient>
+			<Modal
+				style={StyleSheet.absoluteFill}
+				animationType="fade"
+				transparent
+				visible={loading}>
+				<View
+					style={{
+						flex: 1,
+						alignItems: 'center',
+						justifyContent: 'center',
+						backgroundColor: '#00000033',
+					}}>
+					<ActivityIndicator color={Colors.lightBlue} size="large" />
+					<Text
+						style={{
+							marginTop: 20,
+							fontSize: 16,
+							fontFamily: Fonts.semiBold,
+							color: Colors.white,
+						}}>
+						Checking Your Location
+					</Text>
+				</View>
+			</Modal>
 		</View>
 	);
 }

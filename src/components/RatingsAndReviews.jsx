@@ -350,7 +350,7 @@ export default function RatingsAndReviews({}) {
 			<FlatList
 				data={RatingData}
 				renderItem={(object) => <RenderReviews {...object} />}
-				keyExtractor={({ index, item }) => index + item}
+				keyExtractor={(index, item) => index.toString()}
 				ItemSeparatorComponent={() => (
 					<View style={{ height: 1, backgroundColor: '#999999' }} />
 				)}

@@ -75,7 +75,7 @@ export default function SubCategories({ navigation, route }) {
 			<FlatList
 				data={CircularCategoriesData}
 				renderItem={(object) => <_renderItem {...object} />}
-				keyExtractor={({ index, item }) => index + item}
+				keyExtractor={(index, item) => index.toString()}
 				contentContainerStyle={styles.flatListContainer}
 				ItemSeparatorComponent={() => (
 					<View

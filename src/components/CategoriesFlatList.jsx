@@ -21,7 +21,7 @@ export default function CategoriesFlatList({ data, title, containerStyle }) {
 			/>
 		);
 	};
-	const _keyExtractor = ({ item, index }) => index + item;
+	const _keyExtractor = (item, index) => index.toString();
 	return (
 		<View style={[{ width: wp(100) }, containerStyle]}>
 			<Header title={title} />

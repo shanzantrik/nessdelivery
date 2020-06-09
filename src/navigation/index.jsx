@@ -8,6 +8,9 @@ import {
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 
+//Shared Element Navigator
+import { createSharedElementStackNavigator } from 'react-navigation-shared-element';
+
 //HomeStack Screens
 import {
 	SplashScreen,
@@ -27,6 +30,8 @@ import {
 const HomeStack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
+const SharedStack = createSharedElementStackNavigator();
+
 const config = {
 	animation: 'spring',
 	config: {
@@ -38,6 +43,31 @@ const config = {
 		restSpeedThreshold: 0.01,
 	},
 };
+
+function ProductSharedNavigator({ navigation }) {
+	<SharedStack.Navigator>
+		<SharedStack.Screen
+			name="ProductList"
+			component={ProductList}
+			options={{
+				header: (props) => <HomepageToolbar {...props} />,
+			}}
+		/>
+		<SharedStack.Screen
+			name="ProductDetail"
+			component={ProductDetail}
+			options={{
+				header: (props) => (
+					<HomepageToolbar
+						{...props}
+						navigation={navigation}
+						searchBar={false}
+					/>
+				),
+			}}
+		/>
+	</SharedStack.Navigator>;
+}
 
 function HomeStackNavigation({ navigation }) {
 	return (
@@ -77,13 +107,6 @@ function HomeStackNavigation({ navigation }) {
 				}}
 			/>
 			<HomeStack.Screen
-				name="ProductList"
-				component={ProductList}
-				options={{
-					header: (props) => <HomepageToolbar {...props} />,
-				}}
-			/>
-			<HomeStack.Screen
 				name="Homepage"
 				component={HomePage}
 				options={{
@@ -100,6 +123,17 @@ function HomeStackNavigation({ navigation }) {
 				}}
 			/>
 			<HomeStack.Screen
+				name="ProductShared"
+				component={ProductSharedNavigator}
+			/>
+			{/* <HomeStack.Screen
+				name="ProductList"
+				component={ProductList}
+				options={{
+					header: (props) => <HomepageToolbar {...props} />,
+				}}
+			/>
+			<HomeStack.Screen
 				name="ProductDetail"
 				component={ProductDetail}
 				options={{
@@ -111,7 +145,7 @@ function HomeStackNavigation({ navigation }) {
 						/>
 					),
 				}}
-			/>
+			/> */}
 			<HomeStack.Screen
 				name="Cart"
 				component={Cart}

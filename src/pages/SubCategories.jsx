@@ -147,8 +147,10 @@ export default function SubCategories({ navigation, route }) {
 						<FlatList
 							data={item.subCategories}
 							renderItem={_renderSubCategories}
-							keyExtractor={({ index, item }) => index + item}
-							listKey={(item, index) => 'D' + index.toString()}
+							keyExtractor={(index, item) => index.toString()}
+							listKey={({ item, index }) =>
+								'D' + index.toString()
+							}
 							numColumns={2}
 						/>
 					</View>
@@ -168,7 +170,7 @@ export default function SubCategories({ navigation, route }) {
 				renderItem={(object) => (
 					<_renderItem {...object} selected={data} />
 				)}
-				keyExtractor={({ index, item }) => index + item}
+				keyExtractor={(index, item) => index.toString()}
 				contentContainerStyle={styles.flatListContainer}
 				ItemSeparatorComponent={() => (
 					<View

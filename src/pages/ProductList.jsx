@@ -186,7 +186,7 @@ export default function ProductList({ navigation, route }) {
 			<FlatList
 				data={data}
 				renderItem={(object) => <ProductItem {...object} />}
-				keyExtractor={({ index, item }) => index + item}
+				keyExtractor={(index, item) => index.toString()}
 				contentContainerStyle={styles.flatListContainer}
 				ItemSeparatorComponent={(leadingItem, section) => (
 					<View

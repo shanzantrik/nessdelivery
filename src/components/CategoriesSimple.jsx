@@ -8,8 +8,6 @@ import {
 	TouchableOpacity,
 } from 'react-native';
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
-import LinearGradient from 'react-native-linear-gradient';
-import { Header, CircularCategories } from './index';
 import PropTypes from 'prop-types';
 import { Colors } from '../constants';
 
@@ -19,12 +17,12 @@ export default function CategoriesSimple({
 	containerStyle,
 	navigation,
 }) {
-	const _renderCircularItem = ({ item, index }) => {
+	const RenderCircularItem = ({ item, index, length }) => {
 		return (
 			<TouchableOpacity
 				style={{
 					height: '100%',
-					width: wp(100) / (data.length / 2) - 4,
+					width: wp(25) - (length > 8 ? 3 : 4),
 				}}
 				onPress={() =>
 					navigation.navigate('SubCategories', {
@@ -54,17 +52,23 @@ export default function CategoriesSimple({
 			</TouchableOpacity>
 		);
 	};
-	const _keyExtractor = ({ item, index }) => index + item;
+	const _keyExtractor = (item, index) => index.toString();
 	return (
 		<View style={[{ width: wp(100) }, containerStyle]}>
 			<ScrollView horizontal showsHorizontalScrollIndicator={false}>
 				<FlatList
 					style={styles.container}
 					data={data}
-					renderItem={_renderCircularItem}
+					renderItem={(object) => (
+						<RenderCircularItem {...object} length={data.length} />
+					)}
 					keyExtractor={_keyExtractor}
 					showsHorizontalScrollIndicator={false}
-					numColumns={data.length / 2}
+					numColumns={
+						data.length % 2 === 0
+							? data.length / 2
+							: (data.length + 1) / 2
+					}
 				/>
 			</ScrollView>
 		</View>
