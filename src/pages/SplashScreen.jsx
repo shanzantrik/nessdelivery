@@ -20,13 +20,16 @@ import { Colors, Fonts, Shadow } from '../constants';
 import { check, PERMISSIONS, RESULTS, request } from 'react-native-permissions';
 import LinearGradient from 'react-native-linear-gradient';
 import Geolocation from 'react-native-geolocation-service';
-import GeoFencing from 'react-native-geo-fencing';
+// import GeoFencing from 'react-native-geo-fencing';
 import Geocoder from 'react-native-geocoding';
+import { useDispatch } from 'react-redux';
 import GEOFENCE from '../assets/map.json';
 import axios from 'axios';
 import API from '../API';
+import Actions from '../redux/Actions';
 
-export default function SplashScreen({ navigation }) {
+function SplashScreen({ navigation, categories }) {
+	const dispatch = useDispatch();
 	const [loading, setLoading] = useState(false);
 	useEffect(() => {
 		Animated.loop(
@@ -38,21 +41,36 @@ export default function SplashScreen({ navigation }) {
 			})
 		).start();
 
-		// API.get('/product/categories')
-		// 	.then((res) => console.log(res))
-		// 	.catch((err) => console.log(err));
+		API.get('products/categories?per_page=50')
+			.then((res) => {
+				dispatch({
+					type: Actions.CATEGORIES,
+					payload: res.data.sort(compare),
+				});
+				setReady(true);
+				setLoading(false);
+				console.log('Ready: ' + true);
 
-		axios
-			.get('/wp-json/wc/v3/products/categories', {
-				baseURL: 'https://nessfrozenhub.in',
-				auth: {
-					username: 'ck_e1ede8d97da3048865e2e0e9da37cf2f602e8d86',
-					password: 'cs_d3bf68b259d0e7de5b682638d352400631a018cb',
-				},
+				if (loading) {
+					navigation.navigate('Homepage', {
+						locationAvailable: true,
+						location: 'Gardanibagh, Patna',
+					});
+				}
 			})
-			.then((res) => console.log(res))
 			.catch((err) => console.log(err));
 	});
+
+	const compare = (a, b) => {
+		let comparison = 0;
+		if (a.id > b.id) {
+			comparison = 1;
+		} else {
+			comparison = -1;
+		}
+
+		return comparison; // Multiplying it with -1 reverses the sorting order
+	};
 
 	const spinValue = new Animated.Value(0);
 
@@ -60,6 +78,8 @@ export default function SplashScreen({ navigation }) {
 		inputRange: [0, 1],
 		outputRange: ['0deg', '360deg'],
 	});
+
+	const [ready, setReady] = useState(false);
 
 	const getLocationName = (lat, lng) => {
 		Geocoder.init('AIzaSyDg1r3zd1vVKya0U63g1vacakzhR7DhblA');
@@ -85,61 +105,61 @@ export default function SplashScreen({ navigation }) {
 			});
 	};
 
-	const checkGeofencing = () => {
-		Geolocation.getCurrentPosition(
-			//Will give you the current location
-			(position) => {
-				let point = {
-					lat: position.coords.latitude,
-					lng: position.coords.longitude,
-				};
-				//getting the Latitude from the location json
+	// const checkGeofencing = () => {
+	// 	Geolocation.getCurrentPosition(
+	// 		//Will give you the current location
+	// 		(position) => {
+	// 			let point = {
+	// 				lat: position.coords.latitude,
+	// 				lng: position.coords.longitude,
+	// 			};
+	// 			//getting the Latitude from the location json
 
-				GeoFencing.containsLocation(
-					point,
-					GEOFENCE.features[0].geometry.coordinates
-				)
-					.then(() => {
-						console.log("Welcome to Ness's Frozen Delivery");
-						ToastAndroid.show(
-							"Welcome to Ness's Frozen Delivery",
-							ToastAndroid.LONG
-						);
+	// 			GeoFencing.containsLocation(
+	// 				point,
+	// 				GEOFENCE.features[0].geometry.coordinates
+	// 			)
+	// 				.then(() => {
+	// 					console.log("Welcome to Ness's Frozen Delivery");
+	// 					ToastAndroid.show(
+	// 						"Welcome to Ness's Frozen Delivery",
+	// 						ToastAndroid.LONG
+	// 					);
 
-						getLocationName(point.lat, point.lng);
-					})
-					.catch(() => {
-						console.log(
-							'Your location is not within the delivery area\n\nPlease check back later'
-						);
-						ToastAndroid.show(
-							'Your location is not within the delivery area\n\nPlease check back later',
-							ToastAndroid.LONG
-						);
+	// 					getLocationName(point.lat, point.lng);
+	// 				})
+	// 				.catch(() => {
+	// 					console.log(
+	// 						'Your location is not within the delivery area\n\nPlease check back later'
+	// 					);
+	// 					ToastAndroid.show(
+	// 						'Your location is not within the delivery area\n\nPlease check back later',
+	// 						ToastAndroid.LONG
+	// 					);
 
-						setLoading(false);
-						console.log('Set Loading to False');
+	// 					setLoading(false);
+	// 					console.log('Set Loading to False');
 
-						navigation.navigate('Homepage', {
-							location: 'Not Available in your location',
-							locationAvailable: false,
-						});
-					});
-			},
-			(error) => {
-				alert(error.message);
+	// 					navigation.navigate('Homepage', {
+	// 						location: 'Not Available in your location',
+	// 						locationAvailable: false,
+	// 					});
+	// 				});
+	// 		},
+	// 		(error) => {
+	// 			alert(error.message);
 
-				setLoading(false);
-				console.log('Set Loading to False');
-			},
-			{
-				enableHighAccuracy: true,
-				timeout: 20000,
-				maximumAge: 1000,
-			}
-		);
-		// navigation.navigate('Homepage');
-	};
+	// 			setLoading(false);
+	// 			console.log('Set Loading to False');
+	// 		},
+	// 		{
+	// 			enableHighAccuracy: true,
+	// 			timeout: 20000,
+	// 			maximumAge: 1000,
+	// 		}
+	// 	);
+	// 	// navigation.navigate('Homepage');
+	// };
 
 	const checkLocationPermission = () => {
 		setLoading(true);
@@ -170,7 +190,7 @@ export default function SplashScreen({ navigation }) {
 						requestLocationPermission();
 						break;
 					case RESULTS.GRANTED:
-						checkGeofencing();
+						// checkGeofencing();
 						break;
 					case RESULTS.BLOCKED:
 						console.log(
@@ -200,7 +220,7 @@ export default function SplashScreen({ navigation }) {
 				: PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION
 		)
 			.then((result) => {
-				checkGeofencing();
+				// checkGeofencing();
 			})
 			.catch((error) => console.log(error));
 	};
@@ -257,12 +277,17 @@ export default function SplashScreen({ navigation }) {
 					style={{ borderRadius: 32, marginVertical: 20 }}>
 					<TouchableOpacity
 						style={styles.signInContainer}
-						onPress={() =>
-							navigation.navigate('Homepage', {
-								locationAvailable: true,
-								location: 'Gardanibagh, Patna',
-							})
-						}>
+						onPress={() => {
+							console.log('Ready: ' + ready);
+							if (ready) {
+								navigation.navigate('Homepage', {
+									locationAvailable: true,
+									location: 'Gardanibagh, Patna',
+								});
+							} else {
+								setLoading(true);
+							}
+						}}>
 						<View style={styles.signInView}>
 							<Text style={[styles.signIn, { color: '#7F7FD5' }]}>
 								Continue
@@ -291,7 +316,7 @@ export default function SplashScreen({ navigation }) {
 							fontFamily: Fonts.semiBold,
 							color: Colors.white,
 						}}>
-						Checking Your Location
+						Loading
 					</Text>
 				</View>
 			</Modal>
@@ -349,3 +374,5 @@ const styles = StyleSheet.create({
 		textTransform: 'uppercase',
 	},
 });
+
+export default SplashScreen;

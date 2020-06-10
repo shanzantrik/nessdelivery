@@ -26,7 +26,7 @@ const RatingData = [
 	},
 ];
 
-export default function RatingsAndReviews({}) {
+export default function RatingsAndReviews({ data }) {
 	const RenderReviews = ({ index, item }) => {
 		return (
 			<View style={{ marginVertical: 10 }}>
@@ -191,7 +191,7 @@ export default function RatingsAndReviews({}) {
 									color: Colors.greenText,
 									marginEnd: 5,
 								}}>
-								4.2
+								{data.average_rating}
 							</Text>
 							<Icon
 								name="star"
@@ -211,7 +211,7 @@ export default function RatingsAndReviews({}) {
 									fontSize: 12,
 									fontFamily: Fonts.primary,
 								}}>
-								17783 Ratings & 107 Reviews
+								{data.rating_count} Ratings
 							</Text>
 						</View>
 					</View>

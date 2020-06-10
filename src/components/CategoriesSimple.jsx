@@ -22,11 +22,11 @@ export default function CategoriesSimple({
 			<TouchableOpacity
 				style={{
 					height: '100%',
-					width: wp(25) - (length > 8 ? 3 : 4),
+					width: wp(33) - 4,
 				}}
 				onPress={() =>
 					navigation.navigate('SubCategories', {
-						data: item.title,
+						itemId: item.id,
 					})
 				}>
 				<View
@@ -43,10 +43,12 @@ export default function CategoriesSimple({
 						style={{
 							color: Colors.black,
 							paddingHorizontal: 2,
+							textTransform: 'capitalize',
+							textAlign: 'center',
 						}}
 						adjustsFontSizeToFit={true}
 						numberOfLines={1}>
-						{item.title}
+						{item.name.replace('and', '&')}
 					</Text>
 				</View>
 			</TouchableOpacity>
@@ -65,7 +67,9 @@ export default function CategoriesSimple({
 					keyExtractor={_keyExtractor}
 					showsHorizontalScrollIndicator={false}
 					numColumns={
-						data.length % 2 === 0
+						data.length <= 3
+							? data.length
+							: data.length % 2 === 0
 							? data.length / 2
 							: (data.length + 1) / 2
 					}

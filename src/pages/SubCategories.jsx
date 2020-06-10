@@ -8,15 +8,18 @@ import {
 	TouchableWithoutFeedback,
 	Platform,
 	UIManager,
-	Easing,
+	ToastAndroid,
+	ActivityIndicator,
+	Modal,
 } from 'react-native';
 import {
 	widthPercentageToDP as wp,
 	heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import { Colors, Fonts } from '../constants';
-import { CircularCategoriesData, VegProducts } from '../static';
 import Animated, { concat } from 'react-native-reanimated';
+import { useSelector } from 'react-redux';
+import API from '../API';
 
 export default function SubCategories({ navigation, route }) {
 	useEffect(() => {
@@ -24,14 +27,35 @@ export default function SubCategories({ navigation, route }) {
 			UIManager.setLayoutAnimationEnabledExperimental(true);
 		}
 	});
-	const { data } = route.params;
+	const { itemId } = route.params;
+	const categories = useSelector((state) => state.categories);
+	const [loading, setLoading] = useState(false);
 	const borderProps = {
 		borderWidth: 2,
 		borderColor: 'black',
 	};
-	const _renderItem = ({ index, item, selected }) => {
+
+	const getProductList = (id) => {
+		setLoading(true);
+		API.get(`products?category=${id}`)
+			.then((res) => {
+				console.log('Setting Product List');
+				console.log(res.data);
+				setLoading(false);
+				navigation.navigate('ProductList', {
+					data: res.data,
+				});
+			})
+			.catch((error) => {
+				ToastAndroid.show('Some Error Occurred, Pls Try Again');
+				navigation.pop();
+				setLoading(false);
+				console.log(error);
+			});
+	};
+	const RenderItem = ({ index, item, selected }) => {
 		const [isExpanded, toggleExpanded] = useState(
-			selected === 'None' ? false : selected === item.title
+			selected === 'None' ? false : selected === item.id
 		);
 
 		const showSubCategories = () => {
@@ -41,16 +65,12 @@ export default function SubCategories({ navigation, route }) {
 		const _renderSubCategories = ({ index, item }) => {
 			return (
 				<TouchableWithoutFeedback
-					onPress={() =>
-						navigation.navigate('ProductList', {
-							data: VegProducts,
-						})
-					}>
+					onPress={() => getProductList(item.id)}>
 					<View
 						style={{
 							width: wp(50) - 20,
 							flexDirection: 'row',
-							height: 100,
+							height: 70,
 							borderColor: 'gray',
 							borderWidth: 1,
 							borderRadius: 8,
@@ -64,7 +84,7 @@ export default function SubCategories({ navigation, route }) {
 								marginHorizontal: 10,
 							}}>
 							<Image
-								source={item.image}
+								source={{ uri: item?.image?.src }}
 								style={{
 									height: '70%',
 									aspectRatio: 1,
@@ -73,16 +93,19 @@ export default function SubCategories({ navigation, route }) {
 						</View>
 						<View
 							style={{
-								marginTop: 30,
 								width: 0,
 								flexGrow: 1,
 								flex: 1,
+								justifyContent: 'center',
 							}}>
 							<Text
+								style={{
+									textAlign: 'left',
+									textTransform: 'capitalize',
+								}}
 								adjustsFontSizeToFit={true}
-								numberOfLines={2}
-								lineBreakMode="middle">
-								{item.title}
+								numberOfLines={2}>
+								{item.name}
 							</Text>
 						</View>
 					</View>
@@ -100,11 +123,11 @@ export default function SubCategories({ navigation, route }) {
 								alignItems: 'center',
 							}}>
 							<Image
-								source={item.image}
+								source={{ uri: item?.image?.src }}
 								style={{ width: 20, height: 20 }}
 							/>
 							<View style={styles.titleContainer}>
-								<Text style={styles.title}>{item.title}</Text>
+								<Text style={styles.title}>{item.name}</Text>
 							</View>
 						</View>
 						<View
@@ -145,7 +168,9 @@ export default function SubCategories({ navigation, route }) {
 							!isExpanded && { height: 0 },
 						]}>
 						<FlatList
-							data={item.subCategories}
+							data={categories.filter(
+								(category) => category.parent === item.id
+							)}
 							renderItem={_renderSubCategories}
 							keyExtractor={(index, item) => index.toString()}
 							listKey={({ item, index }) =>
@@ -166,9 +191,11 @@ export default function SubCategories({ navigation, route }) {
 				</Text>
 			</View>
 			<FlatList
-				data={CircularCategoriesData}
+				data={categories.filter(
+					(category) => category.display === 'default'
+				)}
 				renderItem={(object) => (
-					<_renderItem {...object} selected={data} />
+					<RenderItem {...object} selected={itemId} />
 				)}
 				keyExtractor={(index, item) => index.toString()}
 				contentContainerStyle={styles.flatListContainer}
@@ -183,6 +210,30 @@ export default function SubCategories({ navigation, route }) {
 					/>
 				)}
 			/>
+			<Modal
+				style={StyleSheet.absoluteFill}
+				animationType="fade"
+				transparent
+				visible={loading}>
+				<View
+					style={{
+						flex: 1,
+						alignItems: 'center',
+						justifyContent: 'center',
+						backgroundColor: '#00000033',
+					}}>
+					<ActivityIndicator color={Colors.lightBlue} size="large" />
+					<Text
+						style={{
+							marginTop: 20,
+							fontSize: 16,
+							fontFamily: Fonts.semiBold,
+							color: Colors.white,
+						}}>
+						Loading
+					</Text>
+				</View>
+			</Modal>
 		</View>
 	);
 }

@@ -45,28 +45,46 @@ const config = {
 };
 
 function ProductSharedNavigator({ navigation }) {
-	<SharedStack.Navigator>
-		<SharedStack.Screen
-			name="ProductList"
-			component={ProductList}
-			options={{
-				header: (props) => <HomepageToolbar {...props} />,
-			}}
-		/>
-		<SharedStack.Screen
-			name="ProductDetail"
-			component={ProductDetail}
-			options={{
-				header: (props) => (
-					<HomepageToolbar
-						{...props}
-						navigation={navigation}
-						searchBar={false}
-					/>
-				),
-			}}
-		/>
-	</SharedStack.Navigator>;
+	return (
+		<SharedStack.Navigator
+			screenOptions={{
+				cardStyle: {
+					backgroundColor: 'white',
+				},
+			}}>
+			<SharedStack.Screen
+				name="ProductList"
+				component={ProductList}
+				options={{
+					header: (props) => <HomepageToolbar {...props} />,
+				}}
+			/>
+			<SharedStack.Screen
+				name="ProductDetail"
+				component={ProductDetail}
+				options={{
+					header: (props) => (
+						<HomepageToolbar
+							{...props}
+							navigation={navigation}
+							searchBar={false}
+						/>
+					),
+				}}
+				sharedElements={(route, otherRoute, showing) => {
+					const { item } = route.params;
+					console.log('Navigator');
+					console.log(item);
+					return [
+						{
+							id: `item.${item.id}.photo`,
+							animation: 'move',
+						},
+					];
+				}}
+			/>
+		</SharedStack.Navigator>
+	);
 }
 
 function HomeStackNavigation({ navigation }) {
@@ -122,11 +140,14 @@ function HomeStackNavigation({ navigation }) {
 						CardStyleInterpolators.forModalPresentationIOS,
 				}}
 			/>
-			<HomeStack.Screen
+			{/* <HomeStack.Screen
 				name="ProductShared"
 				component={ProductSharedNavigator}
-			/>
-			{/* <HomeStack.Screen
+				options={{
+					headerShown: false,
+				}}
+			/> */}
+			<HomeStack.Screen
 				name="ProductList"
 				component={ProductList}
 				options={{
@@ -145,7 +166,7 @@ function HomeStackNavigation({ navigation }) {
 						/>
 					),
 				}}
-			/> */}
+			/>
 			<HomeStack.Screen
 				name="Cart"
 				component={Cart}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
 	View,
 	Text,
@@ -13,25 +13,28 @@ import {
 	widthPercentageToDP as wp,
 	heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+import { SharedElement } from 'react-native-shared-element';
 import { Colors, Fonts, Shadow } from '../constants';
 import { AddButton } from '../components';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Picker } from '@react-native-community/picker';
 import Animated from 'react-native-reanimated';
-const borderProps = {
-	borderWidth: 2,
-	borderColor: 'black',
-};
+import API from '../API';
 
 export default function ProductList({ navigation, route }) {
 	const { data } = route.params;
 
 	const ProductItem = ({ item, index }) => {
+		console.log('ProductItem');
 		const [heartChecked, heartToggle] = useState(false);
 		const [btnEnabled, btnToggle] = useState(false);
 		const [count, setCount] = useState(0);
 		const countTimer = new Animated.Value(10);
-		const [selectedQuantity, setSelectedQuantity] = useState(1000);
+		const [selectedQuantity, setSelectedQuantity] = useState(
+			item.type === 'variable' ? item.product_variations[0] : item.weight
+		);
+
+		// console.log(`item.${item.id}.photo`);
 
 		const countAnimation = () => {
 			Animated.timing(countAnimation, {
@@ -86,11 +89,28 @@ export default function ProductList({ navigation, route }) {
 			}
 		};
 		return (
-			<View style={styles.cardContainer}>
+			<View style={styles.cardContainer} key={`item.${item.id}.photo`}>
 				<TouchableWithoutFeedback
-					onPress={() => navigation.navigate('ProductDetail')}>
-					<View style={{ width: '30%', margin: 5 }}>
-						<Image source={item.image} style={styles.image} />
+					onPress={() =>
+						navigation.navigate('ProductDetail', {
+							item: item,
+							type: item.type,
+							selected: selectedQuantity,
+						})
+					}>
+					<View
+						style={{
+							width: '30%',
+							margin: 5,
+							alignItems: 'center',
+							justifyContent: 'center',
+						}}>
+						<SharedElement id={`item.${item.id}.photo`}>
+							<Image
+								source={{ uri: item?.images[0]?.src }}
+								style={styles.image}
+							/>
+						</SharedElement>
 					</View>
 				</TouchableWithoutFeedback>
 				<View
@@ -98,38 +118,71 @@ export default function ProductList({ navigation, route }) {
 						width: '70%',
 					}}>
 					<TouchableWithoutFeedback
-						onPress={() => navigation.navigate('ProductDetail')}>
+						onPress={() =>
+							navigation.navigate('ProductDetail', {
+								item: item,
+								type: item.type,
+								selected: selectedQuantity,
+							})
+						}>
 						<View>
-							<Text style={styles.brand}>{item.brand}</Text>
-							<Text style={styles.title}>{item.title}</Text>
+							<Text style={styles.brand}>
+								{item?.brands[0]?.name}
+							</Text>
+							<Text style={styles.title}>{item.name}</Text>
 						</View>
 					</TouchableWithoutFeedback>
 					<View style={styles.rating}>
 						<View style={styles.ratingContainer}>
-							<Text style={styles.ratingText}>4.3</Text>
+							<Text style={styles.ratingText}>
+								{item.average_rating}
+							</Text>
 							<Icon name="star" solid style={styles.ratingStar} />
 						</View>
 						<View style={styles.ratingCountContainer}>
-							<Text style={styles.ratingCount}>7782 Rating</Text>
+							<Text style={styles.ratingCount}>
+								{item.rating_count} Reviews
+							</Text>
 						</View>
 					</View>
-					<View style={styles.pickerContainer}>
-						<Picker
-							selectedValue={selectedQuantity}
-							onValueChange={(value) =>
-								setSelectedQuantity(value)
-							}
-							mode="dropdown"
-							style={styles.picker}
-							itemStyle={styles.pickerItem}>
-							<Picker.Item label={'1 KG'} value={1000} />
-							<Picker.Item label={'500 GM'} value={500} />
-							<Picker.Item label={'250 GM'} value={250} />
-						</Picker>
-					</View>
-					<View>
-						<Text style={styles.oldPrice}>
-							MRP: Rs {item.oldPrice}
+					{item.type === 'variable' ? (
+						<View style={styles.pickerContainer}>
+							<Picker
+								selectedValue={selectedQuantity}
+								onValueChange={(value) =>
+									setSelectedQuantity(value)
+								}
+								mode="dropdown"
+								style={styles.picker}
+								itemStyle={styles.pickerItem}>
+								{item.product_variations.map((variation) => {
+									return (
+										<Picker.Item
+											label={variation.attributes[0].option.replace(
+												'-',
+												'.'
+											)}
+											value={variation}
+											itemStyle={{
+												textTransform: 'capitalize',
+											}}
+										/>
+									);
+								})}
+							</Picker>
+						</View>
+					) : (
+						<View>
+							<Text>{item.weight}</Text>
+						</View>
+					)}
+					<View style={!item.sale_price && { marginTop: 20 }}>
+						<Text
+							style={[
+								styles.oldPrice,
+								!item.sale_price && { display: 'none' },
+							]}>
+							MRP: Rs {item.price}
 						</Text>
 						<Text style={styles.price}>Rs {item.price}</Text>
 					</View>
@@ -235,6 +288,7 @@ const styles = StyleSheet.create({
 	image: {
 		height: 100,
 		width: 100,
+		resizeMode: 'contain',
 	},
 	rating: {
 		flexDirection: 'row',

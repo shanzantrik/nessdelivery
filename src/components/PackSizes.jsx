@@ -37,10 +37,10 @@ const packs = [
 
 export default function PackSizes({
 	data,
-	setWeight,
+	selected,
+	setName,
 	setPrice,
 	setOldPrice,
-	setDiscount,
 }) {
 	const compare = (a, b) => {
 		let comparison = 0;
@@ -53,18 +53,19 @@ export default function PackSizes({
 		return comparison * -1; // Multiplying it with -1 reverses the sorting order
 	};
 
-	const [current, setCurrent] = useState(packs[0].weight);
+	const [current, setCurrent] = useState(selected.id);
 
 	const RenderPack = ({ index, item }) => {
-		const [selected] = useState(current === item.weight);
+		const [selected] = useState(current === item.id);
 		return (
 			<TouchableOpacity
 				onPress={() => {
-					setCurrent(item.weight);
-					setWeight(item.weight);
-					setPrice(item.price);
-					setOldPrice(item.oldPrice);
-					setDiscount(item.discount);
+					setCurrent(item.id);
+					setName(item.sku);
+					setPrice(
+						item.on_sale ? item.sale_price : item.regular_price
+					);
+					setOldPrice(item.regular_price);
 				}}>
 				<View
 					style={{
@@ -83,7 +84,7 @@ export default function PackSizes({
 								fontSize: 12,
 								fontFamily: Fonts.semiBold,
 							}}>
-							{item.weight} {item.unit}
+							{item.attributes[0].option.replace('-', '.')}
 						</Text>
 						<Text
 							style={{
@@ -99,17 +100,22 @@ export default function PackSizes({
 								fontSize: 14,
 								fontFamily: Fonts.bold,
 							}}>
-							Rs {item.price}
+							Rs{' '}
+							{item.on_sale
+								? item.sale_price
+								: item.regular_price}
 						</Text>
-						<Text
-							style={{
-								fontSize: 12,
-								fontFamily: Fonts.semiBold,
-								color: '#ff0000',
-								textDecorationLine: 'line-through',
-							}}>
-							MRP: Rs {item.oldPrice}
-						</Text>
+						{item.on_sale && (
+							<Text
+								style={{
+									fontSize: 12,
+									fontFamily: Fonts.semiBold,
+									color: '#ff0000',
+									textDecorationLine: 'line-through',
+								}}>
+								MRP: Rs {item.regular_price}
+							</Text>
+						)}
 					</View>
 					<View
 						style={{
@@ -142,15 +148,17 @@ export default function PackSizes({
 							borderBottomEndRadius: 5,
 							padding: 1,
 						}}>
-						<Text
-							style={{
-								fontSize: 10,
-								fontFamily: Fonts.semiBold,
-								marginHorizontal: 10,
-								color: Colors.white,
-							}}>
-							{item.discount}
-						</Text>
+						{item.on_sale && (
+							<Text
+								style={{
+									fontSize: 10,
+									fontFamily: Fonts.semiBold,
+									marginHorizontal: 10,
+									color: Colors.white,
+								}}>
+								{item.regular_price - item.sale_price}
+							</Text>
+						)}
 					</View>
 				</View>
 			</TouchableOpacity>
@@ -167,7 +175,7 @@ export default function PackSizes({
 				Pack Sizes
 			</Text>
 			<FlatList
-				data={packs.sort(compare)}
+				data={data}
 				renderItem={(object) => <RenderPack {...object} />}
 				keyExtractor={(index, item) => index.toString()}
 			/>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
 	ScrollView,
 	View,
@@ -27,6 +27,7 @@ import {
 } from 'react-native-responsive-screen';
 import { Colors, Fonts } from '../constants';
 import Icon from 'react-native-vector-icons/FontAwesome5';
+import { useSelector } from 'react-redux';
 
 const borderProps = {
 	borderColor: 'black',
@@ -34,7 +35,13 @@ const borderProps = {
 };
 
 export default function Homepage({ navigation, route }) {
-	const { location, locationAvailable } = route.params;
+	// const { location, locationAvailable } = route.params;
+	const location = 'Your Location',
+		locationAvailable = true;
+
+	const categoriesData = useSelector((state) => state.categories);
+
+	// console.log(categoriesData);
 	return (
 		<View style={{ flex: 1 }}>
 			<ScrollView contentContainerStyle={styles.container}>
@@ -66,8 +73,8 @@ export default function Homepage({ navigation, route }) {
 									style={{
 										fontSize: 14,
 										fontFamily: Fonts.bold,
-										marginStart: 10,
 									}}>
+									{' '}
 									{location}
 								</Text>
 							</Text>
@@ -82,7 +89,9 @@ export default function Homepage({ navigation, route }) {
 						)}
 					</View>
 					<CategoriesSimple
-						data={CircularCategoriesData}
+						data={categoriesData.filter(
+							(category) => category.display === 'default'
+						)}
 						title={'Categories'}
 						navigation={navigation}
 					/>

@@ -17,6 +17,8 @@ import {
 	AddButton,
 } from '../components';
 
+import { SharedElement } from 'react-navigation-shared-element';
+
 const product = {
 	brand: 'McCain',
 	weight: 1,
@@ -53,12 +55,21 @@ const product = {
 };
 
 export default function ProductDetail({ navigation, route }) {
-	const [weight, setWeight] = useState(product.weight);
-	const [price, setPrice] = useState(product.price);
-	const [oldPrice, setOldPrice] = useState(product.oldPrice);
-	const [discount, setDiscount] = useState(product.discount);
+	const { item, type, selected } = route.params;
 
-	const [selectedImage, setSelectedImage] = useState(product.imageFront);
+	const [itemName, setItemName] = useState(selected.sku);
+	const [price, setPrice] = useState(
+		type === 'variable'
+			? selected.on_sale
+				? selected.sale_price
+				: selected.regular_price
+			: item.price
+	);
+	const [regularPrice, setRegularPrice] = useState(
+		type === 'variable' ? selected.regular_price : item.regular_price
+	);
+
+	const [selectedImage, setSelectedImage] = useState(item?.images[0].src);
 	return (
 		<View style={styles.container}>
 			<ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
@@ -85,7 +96,7 @@ export default function ProductDetail({ navigation, route }) {
 									textAlign: 'center',
 									color: Colors.black,
 								}}>
-								{product.brand}
+								{item?.brands[0]?.name}
 							</Text>
 						</View>
 						<View>
@@ -94,7 +105,7 @@ export default function ProductDetail({ navigation, route }) {
 									fontSize: 16,
 									fontFamily: Fonts.semiBold,
 								}}>
-								{product.title}, {weight} Kg Pouch
+								{itemName}
 							</Text>
 						</View>
 						<View
@@ -112,29 +123,33 @@ export default function ProductDetail({ navigation, route }) {
 								}}>
 								Rs {price}
 							</Text>
-							<Text
-								style={{
-									fontSize: 13,
-									fontFamily: Fonts.semiBold,
-									color: '#ff0000e6',
-									textDecorationLine: 'line-through',
-								}}>
-								MRP: Rs {oldPrice}
-							</Text>
 							<View
-								style={{
-									backgroundColor: '#eb5c5e',
-									borderTopStartRadius: 5,
-									borderBottomEndRadius: 5,
-								}}>
+								style={!item.sale_price && { display: 'none' }}>
 								<Text
 									style={{
-										marginHorizontal: 10,
-										marginVertical: 2,
-										color: Colors.white,
+										fontSize: 13,
+										fontFamily: Fonts.semiBold,
+										color: '#ff0000e6',
+										textDecorationLine: 'line-through',
 									}}>
-									{discount}
+									MRP: Rs {regularPrice}
 								</Text>
+								<View
+									style={{
+										backgroundColor: '#eb5c5e',
+										borderTopStartRadius: 5,
+										borderBottomEndRadius: 5,
+									}}>
+									<Text
+										style={{
+											marginHorizontal: 10,
+											marginVertical: 2,
+											color: Colors.white,
+										}}>
+										{parseInt(item.sale_price, 10) -
+											parseInt(item.regular_price, 10)}
+									</Text>
+								</View>
 							</View>
 						</View>
 						<Text
@@ -149,7 +164,7 @@ export default function ProductDetail({ navigation, route }) {
 							<View style={styles.rating}>
 								<View style={styles.ratingContainer}>
 									<Text style={styles.ratingText}>
-										{product.rating}
+										{item.average_rating}
 									</Text>
 									<Icon
 										name="star"
@@ -160,7 +175,7 @@ export default function ProductDetail({ navigation, route }) {
 								<TouchableOpacity>
 									<View style={styles.ratingCountContainer}>
 										<Text style={styles.ratingCount}>
-											{product.ratingAndReviews}
+											{item.rating_count} Reviews
 										</Text>
 										<Icon
 											name="chevron-right"
@@ -177,79 +192,71 @@ export default function ProductDetail({ navigation, route }) {
 							alignItems: 'center',
 							justifyContent: 'center',
 						}}>
-						<Image
-							source={selectedImage}
-							style={{
-								height: wp(80),
-								aspectRatio: 1,
-								resizeMode: 'center',
-							}}
-						/>
+						<SharedElement id={`item.${item.id}.photo`}>
+							<Image
+								source={{ uri: selectedImage }}
+								style={{
+									height: wp(80),
+									aspectRatio: 1,
+									resizeMode: 'center',
+								}}
+							/>
+						</SharedElement>
 						<View
 							style={{
 								flexDirection: 'row',
 								marginStart: 30,
 							}}>
-							<TouchableOpacity
-								onPress={() =>
-									setSelectedImage(product.imageFront)
-								}>
-								<View
-									style={{
-										borderWidth: 1,
-										borderColor: 'gray',
-										alignItems: 'center',
-										justifyContent: 'center',
-										padding: 2,
-										marginEnd: 20,
-									}}>
-									<Image
-										source={product.imageFront}
-										style={{
-											width: 40,
-											height: 40,
-										}}
-									/>
-								</View>
-							</TouchableOpacity>
-							<TouchableOpacity
-								onPress={() =>
-									setSelectedImage(product.imageBack)
-								}>
-								<View
-									style={{
-										borderWidth: 1,
-										borderColor: 'gray',
-										alignItems: 'center',
-										justifyContent: 'center',
-										padding: 2,
-										marginEnd: 10,
-									}}>
-									<Image
-										source={product.imageBack}
-										style={{
-											width: 40,
-											height: 40,
-										}}
-									/>
-								</View>
-							</TouchableOpacity>
+							{item.images &&
+								item.images.map((image) => {
+									return (
+										<TouchableOpacity
+											onPress={() =>
+												setSelectedImage(image.src)
+											}>
+											<View
+												style={{
+													borderWidth: 1,
+													borderColor: 'gray',
+													alignItems: 'center',
+													justifyContent: 'center',
+													padding: 2,
+													marginEnd: 20,
+												}}>
+												<Image
+													source={{ uri: image.src }}
+													style={{
+														width: 40,
+														height: 40,
+													}}
+												/>
+											</View>
+										</TouchableOpacity>
+									);
+								})}
 						</View>
 					</View>
-					<PackSizes
-						setWeight={setWeight}
-						setPrice={setPrice}
-						setOldPrice={setOldPrice}
-						setDiscount={setDiscount}
-					/>
+					{item.type === 'variable' && (
+						<PackSizes
+							data={item.product_variations}
+							selected={selected}
+							setName={setItemName}
+							setPrice={setPrice}
+							setOldPrice={setRegularPrice}
+						/>
+					)}
 					<View
-						style={{
-							borderColor: '#999999',
-							borderTopWidth: 2,
-							borderBottomWidth: 2,
-							paddingVertical: 20,
-							marginHorizontal: 20,
-						}}>
+						style={[
+							{
+								borderColor: '#999999',
+								borderBottomWidth: 2,
+								paddingVertical: 20,
+								marginHorizontal: 20,
+							},
+							item.type === 'variable' && {
+								borderTopWidth: 2,
+							},
+						]}>
 						<View style={{ marginBottom: 10 }}>
 							<Text
 								style={{
@@ -273,8 +280,33 @@ export default function ProductDetail({ navigation, route }) {
 							</Text>
 						</View>
 					</View>
-					<AboutProduct data={product.about} />
-					<RatingsAndReviews />
+					{/* <AboutProduct data={item.description} /> */}
+					<View
+						style={{
+							borderBottomColor: '#999999',
+							borderBottomWidth: 1,
+							paddingVertical: 20,
+							marginHorizontal: 20,
+						}}>
+						<Text
+							style={{
+								fontSize: 18,
+								fontFamily: Fonts.semiBold,
+								marginBottom: 20,
+							}}>
+							About this Product
+						</Text>
+
+						<Text
+							style={{
+								fontSize: 14,
+								fontFamily: Fonts.primary,
+								color: '#505050',
+							}}>
+							{item.description}
+						</Text>
+					</View>
+					<RatingsAndReviews data={item} />
 				</View>
 			</ScrollView>
 			<View style={{ position: 'absolute', bottom: 0 }}>

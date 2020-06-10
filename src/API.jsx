@@ -2,8 +2,8 @@ import WooCommerceRestApi from '@woocommerce/woocommerce-rest-api';
 
 const api = new WooCommerceRestApi({
 	url: 'https://nessfrozenhub.in',
-	consumerKey: 'ck_e1ede8d97da3048865e2e0e9da37cf2f602e8d86',
-	consumerSecret: 'cs_d3bf68b259d0e7de5b682638d352400631a018cb',
+	consumerKey: 'ck_c30100e7b9fd584cfa7adcea71444a018aa5b697',
+	consumerSecret: 'cs_faed940b867241d0630d53eafafeac0eb82b6595',
 	version: 'wc/v3',
 });
 

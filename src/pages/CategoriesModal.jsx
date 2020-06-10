@@ -13,9 +13,12 @@ import {
 } from 'react-native-responsive-screen';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Colors, Fonts } from '../constants';
-import { CircularCategoriesData, VegProducts } from '../static';
+import { useSelector } from 'react-redux';
 
 export default function SubCategories({ navigation, route }) {
+	const categories = useSelector((state) => state.categories).filter(
+		(item) => item.display === 'default'
+	);
 	const { selected, setSearchText } = route.params;
 	const borderProps = {
 		borderWidth: 2,
@@ -25,7 +28,7 @@ export default function SubCategories({ navigation, route }) {
 		const [selectedItem] = useState(selected);
 
 		const setValueAndDismiss = () => {
-			setSearchText(item.title);
+			setSearchText(item.name);
 			navigation.goBack();
 		};
 
@@ -38,11 +41,11 @@ export default function SubCategories({ navigation, route }) {
 							alignItems: 'center',
 						}}>
 						<Image
-							source={item.image}
+							source={{ uri: item?.image?.src }}
 							style={{ width: 20, height: 20 }}
 						/>
 						<View style={styles.titleContainer}>
-							<Text style={styles.title}>{item.title}</Text>
+							<Text style={styles.title}>{item.name}</Text>
 						</View>
 					</View>
 					<View
@@ -55,7 +58,7 @@ export default function SubCategories({ navigation, route }) {
 						<Icon
 							name="check"
 							color={
-								selectedItem === item.title
+								selectedItem === item.name
 									? 'green'
 									: Colors.transparent
 							}
@@ -73,7 +76,7 @@ export default function SubCategories({ navigation, route }) {
 				</Text>
 			</View>
 			<FlatList
-				data={CircularCategoriesData}
+				data={categories}
 				renderItem={(object) => <_renderItem {...object} />}
 				keyExtractor={(index, item) => index.toString()}
 				contentContainerStyle={styles.flatListContainer}

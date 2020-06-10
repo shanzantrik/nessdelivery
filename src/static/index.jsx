@@ -1,86 +1,86 @@
 export const CircularCategoriesData = [
 	{
-		title: 'Veg',
+		name: 'Veg',
 		image: require('../assets/homepage/veg.png'),
 		backgroundColor: '#ffffff',
 		subCategories: [
 			{
-				title: 'McCains',
+				name: 'McCains',
 				image: require('../assets/sub_categories/mccain.png'),
 			},
 			{
-				title: 'Parathas & Naan',
+				name: 'Parathas & Naan',
 				image: require('../assets/sub_categories/mccain.png'),
 			},
 			{
-				title: 'Nuggets / Fries',
+				name: 'Nuggets / Fries',
 				image: require('../assets/sub_categories/mccain.png'),
 			},
 			{
-				title: 'Others (Veg)',
+				name: 'Others (Veg)',
 				image: require('../assets/sub_categories/mccain.png'),
 			},
 			{
-				title: 'Green Peas / Sweet Corn',
+				name: 'Green Peas / Sweet Corn',
 				image: require('../assets/sub_categories/mccain.png'),
 			},
 		],
 	},
 	{
-		title: 'Chicken',
+		name: 'Chicken',
 		image: require('../assets/homepage/chicken.png'),
 		backgroundColor: '#ffffff',
 		subCategories: [
 			{
-				title: 'Crispy Nuggets',
+				name: 'Crispy Nuggets',
 				image: require('../assets/sub_categories/crispy_nuggets.jpg'),
 			},
 			{
-				title: 'Salami',
+				name: 'Salami',
 				image: require('../assets/sub_categories/salami.jpg'),
 			},
 			{
-				title: 'Chicken Wings',
+				name: 'Chicken Wings',
 				image: require('../assets/sub_categories/wings.jpg'),
 			},
 			{
-				title: 'Chicken Nuggets',
+				name: 'Chicken Nuggets',
 				image: require('../assets/sub_categories/nuggets.jpg'),
 			},
 			{
-				title: 'Chicken Popcorn',
+				name: 'Chicken Popcorn',
 				image: require('../assets/sub_categories/popcorn.jpg'),
 			},
 		],
 	},
 	{
-		title: 'Pork',
+		name: 'Pork',
 		image: require('../assets/homepage/pork.png'),
 		backgroundColor: '#ffffff',
 	},
 
 	{
-		title: 'Cheese & Slice',
+		name: 'Cheese & Slice',
 		image: require('../assets/homepage/cheese.png'),
 		backgroundColor: '#ffffff',
 	},
 	{
-		title: 'Mithun',
+		name: 'Mithun',
 		image: require('../assets/homepage/mithun.png'),
 		backgroundColor: '#ffffff',
 	},
 	{
-		title: 'Wonder Eggs',
+		name: 'Wonder Eggs',
 		image: require('../assets/homepage/shrimp.png'),
 		backgroundColor: '#ffffff',
 	},
 	{
-		title: 'Sea Food',
+		name: 'Sea Food',
 		image: require('../assets/homepage/shrimp.png'),
 		backgroundColor: '#ffffff',
 	},
 	{
-		title: 'Ice Cream',
+		name: 'Ice Cream',
 		image: require('../assets/homepage/ice-cream.png'),
 		backgroundColor: '#ffffff',
 	},
@@ -88,6 +88,7 @@ export const CircularCategoriesData = [
 
 export const VegProducts = [
 	{
+		id: 101,
 		brand: 'McCain',
 		title: 'French Fries',
 		image: require('../assets/homepage/french_fries.png'),
@@ -97,6 +98,7 @@ export const VegProducts = [
 		discount: 50,
 	},
 	{
+		id: 102,
 		brand: 'McCain',
 		title: 'French Fries',
 		image: require('../assets/homepage/french_fries.png'),
@@ -106,6 +108,7 @@ export const VegProducts = [
 		discount: 50,
 	},
 	{
+		id: 103,
 		brand: 'McCain',
 		title: 'French Fries',
 		image: require('../assets/homepage/french_fries.png'),
@@ -115,6 +118,7 @@ export const VegProducts = [
 		discount: 50,
 	},
 	{
+		id: 104,
 		brand: 'McCain',
 		title: 'French Fries',
 		image: require('../assets/homepage/french_fries.png'),
@@ -124,6 +128,7 @@ export const VegProducts = [
 		discount: 50,
 	},
 	{
+		id: 105,
 		brand: 'McCain',
 		title: 'French Fries',
 		image: require('../assets/homepage/french_fries.png'),
@@ -133,6 +138,7 @@ export const VegProducts = [
 		discount: 50,
 	},
 	{
+		id: 106,
 		brand: 'McCain',
 		title: 'French Fries',
 		image: require('../assets/homepage/french_fries.png'),
@@ -142,6 +148,7 @@ export const VegProducts = [
 		discount: 50,
 	},
 	{
+		id: 107,
 		brand: 'McCain',
 		title: 'French Fries',
 		image: require('../assets/homepage/french_fries.png'),

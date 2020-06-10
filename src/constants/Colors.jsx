@@ -3,6 +3,7 @@ export default {
 	black: '#000000',
 	transparent: '#00000000',
 	lightBlue: '#cee0ec',
+	royalBlue: '#4084f3',
 	gradientPrimary: '#86A8E7',
 	gradientSecondary: '#7F7FD5',
 	greenPrimary: '#88cf45',
