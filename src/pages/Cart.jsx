@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
 	Animated,
 	Easing,
 	View,
 	Text,
-	Image,
 	StyleSheet,
 	FlatList,
 	TouchableOpacity,
@@ -13,37 +12,42 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { Fonts, Colors } from '../constants';
-
-const cartData = [
-	{
-		brand: 'McCain',
-		title: 'French Fries',
-		image: require('../assets/homepage/french_fries.png'),
-		weight: 10,
-		price: 200,
-		oldPrice: 150,
-		quantity: 2,
-	},
-	{
-		brand: 'Delicious',
-		title: 'Chicken Salami',
-		image: require('../assets/sub_categories/salami.jpg'),
-		weight: 1,
-		price: 250,
-		oldPrice: 300,
-		quantity: 3,
-	},
-];
+import { useSelector, useDispatch } from 'react-redux';
+import FastImage from 'react-native-fast-image';
+import Actions from '../redux/Actions';
 
 export default function Card({ navigation }) {
+	const dispatch = useDispatch();
+	const cartData = useSelector((state) => state.cart);
+	useEffect(() => {
+		setCart(cartData);
+		console.log('Setting Cart Data');
+	}, [cartData]);
 	const [cart, setCart] = useState(cartData);
+	console.log(cart);
+
 	const ProductItem = ({ item, index }) => {
 		const [heartChecked, heartToggle] = useState(false);
 		const [count, setCount] = useState(item.quantity);
+		const [btnEnabled, btnToggle] = useState(item.quantity !== 0);
 
-		if (cart.length === 0) {
-			console.log('Cart is empty!');
-		}
+		// if (cart !== null && cart.length === 0) {
+		// 	console.log('Cart is empty!');
+		// }
+
+		const cartAction = (action) => {
+			dispatch({
+				type: action,
+				payload: {
+					...item,
+					brand: item.brands[0].name,
+					image: item.images[0].src,
+					price: item.price,
+					selected: item.selectedQuantity,
+					quantity: count,
+				},
+			});
+		};
 
 		const countAnimation = () => {
 			Animated.timing(countAnimation, {
@@ -54,46 +58,74 @@ export default function Card({ navigation }) {
 		};
 
 		const AddButton = () => {
-			return (
-				<Animated.View style={styles.itemCounterContainer}>
+			if (btnEnabled) {
+				return (
+					<Animated.View style={styles.itemCounterContainer}>
+						<TouchableOpacity
+							style={{
+								flex: 1,
+							}}
+							onPress={() => {
+								console.log(count);
+								if (count === 1) {
+									console.log('Removing Item');
+									btnToggle(!btnEnabled);
+									cartAction(Actions.REMOVE_FROM_CART);
+								} else {
+									cartAction(Actions.SUB_QUANTITY);
+								}
+								setCount(count - 1);
+							}}>
+							<View style={styles.countContainer}>
+								<Text style={styles.count}>−</Text>
+							</View>
+						</TouchableOpacity>
+						<Animated.View style={styles.countTextContainer}>
+							<Animated.Text style={styles.countText}>
+								{count}
+							</Animated.Text>
+						</Animated.View>
+						<TouchableOpacity
+							style={{
+								flex: 1,
+							}}
+							onPress={() => {
+								console.log('Updating in cart');
+								cartAction(Actions.ADD_QUANTITY);
+								setCount(count + 1);
+							}}>
+							<Animated.View style={styles.countContainer}>
+								<Text style={styles.count}>+</Text>
+							</Animated.View>
+						</TouchableOpacity>
+					</Animated.View>
+				);
+			} else {
+				return (
 					<TouchableOpacity
-						style={{ flex: 1 }}
 						onPress={() => {
-							if (count === 1) {
-								setCart(cart.splice(index, 1));
-								setCount(count - 1);
-								console.log(cart.splice(index, 1));
-							} else {
-								setCount(count - 1);
-							}
-							console.log('Index: ' + index);
-							console.log('Count: ' + count);
+							setCount(count + 1);
+							btnToggle(!btnEnabled);
+							cartAction(Actions.ADD_TO_CART);
+							console.log('Adding to Cart');
 						}}>
-						<View style={styles.countContainer}>
-							<Text style={styles.count}>−</Text>
+						<View style={styles.addBtnContainer}>
+							<Text style={styles.addBtnText}>Add</Text>
 						</View>
 					</TouchableOpacity>
-					<Animated.View style={styles.countTextContainer}>
-						<Animated.Text style={styles.countText}>
-							{count}
-						</Animated.Text>
-					</Animated.View>
-					<TouchableOpacity
-						style={{ flex: 1 }}
-						onPress={() => setCount(count + 1)}>
-						<Animated.View style={styles.countContainer}>
-							<Text style={styles.count}>+</Text>
-						</Animated.View>
-					</TouchableOpacity>
-				</Animated.View>
-			);
+				);
+			}
 		};
 		return (
 			<View style={styles.cardContainer}>
 				<TouchableWithoutFeedback
 					onPress={() => navigation.navigate('ProductDetail')}>
 					<View style={{ width: '30%', margin: 5 }}>
-						<Image source={item.image} style={styles.image} />
+						<FastImage
+							source={{ uri: item.image }}
+							style={styles.image}
+							resizeMode={FastImage.resizeMode.contain}
+						/>
 					</View>
 				</TouchableWithoutFeedback>
 				<View
@@ -104,16 +136,25 @@ export default function Card({ navigation }) {
 						onPress={() => navigation.navigate('ProductDetail')}>
 						<View>
 							<Text style={styles.brand}>{item.brand}</Text>
-							<Text style={styles.title}>{item.title}</Text>
+							<Text style={styles.title}>{item.name}</Text>
 						</View>
 					</TouchableWithoutFeedback>
 					<View style={styles.pickerContainer}>
-						<Text style={styles.weightText}>{item.weight} Kg</Text>
+						<Text style={styles.weightText}>
+							{item.type === 'variable'
+								? item.selected.attributes[0].option.replace(
+										'-',
+										'.'
+								  )
+								: item.weight}
+						</Text>
 					</View>
 					<View>
-						<Text style={styles.oldPrice}>
-							MRP: Rs {item.oldPrice}
-						</Text>
+						{item.selected.on_sale && (
+							<Text style={styles.oldPrice}>
+								MRP: Rs {item.oldPrice}
+							</Text>
+						)}
 						<Text style={styles.price}>Rs {item.price}</Text>
 					</View>
 					<View
@@ -145,11 +186,11 @@ export default function Card({ navigation }) {
 			</View>
 		);
 	};
-	if (cart.length !== 0) {
+	if (cart.addedItems !== null && cart.addedItems.length !== 0) {
 		return (
 			<View style={styles.container}>
 				<FlatList
-					data={cart}
+					data={cart.addedItems}
 					renderItem={(object) => <ProductItem {...object} />}
 					ItemSeparatorComponent={() => (
 						<View
@@ -176,7 +217,7 @@ export default function Card({ navigation }) {
 								fontFamily: Fonts.primary,
 								color: Colors.white,
 							}}>
-							Rs 200
+							Rs {cart.total}
 						</Text>
 						<Text
 							style={{

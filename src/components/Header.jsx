@@ -2,17 +2,19 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Fonts } from '../constants';
 
-export default function Header({ title, onPress }) {
+export default function Header({ title, onPress, viewAll }) {
 	return (
 		<View style={styles.container}>
 			<View>
 				<Text style={styles.titleStyle}>{title}</Text>
 			</View>
-			<TouchableOpacity onPress={onPress}>
-				<View style={styles.viewAllContainerStyle}>
-					<Text style={styles.viewAllStyle}>View All</Text>
-				</View>
-			</TouchableOpacity>
+			{viewAll !== false && (
+				<TouchableOpacity onPress={onPress}>
+					<View style={styles.viewAllContainerStyle}>
+						<Text style={styles.viewAllStyle}>View All</Text>
+					</View>
+				</TouchableOpacity>
+			)}
 		</View>
 	);
 }

@@ -1,12 +1,12 @@
 const initialState = null;
 
-const Products = (state = initialState, action) => {
+const Carousel = (state = initialState, action) => {
 	switch (action.type) {
-		case 'PRODUCTS':
+		case 'CAROUSEL':
 			return (state = action.payload);
 		default:
 			return state;
 	}
 };
 
-export default Products;
+export default Carousel;

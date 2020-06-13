@@ -7,6 +7,7 @@ import {
 	StyleSheet,
 	Modal,
 	TouchableOpacity,
+	ToastAndroid,
 } from 'react-native';
 import {
 	CategoriesFlatList,
@@ -27,7 +28,9 @@ import {
 } from 'react-native-responsive-screen';
 import { Colors, Fonts } from '../constants';
 import Icon from 'react-native-vector-icons/FontAwesome5';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import API from '../API';
+import Actions from '../redux/Actions';
 
 const borderProps = {
 	borderColor: 'black',
@@ -35,11 +38,54 @@ const borderProps = {
 };
 
 export default function Homepage({ navigation, route }) {
+	const dispatch = useDispatch();
 	// const { location, locationAvailable } = route.params;
 	const location = 'Your Location',
 		locationAvailable = true;
 
 	const categoriesData = useSelector((state) => state.categories);
+	const featuredProducts = useSelector((state) => state.products);
+	const simpleCategories = categoriesData.filter(
+		(category) => category.display === 'default'
+	);
+
+	const subCategories = [];
+
+	const compare = (a, b) => {
+		let comparison = 0;
+		if (a.id > b.id) {
+			comparison = 1;
+		} else {
+			comparison = -1;
+		}
+
+		return comparison; // Multiplying it with -1 reverses the sorting order
+	};
+
+	useEffect(() => {
+		Promise.all(
+			simpleCategories.map((simpleItem) => {
+				return API.get(`products/categories?parent=${simpleItem.id}`);
+			})
+		)
+			.then((res) => {
+				res.map((val) => {
+					subCategories.push(...val.data);
+				});
+
+				dispatch({
+					type: Actions.SUB_CATEGORIES,
+					payload: subCategories.sort(compare),
+				});
+			})
+			.catch((error) => {
+				console.error(error);
+				ToastAndroid.show(
+					'Error Getting SubCategories',
+					ToastAndroid.LONG
+				);
+			});
+	});
 
 	// console.log(categoriesData);
 	return (
@@ -52,7 +98,8 @@ export default function Homepage({ navigation, route }) {
 							paddingHorizontal: 16,
 							flexDirection: 'row',
 							alignItems: 'center',
-							paddingVertical: 8,
+							paddingTop: 16,
+							paddingBottom: 4,
 						}}>
 						<Icon
 							name="map-marker-alt"
@@ -89,19 +136,22 @@ export default function Homepage({ navigation, route }) {
 						)}
 					</View>
 					<CategoriesSimple
-						data={categoriesData.filter(
-							(category) => category.display === 'default'
-						)}
+						data={simpleCategories}
 						title={'Categories'}
 						navigation={navigation}
 					/>
-					<Carousel data={CarouselData} />
+					<Carousel />
 					<CategoriesFlatList
-						data={VegProducts}
-						title={'Popular in Veg'}
+						data={featuredProducts}
+						title={'Featured Products'}
 						containerStyle={styles.flatListStyle}
 					/>
 					<CategoriesFlatList
+						data={featuredProducts}
+						title={'Latest Products'}
+						containerStyle={styles.flatListStyle}
+					/>
+					{/* <CategoriesFlatList
 						data={NonVegProducts}
 						title={'Popular in Non-Veg'}
 						containerStyle={styles.flatListStyle}
@@ -110,7 +160,7 @@ export default function Homepage({ navigation, route }) {
 						data={NonVegProducts}
 						title={'Trending Products'}
 						containerStyle={styles.flatListStyle}
-					/>
+					/> */}
 				</View>
 			</ScrollView>
 		</View>

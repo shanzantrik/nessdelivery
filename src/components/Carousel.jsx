@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
-import { View, Image, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet } from 'react-native';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import {
 	widthPercentageToDP as wp,
 	heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+import FastImage from 'react-native-fast-image';
+import { useSelector } from 'react-redux';
 
-export default function CarouselComponent({ data, containerStyle }) {
+export default function CarouselComponent({ containerStyle }) {
+	const [data] = useState(useSelector((state) => state.carousel));
 	var _carousel = React.createRef();
 	const sliderWidth = wp(100),
 		itemWidth = wp(100);
@@ -14,7 +17,11 @@ export default function CarouselComponent({ data, containerStyle }) {
 	const _renderItem = ({ item, index }) => {
 		return (
 			<View>
-				<Image source={item.image} style={styles.image} />
+				<FastImage
+					source={{ uri: item?.guid?.rendered }}
+					style={styles.image}
+					resizeMode={'contain'}
+				/>
 			</View>
 		);
 	};
@@ -63,7 +70,7 @@ const styles = StyleSheet.create({
 	},
 	carouselContainer: {
 		width: wp(100),
-		height: hp(30),
+		maxHeight: hp(35),
 		alignItems: 'center',
 		justifyContent: 'center',
 	},

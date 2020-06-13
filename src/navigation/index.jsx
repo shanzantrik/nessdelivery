@@ -1,4 +1,5 @@
 import React from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { HomepageToolbar } from '../components';
 import { NavigationContainer } from '@react-navigation/native';
 import {
@@ -26,6 +27,9 @@ import {
 	Payment,
 	CardPage,
 } from '../pages';
+import { Colors, Fonts } from '../constants';
+import Actions from '../redux/Actions';
+import { useDispatch } from 'react-redux';
 
 const HomeStack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -73,8 +77,6 @@ function ProductSharedNavigator({ navigation }) {
 				}}
 				sharedElements={(route, otherRoute, showing) => {
 					const { item } = route.params;
-					console.log('Navigator');
-					console.log(item);
 					return [
 						{
 							id: `item.${item.id}.photo`,
@@ -88,6 +90,7 @@ function ProductSharedNavigator({ navigation }) {
 }
 
 function HomeStackNavigation({ navigation }) {
+	const dispatch = useDispatch();
 	return (
 		<HomeStack.Navigator
 			initialRouteName="SplashScreen"
@@ -104,7 +107,9 @@ function HomeStackNavigation({ navigation }) {
 			<HomeStack.Screen
 				name="SplashScreen"
 				component={SplashScreen}
-				options={{ headerShown: false }}
+				options={{
+					headerShown: false,
+				}}
 			/>
 			<HomeStack.Screen
 				name="Login"
@@ -172,6 +177,24 @@ function HomeStackNavigation({ navigation }) {
 				component={Cart}
 				options={{
 					headerTitle: 'Your Cart',
+					headerRight: () => {
+						return (
+							<TouchableOpacity
+								onPress={() => {
+									dispatch({ type: Actions.CLEAR_CART });
+								}}>
+								<View style={{ marginEnd: 20 }}>
+									<Text
+										style={{
+											fontSize: 16,
+											fontFamily: Fonts.bold,
+										}}>
+										Clear Cart
+									</Text>
+								</View>
+							</TouchableOpacity>
+						);
+					},
 				}}
 			/>
 			<HomeStack.Screen
@@ -230,7 +253,7 @@ function DrawerNavigator() {
 			/>
 			<Drawer.Screen
 				name="My Orders"
-				component={HomeStackNavigation}
+				component={Cart}
 				options={{
 					drawerIcon: ({ focused, color }) => (
 						<Icon name="shopping-cart" color={color} size={20} />
@@ -239,7 +262,7 @@ function DrawerNavigator() {
 			/>
 			<Drawer.Screen
 				name="Login"
-				component={HomeStackNavigation}
+				component={Login}
 				options={{
 					drawerIcon: ({ focused, color }) => (
 						<Icon name="sign-in-alt" color={color} size={20} />
@@ -248,7 +271,7 @@ function DrawerNavigator() {
 			/>
 			<Drawer.Screen
 				name="Register"
-				component={HomeStackNavigation}
+				component={Signup}
 				options={{
 					drawerIcon: ({ focused, color }) => (
 						<Icon name="link" color={color} size={20} solid />

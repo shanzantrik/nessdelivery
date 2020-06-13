@@ -1,12 +1,12 @@
 const initialState = null;
 
-const Products = (state = initialState, action) => {
+const Wishlist = (state = initialState, action) => {
 	switch (action.type) {
-		case 'PRODUCTS':
+		case 'WISHLIST':
 			return (state = action.payload);
 		default:
 			return state;
 	}
 };
 
-export default Products;
+export default Wishlist;

@@ -41,6 +41,7 @@ export default function PackSizes({
 	setName,
 	setPrice,
 	setOldPrice,
+	changeQuantity,
 }) {
 	const compare = (a, b) => {
 		let comparison = 0;
@@ -66,6 +67,7 @@ export default function PackSizes({
 						item.on_sale ? item.sale_price : item.regular_price
 					);
 					setOldPrice(item.regular_price);
+					changeQuantity(item);
 				}}>
 				<View
 					style={{
@@ -85,13 +87,6 @@ export default function PackSizes({
 								fontFamily: Fonts.semiBold,
 							}}>
 							{item.attributes[0].option.replace('-', '.')}
-						</Text>
-						<Text
-							style={{
-								fontSize: 12,
-								fontFamily: Fonts.semiBold,
-							}}>
-							Pouch
 						</Text>
 					</View>
 					<View>

@@ -4,18 +4,26 @@ import { useNavigation } from '@react-navigation/native';
 import { SearchBar } from 'react-native-elements';
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { Fonts, Colors } from '../constants';
+import { useDispatch, useSelector } from 'react-redux';
+import Actions from '../redux/Actions';
+
 const borderProps = {
 	borderWidth: 1,
 	borderColor: 'black',
 };
 export default function Search() {
+	const dispatch = useDispatch();
 	const navigation = useNavigation();
-	const [title, setTitle] = useState('Categories');
+	const [title, setTitle] = useState(
+		useSelector((state) => state.searchCategory)
+	);
 	const [searchText, setSearchText] = useState('');
 
 	const setSearchResult = (item) => {
 		setTitle(item);
+		dispatch({ type: Actions.SEARCH_CATEGORY, payload: item });
 	};
+
 	return (
 		<View style={styles.container}>
 			<TouchableOpacity
@@ -31,7 +39,7 @@ export default function Search() {
 						style={styles.categoriesText}
 						numberOfLines={1}
 						adjustsFontSizeToFit={true}>
-						{title}
+						{title.name}
 					</Text>
 				</View>
 			</TouchableOpacity>

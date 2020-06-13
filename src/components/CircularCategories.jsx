@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Image, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import PropTypes from 'prop-types';
 import { Fonts } from '../constants';
 
@@ -22,7 +23,10 @@ export default function CircularCategories(props) {
 						{ backgroundColor: backgroundColor },
 						imageContainerStyle,
 					]}>
-					<Image source={image} style={[styles.image, imageStyle]} />
+					<FastImage
+						source={image}
+						style={[styles.image, imageStyle]}
+					/>
 				</View>
 				<View style={styles.titleContainer}>
 					<Text style={[styles.textStyle, textStyle]}>{title}</Text>

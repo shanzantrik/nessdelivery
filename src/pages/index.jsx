@@ -10,6 +10,7 @@ import ProductDetail from './ProductDetail';
 import Cart from './Cart';
 import Payment from './Payment';
 import CardPage from './CardPage';
+import SearchList from './SearchList';
 
 export {
 	SplashScreen,
@@ -24,4 +25,5 @@ export {
 	Cart,
 	Payment,
 	CardPage,
+	SearchList,
 };

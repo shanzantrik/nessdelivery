@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import {
 	View,
 	Text,
-	Image,
 	TouchableOpacity,
 	Platform,
 	StyleSheet,
@@ -27,6 +26,7 @@ import GEOFENCE from '../assets/map.json';
 import axios from 'axios';
 import API from '../API';
 import Actions from '../redux/Actions';
+import FastImage from 'react-native-fast-image';
 
 function SplashScreen({ navigation, categories }) {
 	const dispatch = useDispatch();
@@ -41,12 +41,54 @@ function SplashScreen({ navigation, categories }) {
 			})
 		).start();
 
-		API.get('products/categories?per_page=50')
-			.then((res) => {
+		dispatch({
+			type: Actions.SEARCH_CATEGORY,
+			payload: {
+				id: -1,
+				name: 'Categories',
+			},
+		});
+
+		// API.get('products/categories?per_page=50')
+		// 	.then((res) => {
+		// 		dispatch({
+		// 			type: Actions.CATEGORIES,
+		// 			payload: res.data.sort(compare),
+		// 		});
+		// 		setReady(true);
+		// 		setLoading(false);
+		// 		console.log('Ready: ' + true);
+
+		// 		if (loading) {
+		// 			navigation.navigate('Homepage', {
+		// 				locationAvailable: true,
+		// 				location: 'Gardanibagh, Patna',
+		// 			});
+		// 		}
+		// 	})
+		// 	.catch((err) => console.log(err));
+
+		Promise.all([
+			API.get('products/categories?per_page=100'),
+			API.get('products?per_page=100'),
+			axios.get(
+				'https://nessfrozenhub.in/wp-json/wp/v2/media?categories=1'
+			),
+		])
+			.then((values) => {
 				dispatch({
 					type: Actions.CATEGORIES,
-					payload: res.data.sort(compare),
+					payload: values[0].data.sort(compare),
 				});
+				dispatch({
+					type: Actions.PRODUCTS,
+					payload: values[1].data.sort(compare),
+				});
+				dispatch({
+					type: Actions.CAROUSEL,
+					payload: values[2].data.sort(compare),
+				});
+
 				setReady(true);
 				setLoading(false);
 				console.log('Ready: ' + true);
@@ -58,7 +100,7 @@ function SplashScreen({ navigation, categories }) {
 					});
 				}
 			})
-			.catch((err) => console.log(err));
+			.catch((error) => console.log(error));
 	});
 
 	const compare = (a, b) => {
@@ -227,74 +269,66 @@ function SplashScreen({ navigation, categories }) {
 
 	return (
 		<View style={styles.container}>
+			<View
+				style={{
+					width: wp(80),
+					aspectRatio: 5000 / 1995,
+					alignItems: 'center',
+					justifyContent: 'center',
+				}}>
+				<FastImage
+					source={require('../assets/logos/logo_without_flake.png')}
+					style={styles.logo}
+				/>
+				<View
+					style={{
+						position: 'absolute',
+						left: 10,
+						top: 0,
+						alignItems: 'center',
+						justifyContent: 'center',
+						height: '100%',
+						width: '30%',
+					}}>
+					<Animated.Image
+						source={require('../assets/logos/flake.png')}
+						style={{
+							height: '70%',
+							aspectRatio: 1,
+							resizeMode: 'contain',
+							transform: [{ rotate: spin }],
+						}}
+					/>
+				</View>
+			</View>
 			<LinearGradient
-				colors={['#DA22FF', '#9733EE']}
+				colors={['#86A8E7', '#7F7FD5']}
 				start={{ x: 0.0, y: 1.0 }}
 				end={{ x: 1.0, y: 1.0 }}
 				style={{
-					width: wp(100),
-					height: hp(100),
-					alignItems: 'center',
-					justifyContent: 'space-around',
+					position: 'absolute',
+					bottom: hp(15),
+					borderRadius: 32,
 				}}>
-				<View
-					style={{
-						width: wp(80),
-						aspectRatio: 5000 / 1995,
-						alignItems: 'center',
-						justifyContent: 'center',
+				<TouchableOpacity
+					style={styles.signInContainer}
+					onPress={() => {
+						console.log('Ready: ' + ready);
+						if (ready) {
+							navigation.navigate('Homepage', {
+								locationAvailable: true,
+								location: 'Gardanibagh, Patna',
+							});
+						} else {
+							setLoading(true);
+						}
 					}}>
-					<View
-						style={{
-							position: 'absolute',
-							left: 0,
-							top: 0,
-							alignItems: 'center',
-							justifyContent: 'center',
-							height: '100%',
-							width: '30%',
-						}}>
-						<Animated.Image
-							source={require('../assets/logos/flake.png')}
-							style={{
-								height: '100%',
-								width: '100%',
-								aspectRatio: 1,
-								resizeMode: 'contain',
-								transform: [{ rotate: spin }],
-							}}
-						/>
+					<View style={styles.signInView}>
+						<Text style={[styles.signIn, { color: '#7F7FD5' }]}>
+							Continue
+						</Text>
 					</View>
-					<Image
-						source={require('../assets/logos/logo_without_flake.png')}
-						style={styles.logo}
-					/>
-				</View>
-				<LinearGradient
-					colors={['#86A8E7', '#7F7FD5']}
-					start={{ x: 0.0, y: 1.0 }}
-					end={{ x: 1.0, y: 1.0 }}
-					style={{ borderRadius: 32, marginVertical: 20 }}>
-					<TouchableOpacity
-						style={styles.signInContainer}
-						onPress={() => {
-							console.log('Ready: ' + ready);
-							if (ready) {
-								navigation.navigate('Homepage', {
-									locationAvailable: true,
-									location: 'Gardanibagh, Patna',
-								});
-							} else {
-								setLoading(true);
-							}
-						}}>
-						<View style={styles.signInView}>
-							<Text style={[styles.signIn, { color: '#7F7FD5' }]}>
-								Continue
-							</Text>
-						</View>
-					</TouchableOpacity>
-				</LinearGradient>
+				</TouchableOpacity>
 			</LinearGradient>
 			<Modal
 				style={StyleSheet.absoluteFill}
@@ -328,7 +362,8 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		alignItems: 'center',
-		justifyContent: 'space-around',
+		justifyContent: 'center',
+		backgroundColor: '#161616',
 	},
 	logoContainer: {
 		width: wp(60),

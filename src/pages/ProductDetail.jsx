@@ -1,63 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
 	View,
 	ScrollView,
 	Text,
-	Image,
 	TouchableOpacity,
 	StyleSheet,
+	ToastAndroid,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { Colors, Fonts } from '../constants';
-import {
-	PackSizes,
-	AboutProduct,
-	RatingsAndReviews,
-	AddButton,
-} from '../components';
-
+import { PackSizes, AddButton, CategoriesFlatList } from '../components';
+import FastImage from 'react-native-fast-image';
 import { SharedElement } from 'react-navigation-shared-element';
-
-const product = {
-	brand: 'McCain',
-	weight: 1,
-	title: 'French Fries',
-	imageFront: require('../assets/homepage/french_fries_front.png'),
-	imageBack: require('../assets/homepage/french_fries_back.png'),
-	price: 412,
-	oldPrice: 490,
-	discount: '16% off',
-	rating: 4.3,
-	ratingAndReviews: '17783 Ratings and 107 Reviews',
-	about: [
-		{
-			title: 'About',
-			details:
-				"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-		},
-		{
-			title: 'Ingredients',
-			details:
-				"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-		},
-		{
-			title: 'Nitritional Facts',
-			details:
-				"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-		},
-		{
-			title: 'Other Product Info',
-			details:
-				"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-		},
-	],
-};
+import API from '../API';
 
 export default function ProductDetail({ navigation, route }) {
-	const { item, type, selected } = route.params;
+	const {
+		item,
+		type,
+		selected,
+		changeQuantity,
+		relatedProductsData,
+	} = route.params;
 
-	const [itemName, setItemName] = useState(selected.sku);
+	console.log(item);
+
+	const [itemName, setItemName] = useState(
+		type === 'variable' ? selected.sku : selected.name
+	);
 	const [price, setPrice] = useState(
 		type === 'variable'
 			? selected.on_sale
@@ -68,6 +39,8 @@ export default function ProductDetail({ navigation, route }) {
 	const [regularPrice, setRegularPrice] = useState(
 		type === 'variable' ? selected.regular_price : item.regular_price
 	);
+
+	const [relatedProducts] = useState(relatedProductsData);
 
 	const [selectedImage, setSelectedImage] = useState(item?.images[0].src);
 	return (
@@ -160,31 +133,6 @@ export default function ProductDetail({ navigation, route }) {
 							}}>
 							(Inclusive of all taxes)
 						</Text>
-						<View style={{ flexDirection: 'row' }}>
-							<View style={styles.rating}>
-								<View style={styles.ratingContainer}>
-									<Text style={styles.ratingText}>
-										{item.average_rating}
-									</Text>
-									<Icon
-										name="star"
-										solid
-										style={styles.ratingStar}
-									/>
-								</View>
-								<TouchableOpacity>
-									<View style={styles.ratingCountContainer}>
-										<Text style={styles.ratingCount}>
-											{item.rating_count} Reviews
-										</Text>
-										<Icon
-											name="chevron-right"
-											style={{ marginStart: 10 }}
-										/>
-									</View>
-								</TouchableOpacity>
-							</View>
-						</View>
 					</View>
 					<View
 						style={{
@@ -193,13 +141,15 @@ export default function ProductDetail({ navigation, route }) {
 							justifyContent: 'center',
 						}}>
 						<SharedElement id={`item.${item.id}.photo`}>
-							<Image
+							<FastImage
 								source={{ uri: selectedImage }}
 								style={{
-									height: wp(80),
+									width: '70%',
 									aspectRatio: 1,
-									resizeMode: 'center',
+									marginVertical: 20,
+									padding: 10,
 								}}
+								resizeMode={FastImage.resizeMode.contain}
 							/>
 						</SharedElement>
 						<View
@@ -223,7 +173,7 @@ export default function ProductDetail({ navigation, route }) {
 													padding: 2,
 													marginEnd: 20,
 												}}>
-												<Image
+												<FastImage
 													source={{ uri: image.src }}
 													style={{
 														width: 40,
@@ -243,6 +193,7 @@ export default function ProductDetail({ navigation, route }) {
 							setName={setItemName}
 							setPrice={setPrice}
 							setOldPrice={setRegularPrice}
+							changeQuantity={changeQuantity}
 						/>
 					)}
 					<View
@@ -280,7 +231,6 @@ export default function ProductDetail({ navigation, route }) {
 							</Text>
 						</View>
 					</View>
-					{/* <AboutProduct data={item.description} /> */}
 					<View
 						style={{
 							borderBottomColor: '#999999',
@@ -299,14 +249,23 @@ export default function ProductDetail({ navigation, route }) {
 
 						<Text
 							style={{
-								fontSize: 14,
+								fontSize: 16,
 								fontFamily: Fonts.primary,
 								color: '#505050',
 							}}>
-							{item.description}
+							{/* Regex to remove html tags */}
+							{item.description.replace(/(<([^>]+)>)/gi, '')}
 						</Text>
 					</View>
-					<RatingsAndReviews data={item} />
+					{relatedProducts.length !== 0 && (
+						<View style={{ marginTop: 20, marginBottom: 30 }}>
+							<CategoriesFlatList
+								title={'Related Products'}
+								data={relatedProducts}
+								viewAll={false}
+							/>
+						</View>
+					)}
 				</View>
 			</ScrollView>
 			<View style={{ position: 'absolute', bottom: 0 }}>

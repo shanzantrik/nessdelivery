@@ -1,6 +1,6 @@
 const initialState = null;
 
-const SubCategories = (state = initialState, action) => {
+const Categories = (state = initialState, action) => {
 	switch (action.type) {
 		case 'CATEGORIES':
 			return (state = action.payload);
@@ -9,4 +9,4 @@ const SubCategories = (state = initialState, action) => {
 	}
 };
 
-export default SubCategories;
+export default Categories;

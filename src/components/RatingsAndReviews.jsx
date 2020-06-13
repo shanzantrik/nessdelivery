@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import { Fonts, Colors } from '../constants';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import * as Progress from 'react-native-progress';
+import API from '../API';
 
 const RatingData = [
 	{
@@ -26,7 +27,14 @@ const RatingData = [
 	},
 ];
 
-export default function RatingsAndReviews({ data }) {
+export default function RatingsAndReviews({ itemId }) {
+	const [reviews, setReviews] = useState(null);
+	useEffect(() => {
+		API.get('products/reviews?product=' + itemId)
+			.then((res) => setReviews(res.data))
+			.catch((error) => console.error(error));
+	});
+
 	const RenderReviews = ({ index, item }) => {
 		return (
 			<View style={{ marginVertical: 10 }}>
@@ -117,44 +125,6 @@ export default function RatingsAndReviews({ data }) {
 							({item.time})
 						</Text>
 					</View>
-					<View
-						style={{ flexDirection: 'row', alignItems: 'center' }}>
-						<TouchableOpacity
-							style={{
-								flexDirection: 'row',
-								alignItems: 'center',
-							}}>
-							<Text
-								style={{
-									fontSize: 14,
-									fontFamily: Fonts.primary,
-									marginEnd: 5,
-									color: '#505050',
-								}}>
-								{item.likes}
-							</Text>
-							<Icon
-								name="thumbs-up"
-								style={{
-									fontSize: 14,
-									fontFamily: Fonts.primary,
-									marginEnd: 15,
-									color: '#505050',
-								}}
-							/>
-						</TouchableOpacity>
-						<TouchableOpacity>
-							<Icon
-								name="flag"
-								style={{
-									fontSize: 14,
-									fontFamily: Fonts.primary,
-									marginEnd: 5,
-									color: '#505050',
-								}}
-							/>
-						</TouchableOpacity>
-					</View>
 				</View>
 			</View>
 		);
@@ -230,7 +200,7 @@ export default function RatingsAndReviews({ data }) {
 					</TouchableOpacity>
 				</View>
 			</View>
-			<View>
+			{/* <View>
 				<View>
 					<Text style={{ fontSize: 16, fontFamily: Fonts.semiBold }}>
 						Highlights
@@ -346,9 +316,9 @@ export default function RatingsAndReviews({ data }) {
 						</Text>
 					</View>
 				</View>
-			</View>
+			</View> */}
 			<FlatList
-				data={RatingData}
+				data={reviews}
 				renderItem={(object) => <RenderReviews {...object} />}
 				keyExtractor={(index, item) => index.toString()}
 				ItemSeparatorComponent={() => (

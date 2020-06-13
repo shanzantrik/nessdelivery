@@ -27,13 +27,13 @@ import FastImage from 'react-native-fast-image';
 export default function ProductList({ navigation, route }) {
 	const { data } = route.params;
 
-	let relatedProducts = [];
-
 	const dispatch = useDispatch();
 
 	const ProductItem = ({ item, index }) => {
 		useEffect(() => {
 			if (item.related_ids.length !== 0) {
+				const relatedProds = [];
+
 				Promise.all(
 					item.related_ids.map((product_id) => {
 						return API.get(`products/${product_id}`);
@@ -41,8 +41,9 @@ export default function ProductList({ navigation, route }) {
 				)
 					.then((res) => {
 						res.map((data) => {
-							relatedProducts.push(data.data);
+							relatedProds.push(data.data);
 						});
+						setRelatedProducts(relatedProds);
 					})
 					.catch((error) => {
 						console.error(error);
@@ -69,23 +70,11 @@ export default function ProductList({ navigation, route }) {
 			item.type === 'variable' ? item.product_variations[0] : item
 		);
 
+		const [relatedProducts, setRelatedProducts] = useState([]);
+
 		const changeQuantity = (val) => {
 			setSelectedQuantity(val);
 			setPrice(val.on_sale ? val.sale_price : val.regular_price);
-		};
-
-		const cartAction = (action) => {
-			dispatch({
-				type: action,
-				payload: {
-					...item,
-					brand: item.brands[0].name,
-					image: item.images[0].src,
-					price: price,
-					selected: selectedQuantity,
-					quantity: count,
-				},
-			});
 		};
 
 		const navigateToProductDetail = () => {
@@ -111,15 +100,10 @@ export default function ProductList({ navigation, route }) {
 				return (
 					<Animated.View style={styles.itemCounterContainer}>
 						<TouchableOpacity
-							style={{
-								flex: 1,
-							}}
+							style={{ flex: 1 }}
 							onPress={() => {
 								if (count === 1) {
 									btnToggle(!btnEnabled);
-									cartAction(Actions.REMOVE_FROM_CART);
-								} else {
-									cartAction(Actions.SUB_QUANTITY);
 								}
 								setCount(count - 1);
 							}}>
@@ -133,13 +117,17 @@ export default function ProductList({ navigation, route }) {
 							</Animated.Text>
 						</Animated.View>
 						<TouchableOpacity
-							style={{
-								flex: 1,
-							}}
+							style={{ flex: 1 }}
 							onPress={() => {
-								console.log('Updating in cart');
-								cartAction(Actions.ADD_QUANTITY);
 								setCount(count + 1);
+								dispatch({
+									type: Actions.ADD_TO_CART,
+									payload: {
+										item: item,
+										quantity: count + 1,
+										selectedQuantity: selectedQuantity,
+									},
+								});
 							}}>
 							<Animated.View style={styles.countContainer}>
 								<Text style={styles.count}>+</Text>
@@ -153,8 +141,6 @@ export default function ProductList({ navigation, route }) {
 						onPress={() => {
 							setCount(count + 1);
 							btnToggle(!btnEnabled);
-							cartAction(Actions.ADD_TO_CART);
-							console.log('Adding to Cart');
 						}}>
 						<View style={styles.addBtnContainer}>
 							<Text style={styles.addBtnText}>Add</Text>
@@ -175,9 +161,7 @@ export default function ProductList({ navigation, route }) {
 						}}>
 						<SharedElement id={`item.${item.id}.photo`}>
 							<FastImage
-								source={{
-									uri: item?.images[0]?.src,
-								}}
+								source={{ uri: item?.images[0]?.src }}
 								style={styles.image}
 							/>
 						</SharedElement>
@@ -224,20 +208,13 @@ export default function ProductList({ navigation, route }) {
 							<Text>{item.weight}</Text>
 						</View>
 					)}
-					<View
-						style={
-							!item.sale_price && {
-								marginTop: 20,
-							}
-						}>
+					<View style={!item.sale_price && { marginTop: 20 }}>
 						{item.sale_price !== '' ||
 							(item.on_sale && (
 								<Text
 									style={[
 										styles.oldPrice,
-										!item.sale_price && {
-											display: 'none',
-										},
+										!item.sale_price && { display: 'none' },
 									]}>
 									MRP: Rs {item.price}
 								</Text>

@@ -16,7 +16,17 @@ const persistConfig = {
 	blacklist: [],
 };
 
+const middlewares = [thunk];
+
+if (__DEV__) {
+	const createDebugger = require('redux-flipper').default;
+	middlewares.push(createDebugger());
+}
+
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-export let store = createStore(persistedReducer, applyMiddleware(thunk));
+export let store = createStore(
+	persistedReducer,
+	applyMiddleware(...middlewares)
+);
 export let persistor = persistStore(store);

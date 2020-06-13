@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
 	View,
 	Text,
-	Image,
 	StyleSheet,
 	FlatList,
 	TouchableWithoutFeedback,
@@ -12,12 +11,12 @@ import {
 	ActivityIndicator,
 	Modal,
 } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import {
 	widthPercentageToDP as wp,
 	heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import { Colors, Fonts } from '../constants';
-import Animated, { concat } from 'react-native-reanimated';
 import { useSelector } from 'react-redux';
 import API from '../API';
 
@@ -29,6 +28,7 @@ export default function SubCategories({ navigation, route }) {
 	});
 	const { itemId } = route.params;
 	const categories = useSelector((state) => state.categories);
+	const subCategories = useSelector((state) => state.subCategories);
 	const [loading, setLoading] = useState(false);
 	const borderProps = {
 		borderWidth: 2,
@@ -39,8 +39,6 @@ export default function SubCategories({ navigation, route }) {
 		setLoading(true);
 		API.get(`products?category=${id}`)
 			.then((res) => {
-				console.log('Setting Product List');
-				console.log(res.data);
 				setLoading(false);
 				navigation.navigate('ProductList', {
 					data: res.data,
@@ -50,7 +48,7 @@ export default function SubCategories({ navigation, route }) {
 				ToastAndroid.show('Some Error Occurred, Pls Try Again');
 				navigation.pop();
 				setLoading(false);
-				console.log(error);
+				console.error(error);
 			});
 	};
 	const RenderItem = ({ index, item, selected }) => {
@@ -83,7 +81,7 @@ export default function SubCategories({ navigation, route }) {
 								justifyContent: 'center',
 								marginHorizontal: 10,
 							}}>
-							<Image
+							<FastImage
 								source={{ uri: item?.image?.src }}
 								style={{
 									height: '70%',
@@ -122,7 +120,7 @@ export default function SubCategories({ navigation, route }) {
 								flexDirection: 'row',
 								alignItems: 'center',
 							}}>
-							<Image
+							<FastImage
 								source={{ uri: item?.image?.src }}
 								style={{ width: 20, height: 20 }}
 							/>
@@ -168,7 +166,7 @@ export default function SubCategories({ navigation, route }) {
 							!isExpanded && { height: 0 },
 						]}>
 						<FlatList
-							data={categories.filter(
+							data={subCategories.filter(
 								(category) => category.parent === item.id
 							)}
 							renderItem={_renderSubCategories}

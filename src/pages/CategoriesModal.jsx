@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
 	View,
 	Text,
-	Image,
 	StyleSheet,
 	FlatList,
 	TouchableOpacity,
@@ -14,6 +13,7 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Colors, Fonts } from '../constants';
 import { useSelector } from 'react-redux';
+import FastImage from 'react-native-fast-image';
 
 export default function SubCategories({ navigation, route }) {
 	const categories = useSelector((state) => state.categories).filter(
@@ -28,7 +28,7 @@ export default function SubCategories({ navigation, route }) {
 		const [selectedItem] = useState(selected);
 
 		const setValueAndDismiss = () => {
-			setSearchText(item.name);
+			setSearchText(item);
 			navigation.goBack();
 		};
 
@@ -40,7 +40,7 @@ export default function SubCategories({ navigation, route }) {
 							flexDirection: 'row',
 							alignItems: 'center',
 						}}>
-						<Image
+						<FastImage
 							source={{ uri: item?.image?.src }}
 							style={{ width: 20, height: 20 }}
 						/>

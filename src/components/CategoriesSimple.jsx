@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import {
 	View,
 	ScrollView,
@@ -6,10 +6,15 @@ import {
 	FlatList,
 	StyleSheet,
 	TouchableOpacity,
+	ToastAndroid,
 } from 'react-native';
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import PropTypes from 'prop-types';
-import { Colors } from '../constants';
+import { useSelector, useDispatch } from 'react-redux';
+import Actions from '../redux/Actions';
+import { Colors, Fonts } from '../constants';
+import Icon from 'react-native-vector-icons/FontAwesome5';
+import API from '../API';
 
 export default function CategoriesSimple({
 	data,
@@ -17,6 +22,7 @@ export default function CategoriesSimple({
 	containerStyle,
 	navigation,
 }) {
+	const scrollViewRef = useRef(null);
 	const RenderCircularItem = ({ item, index, length }) => {
 		return (
 			<TouchableOpacity
@@ -24,11 +30,11 @@ export default function CategoriesSimple({
 					height: '100%',
 					width: wp(33) - 4,
 				}}
-				onPress={() =>
+				onPress={() => {
 					navigation.navigate('SubCategories', {
 						itemId: item.id,
-					})
-				}>
+					});
+				}}>
 				<View
 					style={{
 						height: 40,
@@ -57,7 +63,29 @@ export default function CategoriesSimple({
 	const _keyExtractor = (item, index) => index.toString();
 	return (
 		<View style={[{ width: wp(100) }, containerStyle]}>
-			<ScrollView horizontal showsHorizontalScrollIndicator={false}>
+			<TouchableOpacity
+				style={{ position: 'absolute', top: -35 }}
+				onPress={() =>
+					scrollViewRef.current.scrollToEnd({
+						animated: true,
+					})
+				}>
+				<View
+					style={{
+						width: wp(100),
+						padding: 10,
+						flexDirection: 'row',
+						justifyContent: 'flex-end',
+						marginHorizontal: -10,
+					}}>
+					<Icon name="chevron-right" style={{ fontSize: 16 }} />
+					<Icon name="chevron-right" style={{ fontSize: 16 }} />
+				</View>
+			</TouchableOpacity>
+			<ScrollView
+				horizontal
+				showsHorizontalScrollIndicator={false}
+				ref={scrollViewRef}>
 				<FlatList
 					style={styles.container}
 					data={data}

@@ -5,16 +5,18 @@ import { Header, CategoryItem } from './index';
 import PropTypes from 'prop-types';
 import { Shadow } from '../constants';
 
-export default function CategoriesFlatList({ data, title, containerStyle }) {
+export default function CategoriesFlatList({
+	data,
+	title,
+	containerStyle,
+	viewAll,
+}) {
+	console.log(data[0]);
 	const _renderCircularItem = ({ item, index }) => {
 		return (
 			<CategoryItem
-				key={item.title + index}
-				title={item.title}
-				image={item.image}
-				price={item.price}
-				oldPrice={item.oldPrice}
-				discount={item.discount}
+				key={item.name + index}
+				item={item}
 				containerStyle={styles.circularContainerStyle}
 				backgroundColor={item.backgroundColor}
 				imageContainerStyle={styles.circularImageStyle}
@@ -24,7 +26,7 @@ export default function CategoriesFlatList({ data, title, containerStyle }) {
 	const _keyExtractor = (item, index) => index.toString();
 	return (
 		<View style={[{ width: wp(100) }, containerStyle]}>
-			<Header title={title} />
+			<Header title={title} viewAll={viewAll} />
 			<FlatList
 				style={styles.container}
 				data={data}
@@ -41,6 +43,10 @@ CategoriesFlatList.propTypes = {
 	data: PropTypes.array.isRequired,
 	title: PropTypes.string.isRequired,
 	containerStyle: PropTypes.object,
+};
+
+CategoriesFlatList.defaultProps = {
+	viewAll: true,
 };
 
 const styles = StyleSheet.create({

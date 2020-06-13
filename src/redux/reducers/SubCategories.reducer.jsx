@@ -1,12 +1,12 @@
 const initialState = null;
 
-const Products = (state = initialState, action) => {
+const SubCategories = (state = initialState, action) => {
 	switch (action.type) {
-		case 'PRODUCTS':
+		case 'SUB_CATEGORIES':
 			return (state = action.payload);
 		default:
 			return state;
 	}
 };
 
-export default Products;
+export default SubCategories;

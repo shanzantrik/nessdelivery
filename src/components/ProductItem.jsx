@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { Fonts, Colors, Shadow } from '../constants';
+import FastImage from 'react-native-fast-image';
 
 export default function ProductItem({ item, index }) {
 	// const [heartChecked, heartToggle] = useState(false);
 	return (
 		<View style={styles.cardContainer}>
 			<View style={{ width: '30%', margin: 5 }}>
-				<Image source={item.image} style={styles.image} />
+				<FastImage source={item.image} style={styles.image} />
 			</View>
 			<View
 				style={{
@@ -18,8 +19,8 @@ export default function ProductItem({ item, index }) {
 				}}>
 				<Text style={styles.title}>{item.title}</Text>
 				<View style={{ marginTop: 20 }}>
-					<Text style={styles.price}>₹ {item.price}</Text>
-					<Text style={styles.oldPrice}>₹ {item.oldPrice}</Text>
+					<Text style={styles.price}>Rs {item.price}</Text>
+					<Text style={styles.oldPrice}>Rs {item.oldPrice}</Text>
 				</View>
 				<View
 					style={{

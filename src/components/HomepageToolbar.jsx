@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
 	View,
 	Text,
-	Image,
 	TouchableOpacity,
 	StyleSheet,
 	Platform,
@@ -10,8 +9,16 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Fonts, Colors } from '../constants';
 import Search from './Search';
+import { Badge } from 'react-native-elements';
+import { useSelector } from 'react-redux';
+import FastImage from 'react-native-fast-image';
 
 export default function HomepageToolbar({ navigation, searchBar }) {
+	const cartData = useSelector((state) => state.cart);
+	const [cart, setCart] = useState(cartData);
+	useEffect(() => {
+		setCart(cartData);
+	}, [cartData]);
 	return (
 		<View style={styles.container}>
 			<View style={styles.headerContainer}>
@@ -22,19 +29,37 @@ export default function HomepageToolbar({ navigation, searchBar }) {
 						</View>
 					</TouchableOpacity>
 					<View style={styles.flexRow}>
-						<Image
+						<FastImage
 							source={require('../assets/logos/logo.png')}
 							style={styles.logo}
 						/>
 					</View>
 				</View>
-				<View style={styles.flexRow}>
+				<View
+					style={[
+						styles.flexRow,
+						{ height: '100%', alignItems: 'center' },
+					]}>
 					<TouchableOpacity>
 						<Icon name="bell" style={styles.search} />
 					</TouchableOpacity>
 					<TouchableOpacity
 						onPress={() => navigation.navigate('Cart')}>
 						<Icon name="shopping-cart" style={styles.search} />
+						{cart.addedItems !== null &&
+							cart.addedItems.length !== 0 && (
+								<Badge
+									containerStyle={{
+										position: 'absolute',
+										right: 0,
+										top: -8,
+									}}
+									badgeStyle={{
+										backgroundColor: Colors.redPrimary,
+									}}
+									value={cart.addedItems.length}
+								/>
+							)}
 					</TouchableOpacity>
 				</View>
 			</View>
@@ -84,6 +109,7 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontFamily: Fonts.semiBold,
 		color: Colors.black,
+		marginEnd: 10,
 	},
 	logo: {
 		width: 100,
