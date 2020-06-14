@@ -19,7 +19,7 @@ import { Colors, Fonts, Shadow } from '../constants';
 import { check, PERMISSIONS, RESULTS, request } from 'react-native-permissions';
 import LinearGradient from 'react-native-linear-gradient';
 import Geolocation from 'react-native-geolocation-service';
-// import GeoFencing from 'react-native-geo-fencing';
+import GeoFencing from 'react-native-geo-fencing';
 import Geocoder from 'react-native-geocoding';
 import { useDispatch } from 'react-redux';
 import GEOFENCE from '../assets/map.json';
@@ -49,25 +49,6 @@ function SplashScreen({ navigation, categories }) {
 				name: 'Categories',
 			},
 		});
-
-		// API.get('products/categories?per_page=50')
-		// 	.then((res) => {
-		// 		dispatch({
-		// 			type: Actions.CATEGORIES,
-		// 			payload: res.data.sort(compare),
-		// 		});
-		// 		setReady(true);
-		// 		setLoading(false);
-		// 		console.log('Ready: ' + true);
-
-		// 		if (loading) {
-		// 			navigation.navigate('Homepage', {
-		// 				locationAvailable: true,
-		// 				location: 'Gardanibagh, Patna',
-		// 			});
-		// 		}
-		// 	})
-		// 	.catch((err) => console.log(err));
 
 		const subCategories = [];
 		API.get('products/categories?per_page=100')
@@ -186,61 +167,61 @@ function SplashScreen({ navigation, categories }) {
 			});
 	};
 
-	// const checkGeofencing = () => {
-	// 	Geolocation.getCurrentPosition(
-	// 		//Will give you the current location
-	// 		(position) => {
-	// 			let point = {
-	// 				lat: position.coords.latitude,
-	// 				lng: position.coords.longitude,
-	// 			};
-	// 			//getting the Latitude from the location json
+	const checkGeofencing = () => {
+		Geolocation.getCurrentPosition(
+			//Will give you the current location
+			(position) => {
+				let point = {
+					lat: position.coords.latitude,
+					lng: position.coords.longitude,
+				};
+				//getting the Latitude from the location json
 
-	// 			GeoFencing.containsLocation(
-	// 				point,
-	// 				GEOFENCE.features[0].geometry.coordinates
-	// 			)
-	// 				.then(() => {
-	// 					console.log("Welcome to Ness's Frozen Delivery");
-	// 					ToastAndroid.show(
-	// 						"Welcome to Ness's Frozen Delivery",
-	// 						ToastAndroid.LONG
-	// 					);
+				GeoFencing.containsLocation(
+					point,
+					GEOFENCE.features[0].geometry.coordinates
+				)
+					.then(() => {
+						console.log("Welcome to Ness's Frozen Delivery");
+						ToastAndroid.show(
+							"Welcome to Ness's Frozen Delivery",
+							ToastAndroid.LONG
+						);
 
-	// 					getLocationName(point.lat, point.lng);
-	// 				})
-	// 				.catch(() => {
-	// 					console.log(
-	// 						'Your location is not within the delivery area\n\nPlease check back later'
-	// 					);
-	// 					ToastAndroid.show(
-	// 						'Your location is not within the delivery area\n\nPlease check back later',
-	// 						ToastAndroid.LONG
-	// 					);
+						getLocationName(point.lat, point.lng);
+					})
+					.catch(() => {
+						console.log(
+							'Your location is not within the delivery area\n\nPlease check back later'
+						);
+						ToastAndroid.show(
+							'Your location is not within the delivery area\n\nPlease check back later',
+							ToastAndroid.LONG
+						);
 
-	// 					setLoading(false);
-	// 					console.log('Set Loading to False');
+						setLoading(false);
+						console.log('Set Loading to False');
 
-	// 					navigation.navigate('Homepage', {
-	// 						location: 'Not Available in your location',
-	// 						locationAvailable: false,
-	// 					});
-	// 				});
-	// 		},
-	// 		(error) => {
-	// 			alert(error.message);
+						navigation.navigate('Homepage', {
+							location: 'Not Available in your location',
+							locationAvailable: false,
+						});
+					});
+			},
+			(error) => {
+				alert(error.message);
 
-	// 			setLoading(false);
-	// 			console.log('Set Loading to False');
-	// 		},
-	// 		{
-	// 			enableHighAccuracy: true,
-	// 			timeout: 20000,
-	// 			maximumAge: 1000,
-	// 		}
-	// 	);
-	// 	// navigation.navigate('Homepage');
-	// };
+				setLoading(false);
+				console.log('Set Loading to False');
+			},
+			{
+				enableHighAccuracy: true,
+				timeout: 20000,
+				maximumAge: 1000,
+			}
+		);
+		// navigation.navigate('Homepage');
+	};
 
 	const checkLocationPermission = () => {
 		setLoading(true);
@@ -271,7 +252,7 @@ function SplashScreen({ navigation, categories }) {
 						requestLocationPermission();
 						break;
 					case RESULTS.GRANTED:
-						// checkGeofencing();
+						checkGeofencing();
 						break;
 					case RESULTS.BLOCKED:
 						console.log(
@@ -301,7 +282,7 @@ function SplashScreen({ navigation, categories }) {
 				: PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION
 		)
 			.then((result) => {
-				// checkGeofencing();
+				checkGeofencing();
 			})
 			.catch((error) => console.log(error));
 	};
@@ -351,17 +332,18 @@ function SplashScreen({ navigation, categories }) {
 				}}>
 				<TouchableOpacity
 					style={styles.signInContainer}
-					onPress={() => {
-						console.log('Ready: ' + ready);
-						if (ready) {
-							navigation.navigate('Homepage', {
-								locationAvailable: true,
-								location: 'Gardanibagh, Patna',
-							});
-						} else {
-							setLoading(true);
-						}
-					}}>
+					// onPress={() => {
+					// 	console.log('Ready: ' + ready);
+					// 	if (ready) {
+					// 		navigation.navigate('Homepage', {
+					// 			locationAvailable: true,
+					// 			location: 'Gardanibagh, Patna',
+					// 		});
+					// 	} else {
+					// 		setLoading(true);
+					// 	}
+					// }}
+					onPress={checkLocationPermission}>
 					<View style={styles.signInView}>
 						<Text style={[styles.signIn, { color: '#7F7FD5' }]}>
 							Continue

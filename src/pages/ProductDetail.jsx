@@ -10,10 +10,17 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { Colors, Fonts } from '../constants';
-import { PackSizes, AddButton, CategoriesFlatList } from '../components';
+import {
+	PackSizes,
+	AddButton as AddToCart,
+	CategoriesFlatList,
+} from '../components';
 import FastImage from 'react-native-fast-image';
 import { SharedElement } from 'react-navigation-shared-element';
 import API from '../API';
+import { useDispatch } from 'react-redux';
+import Animated from 'react-native-reanimated';
+import Actions from '../redux/Actions';
 
 export default function ProductDetail({ navigation, route }) {
 	const {
@@ -24,7 +31,82 @@ export default function ProductDetail({ navigation, route }) {
 		relatedProductsData,
 	} = route.params;
 
-	console.log(item);
+	const dispatch = useDispatch();
+
+	const [count, setCount] = useState(0);
+	const [btnEnabled, btnToggle] = useState(false);
+
+	const cartAction = (action) => {
+		dispatch({
+			type: action,
+			payload: {
+				...item,
+				brand: item.brands[0].name,
+				image: item.images[0].src,
+				price: price,
+				selected: selected,
+				quantity: count,
+			},
+		});
+	};
+
+	const AddButton = () => {
+		if (btnEnabled) {
+			return (
+				<Animated.View style={styles.itemCounterContainer}>
+					<TouchableOpacity
+						style={{
+							flex: 1,
+						}}
+						onPress={() => {
+							if (count === 1) {
+								btnToggle(!btnEnabled);
+								cartAction(Actions.REMOVE_FROM_CART);
+							} else {
+								cartAction(Actions.SUB_QUANTITY);
+							}
+							setCount(count - 1);
+						}}>
+						<View style={styles.countContainer}>
+							<Text style={styles.count}>−</Text>
+						</View>
+					</TouchableOpacity>
+					<Animated.View style={styles.countTextContainer}>
+						<Animated.Text style={styles.countText}>
+							{count}
+						</Animated.Text>
+					</Animated.View>
+					<TouchableOpacity
+						style={{
+							flex: 1,
+						}}
+						onPress={() => {
+							console.log('Updating in cart');
+							cartAction(Actions.ADD_QUANTITY);
+							setCount(count + 1);
+						}}>
+						<Animated.View style={styles.countContainer}>
+							<Text style={styles.count}>+</Text>
+						</Animated.View>
+					</TouchableOpacity>
+				</Animated.View>
+			);
+		} else {
+			return (
+				<TouchableOpacity
+					onPress={() => {
+						setCount(count + 1);
+						btnToggle(!btnEnabled);
+						cartAction(Actions.ADD_TO_CART);
+						console.log('Adding to Cart');
+					}}>
+					<View style={styles.addBtnContainer}>
+						<Text style={styles.addBtnText}>Add</Text>
+					</View>
+				</TouchableOpacity>
+			);
+		}
+	};
 
 	const [itemName, setItemName] = useState(
 		type === 'variable' ? selected.sku : selected.name
@@ -279,7 +361,7 @@ export default function ProductDetail({ navigation, route }) {
 				</View>
 			</ScrollView>
 			<View style={{ position: 'absolute', bottom: 0 }}>
-				<AddButton />
+				<AddToCart />
 			</View>
 		</View>
 	);

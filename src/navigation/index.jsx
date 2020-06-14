@@ -125,7 +125,7 @@ function HomeStackNavigation({ navigation }) {
 	const dispatch = useDispatch();
 	return (
 		<HomeStack.Navigator
-			initialRouteName="AuthStack"
+			initialRouteName="SplashScreen"
 			screenOptions={{
 				cardStyle: {
 					backgroundColor: 'white',

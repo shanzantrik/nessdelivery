@@ -207,6 +207,8 @@ dependencies {
     implementation "com.google.firebase:firebase-auth:19.3.1"
 
     implementation project(':react-native-razorpay')
+    
+    implementation project(':react-native-geo-fencing')
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
       exclude group:'com.facebook.fbjni'
