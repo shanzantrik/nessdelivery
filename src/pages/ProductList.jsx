@@ -239,10 +239,10 @@ export default function ProductList({ navigation, route }) {
 											display: 'none',
 										},
 									]}>
-									MRP: Rs {item.price}
+									MRP: ₹ {item.price}
 								</Text>
 							))}
-						<Text style={styles.price}>Rs {price}</Text>
+						<Text style={styles.price}>₹ {price}</Text>
 					</View>
 					<View
 						style={{

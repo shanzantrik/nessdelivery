@@ -15,7 +15,7 @@ import {
 } from 'react-native-responsive-screen';
 import { SharedElement } from 'react-native-shared-element';
 import { Colors, Fonts, Shadow } from '../constants';
-import { AddButton as AddToCart } from '../components';
+import { AddButton as AddToCart, Search } from '../components';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Picker } from '@react-native-community/picker';
 import Animated from 'react-native-reanimated';
@@ -23,11 +23,34 @@ import API from '../API';
 import { useDispatch } from 'react-redux';
 import Actions from '../redux/Actions';
 import FastImage from 'react-native-fast-image';
+import { useSelector } from 'react-redux/lib/hooks/useSelector';
 
-export default function ProductList({ navigation, route }) {
-	const { data } = route.params;
+export default function SearchList({ navigation, route }) {
+	// const { data } = route.params;
 
 	const dispatch = useDispatch();
+
+	useEffect(() => {
+		console.log('Searching');
+		API.get(
+			`products?per_page=100&category=${searchCategory}&search=${searchText}`
+		)
+			.then((res) => {
+				setSearchProducts(res.data);
+				console.log(res.data);
+			})
+			.catch((error) => console.error(error));
+	}, [searchText, searchCategory]);
+
+	const searchCategory = useSelector((state) => state.searchCategory);
+	const products = useSelector((state) => state.products);
+	const [searchText, setSearchText] = useState('');
+
+	const [searchProducts, setSearchProducts] = useState(null);
+
+	const setSearchValue = (val) => {
+		setSearchText(val);
+	};
 
 	const ProductItem = ({ item, index }) => {
 		useEffect(() => {
@@ -216,10 +239,10 @@ export default function ProductList({ navigation, route }) {
 										styles.oldPrice,
 										!item.sale_price && { display: 'none' },
 									]}>
-									MRP: Rs {item.price}
+									MRP: ₹ {item.price}
 								</Text>
 							))}
-						<Text style={styles.price}>Rs {price}</Text>
+						<Text style={styles.price}>₹ {price}</Text>
 					</View>
 					<View
 						style={{
@@ -251,26 +274,31 @@ export default function ProductList({ navigation, route }) {
 		);
 	};
 
-	return (
-		<View style={styles.container}>
-			<FlatList
-				data={data}
-				renderItem={(object) => <ProductItem {...object} />}
-				keyExtractor={(index, item) => index.toString()}
-				contentContainerStyle={styles.flatListContainer}
-				ItemSeparatorComponent={(leadingItem, section) => (
-					<View
-						style={{
-							width: '100%',
-							height: 1,
-							backgroundColor: 'gray',
-						}}
-					/>
-				)}
-			/>
-			<AddToCart />
-		</View>
-	);
+	if (searchProducts !== null) {
+		return (
+			<View style={styles.container}>
+				<Search setSearchValue={setSearchText} />
+				<FlatList
+					data={searchProducts}
+					renderItem={(object) => <ProductItem {...object} />}
+					keyExtractor={(index, item) => index.toString()}
+					contentContainerStyle={styles.flatListContainer}
+					ItemSeparatorComponent={(leadingItem, section) => (
+						<View
+							style={{
+								width: '100%',
+								height: 1,
+								backgroundColor: 'gray',
+							}}
+						/>
+					)}
+				/>
+				<AddToCart />
+			</View>
+		);
+	} else {
+		return <Search setSearchValue={setSearchValue} />;
+	}
 }
 
 const styles = StyleSheet.create({

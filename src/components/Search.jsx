@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SearchBar } from 'react-native-elements';
@@ -11,13 +11,18 @@ const borderProps = {
 	borderWidth: 1,
 	borderColor: 'black',
 };
-export default function Search() {
+export default function Search({ setSearchValue }) {
 	const dispatch = useDispatch();
 	const navigation = useNavigation();
+
+	const [searchText, setSearchText] = useState('');
+	setSearchValue &&
+		useEffect(() => {
+			setSearchValue(searchText);
+		}, [searchText, setSearchValue]);
 	const [title, setTitle] = useState(
 		useSelector((state) => state.searchCategory)
 	);
-	const [searchText, setSearchText] = useState('');
 
 	const setSearchResult = (item) => {
 		setTitle(item);
@@ -46,6 +51,7 @@ export default function Search() {
 			<View style={styles.searchBarMainContainer}>
 				<SearchBar
 					lightTheme
+					onFocus={() => navigation.navigate('SearchList')}
 					value={searchText}
 					onChangeText={(text) => setSearchText(text)}
 					containerStyle={styles.searchBarContainer}

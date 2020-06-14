@@ -11,7 +11,6 @@ export default function CategoriesFlatList({
 	containerStyle,
 	viewAll,
 }) {
-	console.log(data[0]);
 	const _renderCircularItem = ({ item, index }) => {
 		return (
 			<CategoryItem

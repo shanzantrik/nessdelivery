@@ -49,8 +49,6 @@ export default function Homepage({ navigation, route }) {
 		(category) => category.display === 'default'
 	);
 
-	const subCategories = [];
-
 	const compare = (a, b) => {
 		let comparison = 0;
 		if (a.id > b.id) {
@@ -61,31 +59,6 @@ export default function Homepage({ navigation, route }) {
 
 		return comparison; // Multiplying it with -1 reverses the sorting order
 	};
-
-	useEffect(() => {
-		Promise.all(
-			simpleCategories.map((simpleItem) => {
-				return API.get(`products/categories?parent=${simpleItem.id}`);
-			})
-		)
-			.then((res) => {
-				res.map((val) => {
-					subCategories.push(...val.data);
-				});
-
-				dispatch({
-					type: Actions.SUB_CATEGORIES,
-					payload: subCategories.sort(compare),
-				});
-			})
-			.catch((error) => {
-				console.error(error);
-				ToastAndroid.show(
-					'Error Getting SubCategories',
-					ToastAndroid.LONG
-				);
-			});
-	});
 
 	// console.log(categoriesData);
 	return (

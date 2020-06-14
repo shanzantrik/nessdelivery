@@ -19,8 +19,8 @@ export default function ProductItem({ item, index }) {
 				}}>
 				<Text style={styles.title}>{item.title}</Text>
 				<View style={{ marginTop: 20 }}>
-					<Text style={styles.price}>Rs {item.price}</Text>
-					<Text style={styles.oldPrice}>Rs {item.oldPrice}</Text>
+					<Text style={styles.price}>₹ {item.price}</Text>
+					<Text style={styles.oldPrice}>₹ {item.oldPrice}</Text>
 				</View>
 				<View
 					style={{

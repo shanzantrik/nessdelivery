@@ -7,6 +7,7 @@ import wishlist from './Wishlist.reducer';
 import searchCategory from './SearchCategory.reducer';
 import carousel from './Carousel.reducer';
 import subCategories from './SubCategories.reducer';
+import payments from './Payments.reducer';
 
 const rootReducer = combineReducers({
 	categories,
@@ -16,6 +17,7 @@ const rootReducer = combineReducers({
 	searchCategory,
 	carousel,
 	subCategories,
+	payments,
 });
 
 export default rootReducer;

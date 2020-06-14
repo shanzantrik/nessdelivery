@@ -26,6 +26,7 @@ import {
 	Cart,
 	Payment,
 	CardPage,
+	SearchList,
 } from '../pages';
 import { Colors, Fonts } from '../constants';
 import Actions from '../redux/Actions';
@@ -89,11 +90,42 @@ function ProductSharedNavigator({ navigation }) {
 	);
 }
 
+const AuthStack = createStackNavigator();
+
+function AuthStackNavigator({ navigation }) {
+	return (
+		<AuthStack.Navigator
+			initialRouteName="Login"
+			screenOptions={{
+				cardStyle: {
+					backgroundColor: 'white',
+				},
+				transitionSpec: {
+					open: config,
+					close: config,
+				},
+				cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+			}}>
+			<AuthStack.Screen
+				name="Login"
+				component={Login}
+				options={{ headerShown: false }}
+			/>
+			<AuthStack.Screen name="Signup" component={Signup} />
+			<HomeStack.Screen
+				name="OTPScreen"
+				component={OTPScreen}
+				options={{ headerShown: false }}
+			/>
+		</AuthStack.Navigator>
+	);
+}
+
 function HomeStackNavigation({ navigation }) {
 	const dispatch = useDispatch();
 	return (
 		<HomeStack.Navigator
-			initialRouteName="SplashScreen"
+			initialRouteName="AuthStack"
 			screenOptions={{
 				cardStyle: {
 					backgroundColor: 'white',
@@ -112,16 +144,13 @@ function HomeStackNavigation({ navigation }) {
 				}}
 			/>
 			<HomeStack.Screen
-				name="Login"
-				component={Login}
-				options={{ headerShown: false }}
+				name="AuthStack"
+				component={AuthStackNavigator}
+				options={{
+					headerShown: false,
+				}}
 			/>
-			<HomeStack.Screen name="Signup" component={Signup} />
-			<HomeStack.Screen
-				name="OTPScreen"
-				component={OTPScreen}
-				options={{ headerShown: false }}
-			/>
+
 			<HomeStack.Screen
 				name="SubCategories"
 				component={SubCategories}
@@ -217,6 +246,19 @@ function HomeStackNavigation({ navigation }) {
 					},
 				}}
 			/>
+			<HomeStack.Screen
+				name="SearchList"
+				component={SearchList}
+				options={{
+					header: (props) => (
+						<HomepageToolbar
+							{...props}
+							navigation={navigation}
+							searchBar={false}
+						/>
+					),
+				}}
+			/>
 		</HomeStack.Navigator>
 	);
 }
@@ -262,7 +304,7 @@ function DrawerNavigator() {
 			/>
 			<Drawer.Screen
 				name="Login"
-				component={Login}
+				component={HomeStackNavigation}
 				options={{
 					drawerIcon: ({ focused, color }) => (
 						<Icon name="sign-in-alt" color={color} size={20} />

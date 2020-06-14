@@ -1,3 +1,4 @@
+import Actions from '../Actions';
 const initialState = {
 	addedItems: [],
 	total: 0,
@@ -7,7 +8,7 @@ const Cart = (state = initialState, action) => {
 	//INSIDE HOME COMPONENT
 	console.log(action);
 	console.log(state);
-	if (action.type === 'ADD_TO_CART') {
+	if (action.type === Actions.ADD_TO_CART) {
 		let addedItem = action.payload;
 		//check if the action id exists in the addedItems
 		let existed_item = state.addedItems.find(
@@ -35,7 +36,7 @@ const Cart = (state = initialState, action) => {
 			};
 		}
 	}
-	if (action.type === 'REMOVE_ITEM') {
+	if (action.type === Actions.REMOVE_FROM_CART) {
 		let itemToRemove = state.addedItems.find(
 			(item) => item.id === action.payload.id
 		);
@@ -58,7 +59,7 @@ const Cart = (state = initialState, action) => {
 		};
 	}
 	//INSIDE CART COMPONENT
-	if (action.type === 'ADD_QUANTITY') {
+	if (action.type === Actions.ADD_QUANTITY) {
 		let addedItem = state.addedItems.find(
 			(item) => item.id === action.payload.id
 		);
@@ -70,7 +71,7 @@ const Cart = (state = initialState, action) => {
 			total: parseInt(newTotal, 10),
 		};
 	}
-	if (action.type === 'SUB_QUANTITY') {
+	if (action.type === Actions.SUB_QUANTITY) {
 		let addedItem = state.addedItems.find(
 			(item) => item.id === action.payload.id
 		);
@@ -97,7 +98,7 @@ const Cart = (state = initialState, action) => {
 		}
 	}
 
-	if (action.type === 'CLEAR_CART') {
+	if (action.type === Actions.CLEAR_CART) {
 		return initialState;
 	}
 	return state;

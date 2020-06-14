@@ -1,8 +1,9 @@
+import Actions from '../Actions';
 const initialState = 'Categories';
 
 const SearchCateogry = (state = initialState, action) => {
 	switch (action.type) {
-		case 'SEARCH_CATEGORY':
+		case Actions.SEARCH_CATEGORY:
 			return action.payload;
 		default:
 			return state;

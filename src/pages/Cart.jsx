@@ -152,10 +152,10 @@ export default function Card({ navigation }) {
 					<View>
 						{item.selected.on_sale && (
 							<Text style={styles.oldPrice}>
-								MRP: Rs {item.oldPrice}
+								MRP: ₹ {item.oldPrice}
 							</Text>
 						)}
-						<Text style={styles.price}>Rs {item.price}</Text>
+						<Text style={styles.price}>₹ {item.price}</Text>
 					</View>
 					<View
 						style={{
@@ -217,7 +217,7 @@ export default function Card({ navigation }) {
 								fontFamily: Fonts.primary,
 								color: Colors.white,
 							}}>
-							Rs {cart.total}
+							₹ {cart.total}
 						</Text>
 						<Text
 							style={{
@@ -225,7 +225,7 @@ export default function Card({ navigation }) {
 								fontFamily: Fonts.primary,
 								color: '#90c336',
 							}}>
-							Saved Rs 20
+							Saved ₹ 20
 						</Text>
 					</View>
 					<TouchableOpacity

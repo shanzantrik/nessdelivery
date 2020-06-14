@@ -5,11 +5,13 @@ import {
 	Text,
 	TouchableOpacity,
 	TouchableWithoutFeedback,
+	ToastAndroid,
 } from 'react-native';
 import PropTypes from 'prop-types';
 import { Fonts, Shadow, Colors } from '../constants';
 import { useNavigation } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
+import API from '../API';
 
 const borderProps = {
 	borderColor: 'black',
@@ -29,9 +31,55 @@ export default function CategoryItem(props) {
 		discountContainerStyle,
 		discountTextStyle,
 	} = props;
+	let relatedProducts = [];
+	const [selectedQuantity, setSelectedQuantity] = React.useState(
+		item.type === 'variable' ? item.product_variations[0] : item
+	);
+	const [price, setPrice] = React.useState(
+		item.type === 'variable'
+			? item.product_variations[0].on_sale
+				? item.product_variations[0].regular_price
+				: item.product_variations[0].sale_price
+			: item.price
+	);
+
+	const changeQuantity = (val) => {
+		setSelectedQuantity(val);
+		setPrice(val.on_sale ? val.sale_price : val.regular_price);
+	};
+
+	React.useEffect(() => {
+		if (item.related_ids.length !== 0) {
+			Promise.all(
+				item.related_ids.map((product_id) => {
+					return API.get(`products/${product_id}`);
+				})
+			)
+				.then((res) => {
+					res.map((data) => {
+						relatedProducts.push(data.data);
+					});
+				})
+				.catch((error) => {
+					console.error(error);
+					ToastAndroid.show(
+						'Error getting related products',
+						ToastAndroid.LONG
+					);
+				});
+		}
+	});
 	return (
 		<TouchableWithoutFeedback
-			onPress={() => navigation.navigate('ProductDetail')}>
+			onPress={() =>
+				navigation.navigate('ProductDetail', {
+					item: item,
+					type: item.type,
+					selected: selectedQuantity,
+					changeQuantity: changeQuantity,
+					relatedProductsData: relatedProducts,
+				})
+			}>
 			<View style={[styles.container, containerStyle]}>
 				<View style={[styles.imageContainer, imageContainerStyle]}>
 					<FastImage
@@ -53,11 +101,11 @@ export default function CategoryItem(props) {
 							item.sale_price === '' && { marginTop: 5 },
 							priceStyle,
 						]}>
-						Rs {item.price}
+						₹ {item.price}
 					</Text>
 					{item.sale_price !== '' && (
 						<Text style={[styles.oldPriceStyle, oldPriceStyle]}>
-							Rs {item.regular_price}
+							₹ {item.regular_price}
 						</Text>
 					)}
 				</View>
@@ -68,7 +116,7 @@ export default function CategoryItem(props) {
 							discountContainerStyle,
 						]}>
 						<Text style={[styles.discountText, discountTextStyle]}>
-							Rs {item.regular_price - item.price} off
+							₹ {item.regular_price - item.price} off
 						</Text>
 					</View>
 				)}

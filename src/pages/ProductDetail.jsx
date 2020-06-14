@@ -91,21 +91,29 @@ export default function ProductDetail({ navigation, route }) {
 							}}>
 							<Text
 								style={{
-									fontSize: 14,
+									fontSize: 16,
 									fontFamily: Fonts.bold,
 								}}>
-								Rs {price}
+								₹ {price}
 							</Text>
 							<View
-								style={!item.sale_price && { display: 'none' }}>
+								style={
+									item.sale_price
+										? {
+												flexDirection: 'row',
+												alignItems: 'center',
+										  }
+										: { display: 'none' }
+								}>
 								<Text
 									style={{
 										fontSize: 13,
 										fontFamily: Fonts.semiBold,
 										color: '#ff0000e6',
 										textDecorationLine: 'line-through',
+										marginEnd: 20,
 									}}>
-									MRP: Rs {regularPrice}
+									MRP: ₹ {regularPrice}
 								</Text>
 								<View
 									style={{
@@ -119,8 +127,10 @@ export default function ProductDetail({ navigation, route }) {
 											marginVertical: 2,
 											color: Colors.white,
 										}}>
-										{parseInt(item.sale_price, 10) -
-											parseInt(item.regular_price, 10)}
+										₹{' '}
+										{parseInt(item.regular_price, 10) -
+											parseInt(item.sale_price, 10)}{' '}
+										off
 									</Text>
 								</View>
 							</View>

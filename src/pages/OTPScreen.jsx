@@ -6,6 +6,10 @@ import {
 	TouchableOpacity,
 	ToastAndroid,
 	Keyboard,
+	Alert,
+	TouchableWithoutFeedback,
+	Modal,
+	ActivityIndicator,
 } from 'react-native';
 import {
 	widthPercentageToDP as wp,
@@ -15,12 +19,14 @@ import OTPTextInput from 'react-native-otp-textinput';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Fonts, Colors } from '../constants';
-import { GradientButton } from '../components/Buttons';
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import { URL } from '../constants';
 
 export default function OTPScreen({ route, navigation }) {
-	// const { phone } = route.params;
+	const { data } = route.params;
 	const [counter, setCounter] = useState(30);
+	const [otpValue, setOtpValue] = useState('');
+	const [loading, setLoading] = useState(false);
+
 	let timer = null;
 	useEffect(() => {
 		tick();
@@ -35,11 +41,72 @@ export default function OTPScreen({ route, navigation }) {
 		}, 1000);
 	};
 
+	const verifyOtp = () => {
+		if (otpValue.length === 6 && !isNaN(otpValue)) {
+			setLoading(true);
+			fetch(
+				`${URL}/wp-json/digits/v1/verify_otp?countrycode=${data.countrycode}&mobileNo=${data.phone}&type=${data.type}&otp=${otpValue}`,
+				{
+					method: 'POST',
+				}
+			)
+				.then((res) => {
+					if (res.data.code === 1) {
+						// TODO: Signup not working
+						fetch(
+							`${URL}/wp-json/digits/v1/create_user?digits_reg_name=${data.fullName}&digits_reg_countrycode=${data.countrycode}&digits_reg_mobile=${data.phone}&digits_reg_password=${data.password}&digits_reg_email=${data.email}&digits_reg_meta_key=shan`
+						)
+							.then((data) => {
+								ToastAndroid.show(
+									'Registration is Successfull. Please Login to Continue',
+									ToastAndroid.LONG
+								);
+								setTimeout(() => {
+									navigation.navigate('Login');
+								}, 1000);
+								setLoading(false);
+							})
+							.catch((error) => {
+								console.log(error);
+								Alert.alert(
+									'Registration Unsuccessful',
+									'Registration is not successful. Please Try Again'
+								);
+								setLoading(false);
+							});
+					} else {
+						Alert.alert('Invalid OTP', 'Please Enter a Valid OTP');
+					}
+				})
+				.catch((error) => {
+					Alert.alert('Unable to Verify OTP.', 'Please Try Again.');
+					setLoading(false);
+				});
+		} else {
+			Alert.alert('Invalid OTP.', 'Please Enter a Valid OTP.');
+		}
+	};
+
 	const resendOTP = () => {
-		ToastAndroid.show('OTP has been sent', ToastAndroid.LONG);
-		clearInterval(timer);
-		setCounter(30);
-		tick();
+		fetch(
+			`${URL}/wp-json/digits/v1/resend_otp?countrycode=${data.countrycode}&mobileNo=${data.phone}&type=${data.type}`,
+			{
+				method: 'POST',
+			}
+		)
+			.then((res) => {
+				ToastAndroid.show('OTP has been sent', ToastAndroid.LONG);
+				clearInterval(timer);
+				setCounter(30);
+				tick();
+			})
+			.catch((error) => {
+				console.log(error);
+				Alert.alert(
+					'Resend OTP',
+					'Unable to send OTP. Please Try Again'
+				);
+			});
 	};
 
 	const hideKeyboard = () => {
@@ -97,7 +164,7 @@ export default function OTPScreen({ route, navigation }) {
 									fontFamily: Fonts.bold,
 									textAlign: 'center',
 								}}>
-								Please Verify you account
+								Please Verify your account
 							</Text>
 						</View>
 					</View>
@@ -118,7 +185,7 @@ export default function OTPScreen({ route, navigation }) {
 							fontFamily: Fonts.semiBold,
 							textAlign: 'center',
 						}}>
-						Enter the 4 digit OTP
+						Enter the 6 digit OTP
 					</Text>
 					<Text
 						style={{
@@ -129,18 +196,22 @@ export default function OTPScreen({ route, navigation }) {
 							lineHeight: 30,
 						}}>
 						OTP has been sent to{'\n'}
-						<Text style={{ letterSpacing: 2 }}>+91 9999999999</Text>
+						<Text style={{ letterSpacing: 2 }}>
+							+91 {data.phone}
+						</Text>
 					</Text>
 				</View>
 				<View style={{ marginTop: 30 }}>
 					<OTPTextInput
 						style={{
-							width: 70,
+							width: 50,
 							borderColor: '#9733EE80',
 							borderWidth: 1,
 							fontSize: 25,
 							textAlign: 'center',
 						}}
+						inputCount={6}
+						handleTextChange={(otp) => setOtpValue(otp)}
 					/>
 				</View>
 				<TouchableOpacity
@@ -169,7 +240,7 @@ export default function OTPScreen({ route, navigation }) {
 					style={{ borderRadius: 32, marginVertical: 50 }}>
 					<TouchableOpacity
 						style={styles.signInContainer}
-						onPress={() => navigation.navigate('Homepage')}>
+						onPress={() => verifyOtp()}>
 						<View style={styles.signInView}>
 							<Text style={[styles.signIn, { color: '#7F7FD5' }]}>
 								Verify
@@ -178,6 +249,30 @@ export default function OTPScreen({ route, navigation }) {
 					</TouchableOpacity>
 				</LinearGradient>
 			</View>
+			<Modal
+				style={StyleSheet.absoluteFill}
+				animationType="fade"
+				transparent
+				visible={loading}>
+				<View
+					style={{
+						flex: 1,
+						alignItems: 'center',
+						justifyContent: 'center',
+						backgroundColor: '#00000033',
+					}}>
+					<ActivityIndicator color={Colors.royalBlue} size="large" />
+					<Text
+						style={{
+							marginTop: 20,
+							fontSize: 16,
+							fontFamily: Fonts.semiBold,
+							color: Colors.royalBlue,
+						}}>
+						Loading
+					</Text>
+				</View>
+			</Modal>
 		</TouchableWithoutFeedback>
 	);
 }

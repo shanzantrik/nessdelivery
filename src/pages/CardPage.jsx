@@ -3,8 +3,10 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { Input } from 'react-native-elements';
 import { Fonts, Colors, Shadow } from '../constants';
 import Icon from 'react-native-vector-icons/FontAwesome5';
+import { useSelector } from 'react-redux/lib/hooks/useSelector';
 
 export default function CardPage({ navigation }) {
+	const cart = useSelector((state) => state.cart);
 	const [saved, toggleSaved] = useState(true);
 	return (
 		<View>
@@ -22,7 +24,7 @@ export default function CardPage({ navigation }) {
 					Total Amount Payable
 				</Text>
 				<Text style={{ fontSize: 14, fontFamily: Fonts.semiBold }}>
-					Rs 250
+					₹ {cart.total + 50}
 				</Text>
 			</View>
 			<View

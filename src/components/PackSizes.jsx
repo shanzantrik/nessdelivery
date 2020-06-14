@@ -17,14 +17,14 @@ const packs = [
 		unit: 'Kg',
 		price: 108,
 		oldPrice: 109,
-		discount: 'Rs 1 off',
+		discount: '₹ 1 off',
 	},
 	{
 		weight: 5,
 		unit: 'Kg',
 		price: 268,
 		oldPrice: 270,
-		discount: 'Rs 2 off',
+		discount: '₹ 2 off',
 	},
 	{
 		weight: 10,
@@ -57,7 +57,7 @@ export default function PackSizes({
 	const [current, setCurrent] = useState(selected.id);
 
 	const RenderPack = ({ index, item }) => {
-		const [selected] = useState(current === item.id);
+		const [selectedItem] = useState(current === item.id);
 		return (
 			<TouchableOpacity
 				onPress={() => {
@@ -108,7 +108,7 @@ export default function PackSizes({
 									color: '#ff0000',
 									textDecorationLine: 'line-through',
 								}}>
-								MRP: Rs {item.regular_price}
+								MRP: ₹ {item.regular_price}
 							</Text>
 						)}
 					</View>
@@ -122,7 +122,7 @@ export default function PackSizes({
 							alignItems: 'center',
 							justifyContent: 'center',
 						}}>
-						{selected ? (
+						{selectedItem ? (
 							<View
 								style={{
 									width: 14,
