@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { HomepageToolbar } from '../components';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, StackActions } from '@react-navigation/native';
 import {
 	createStackNavigator,
 	CardStyleInterpolators,
@@ -31,6 +31,7 @@ import {
 import { Colors, Fonts } from '../constants';
 import Actions from '../redux/Actions';
 import { useDispatch } from 'react-redux';
+import API from '../API';
 
 const HomeStack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -90,6 +91,14 @@ function ProductSharedNavigator({ navigation }) {
 	);
 }
 
+function LogoutComponent({ navigation }) {
+	useEffect(() => {
+		navigation.dispatch(StackActions.popToTop());
+	});
+
+	return null;
+}
+
 const AuthStack = createStackNavigator();
 
 function AuthStackNavigator({ navigation }) {
@@ -106,12 +115,12 @@ function AuthStackNavigator({ navigation }) {
 				},
 				cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
 			}}>
-			<AuthStack.Screen
+			<HomeStack.Screen
 				name="Login"
 				component={Login}
 				options={{ headerShown: false }}
 			/>
-			<AuthStack.Screen name="Signup" component={Signup} />
+			<HomeStack.Screen name="Signup" component={Signup} />
 			<HomeStack.Screen
 				name="OTPScreen"
 				component={OTPScreen}
@@ -141,14 +150,27 @@ function HomeStackNavigation({ navigation }) {
 				component={SplashScreen}
 				options={{
 					headerShown: false,
+					backgroundColor: '#161616',
 				}}
 			/>
-			<HomeStack.Screen
+			{/* <HomeStack.Screen
 				name="AuthStack"
 				component={AuthStackNavigator}
 				options={{
 					headerShown: false,
 				}}
+			/> */}
+
+			<AuthStack.Screen
+				name="Login"
+				component={Login}
+				options={{ headerShown: false }}
+			/>
+			<AuthStack.Screen name="Signup" component={Signup} />
+			<HomeStack.Screen
+				name="OTPScreen"
+				component={OTPScreen}
+				options={{ headerShown: false }}
 			/>
 
 			<HomeStack.Screen
@@ -322,7 +344,7 @@ function DrawerNavigator() {
 			/>
 			<Drawer.Screen
 				name="Logout"
-				component={HomeStackNavigation}
+				component={LogoutComponent}
 				options={{
 					drawerIcon: ({ focused, color }) => (
 						<Icon name="sign-out-alt" color={color} size={20} />

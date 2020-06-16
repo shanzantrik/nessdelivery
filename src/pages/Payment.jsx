@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
 	View,
 	Text,
@@ -23,6 +23,20 @@ import { useDispatch } from 'react-redux';
 import Actions from '../redux/Actions';
 
 export default function Payment({ navigation }) {
+	const user = useSelector((state) => state.login);
+	const profile = useSelector((state) => state.profile);
+
+	useEffect(() => {
+		if (user === null || user.token === null) {
+			ToastAndroid.show(
+				'Please Login to Continue Payment',
+				ToastAndroid.LONG
+			);
+			navigation.navigate('Login', {
+				destination: 'Payment',
+			});
+		}
+	});
 	const [cart] = useState(useSelector((state) => state.cart));
 	const [payments] = useState(useSelector((state) => state.payments));
 	const [orderId, setOrderId] = useState('');
@@ -67,17 +81,21 @@ export default function Payment({ navigation }) {
 			// }
 
 			var options = {
-				description: 'Akshay Live Checkout',
-				image: 'https://i.imgur.com/3g7nmJC.png',
+				description: 'Frozen food delivery',
+				image:
+					'https://nessfrozenhub.in/wp-content/uploads/2020/06/IMG-20200526-WA0011-2-3.png',
 				currency: 'INR',
 				key: razorpay.settings.key_id.value,
 				amount: cart.total * 100,
 				name: 'Ness Frozen Hub',
 				order_id: orderId, //Replace this with an order_id created using Orders API. Learn more at https://razorpay.com/docs/api/orders.
 				prefill: {
-					email: 'akshay2796@gmail.com',
-					contact: '919934691419',
-					name: 'Akshay Kumar',
+					email: profile.email,
+					contact: profile.meta_data
+						.find((item) => item.key === 'digits_phone')
+						.value.toString()
+						.substring(1),
+					name: profile.first_name,
 				},
 				theme: { color: '#4084f3' },
 			};

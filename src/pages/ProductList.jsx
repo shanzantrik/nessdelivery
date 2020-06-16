@@ -20,7 +20,7 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Picker } from '@react-native-community/picker';
 import Animated from 'react-native-reanimated';
 import API from '../API';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Actions from '../redux/Actions';
 import FastImage from 'react-native-fast-image';
 
@@ -32,7 +32,23 @@ export default function ProductList({ navigation, route }) {
 	const dispatch = useDispatch();
 
 	const ProductItem = ({ item, index }) => {
+		const cartData = useSelector((state) => state.cart);
 		useEffect(() => {
+			setCart(cartData);
+			console.log('Setting Cart Data');
+			const cartItem = cartData.addedItems.find(
+				(val) => val.id === item.id
+			);
+			if (cartItem) {
+				setCount(cartItem.quantity);
+				btnToggle(true);
+			} else {
+				setCount(0);
+				btnToggle(false);
+			}
+			console.log('CartItem');
+			console.log(cartItem);
+
 			if (item.related_ids.length !== 0) {
 				Promise.all(
 					item.related_ids.map((product_id) => {
@@ -55,8 +71,27 @@ export default function ProductList({ navigation, route }) {
 		});
 
 		const [heartChecked, heartToggle] = useState(false);
-		const [btnEnabled, btnToggle] = useState(false);
+
+		useEffect(() => {
+			setCart(cartData);
+			console.log('Setting Cart Data');
+			const cartItem = cartData.addedItems.find(
+				(val) => val.id === item.id
+			);
+			if (cartItem) {
+				setCount(cartItem.quantity);
+			} else {
+				setCount(0);
+				btnToggle(false);
+			}
+			console.log('CartItem');
+			console.log(cartItem);
+		}, [cartData, cart, item.id, btnEnabled]);
+		const [cart, setCart] = useState(cartData);
+
 		const [count, setCount] = useState(0);
+		const [btnEnabled, btnToggle] = useState(count !== 0);
+
 		const [price, setPrice] = useState(
 			item.type === 'variable'
 				? item.product_variations[0].on_sale
@@ -121,7 +156,6 @@ export default function ProductList({ navigation, route }) {
 								} else {
 									cartAction(Actions.SUB_QUANTITY);
 								}
-								setCount(count - 1);
 							}}>
 							<View style={styles.countContainer}>
 								<Text style={styles.count}>−</Text>
@@ -139,7 +173,6 @@ export default function ProductList({ navigation, route }) {
 							onPress={() => {
 								console.log('Updating in cart');
 								cartAction(Actions.ADD_QUANTITY);
-								setCount(count + 1);
 							}}>
 							<Animated.View style={styles.countContainer}>
 								<Text style={styles.count}>+</Text>
@@ -151,7 +184,6 @@ export default function ProductList({ navigation, route }) {
 				return (
 					<TouchableOpacity
 						onPress={() => {
-							setCount(count + 1);
 							btnToggle(!btnEnabled);
 							cartAction(Actions.ADD_TO_CART);
 							console.log('Adding to Cart');
@@ -291,7 +323,7 @@ export default function ProductList({ navigation, route }) {
 					/>
 				)}
 			/>
-			<AddToCart />
+			{/* <AddToCart item={} price={price} /> */}
 		</View>
 	);
 }

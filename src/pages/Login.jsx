@@ -9,6 +9,7 @@ import {
 	ScrollView,
 	Modal,
 	ActivityIndicator,
+	ToastAndroid,
 } from 'react-native';
 import { Input } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome5';
@@ -18,34 +19,75 @@ import {
 } from 'react-native-responsive-screen';
 import { Colors, Fonts, Shadow } from '../constants';
 import LinearGradient from 'react-native-linear-gradient';
+import { useDispatch } from 'react-redux';
+import Actions from '../redux/Actions';
+import { URL } from '../constants';
+import API from '../API';
 
 const borderProps = {
 	borderColor: 'black',
 	borderWidth: 1,
 };
-export default function Login({ navigation }) {
+export default function Login({ navigation, route }) {
+	const { destination } = route.params;
+
 	const [signInFocused, setSignInFocused] = useState(false);
 	const [phone, setPhone] = useState('');
 	const [password, setPassword] = useState('');
 	const [passwordVisible, setPasswordVisible] = useState(false);
 	const [loading, setLoading] = useState(false);
 
+	const dispatch = useDispatch();
+
 	const signInUsingApi = () => {
 		setLoading(true);
-		fetch(
-			`${URL}/wp-json/digits/v1/login_user?countrycode=+91&user=${phone}&password=${password}&type=login`,
-			{
-				method: 'POST',
-			}
-		)
+		const formData = new FormData();
+
+		formData.append('countrycode', '+91');
+		formData.append('user', phone);
+		formData.append('password', password);
+
+		fetch(`${URL}/wp-json/digits/v1/login_user`, {
+			method: 'POST',
+			body: formData,
+		})
+			.then((response) => response.text())
 			.then((res) => {
 				//Login Successful
+
+				res = JSON.parse(res);
+				console.log(res);
+				if (res.success) {
+					ToastAndroid.show('Login Successful', ToastAndroid.LONG);
+					dispatch({ type: Actions.LOGIN, payload: res.data });
+					fetchProfile(res.data.user_id);
+				} else {
+					Alert.alert(
+						'Please Enter Correct Credentials',
+						'Invalid Phone/Email or Password'
+					);
+				}
+				setLoading(false);
 			})
 			.catch((error) => {
 				//Some error occurred
 				Alert.alert('Unable to sign in', 'Please try again');
 				console.log(error);
+				setLoading(false);
 			});
+	};
+
+	const fetchProfile = async (user_id) => {
+		try {
+			const res = await API.get(`customers/${user_id}`);
+			if (res.status === 200) {
+				console.log(res);
+				dispatch({ type: Actions.PROFILE, payload: res.data });
+				navigation.navigate(destination || 'Homepage');
+			}
+		} catch (error) {
+			console.log(error);
+		}
 	};
 
 	const signIn = () => {
@@ -143,10 +185,10 @@ export default function Login({ navigation }) {
 				</View>
 				<View style={styles.emailContainer}>
 					<Input
-						placeholder="Phone Number"
+						placeholder="Phone Number / Email Address"
 						inputStyle={styles.email}
-						label={'Enter your Phone'}
-						keyboardType={'numeric'}
+						label={'Enter your Phone or Email'}
+						keyboardType={'email-address'}
 						leftIcon={
 							<Icon
 								name="mobile-alt"
@@ -216,7 +258,11 @@ export default function Login({ navigation }) {
 					style={{ borderRadius: 32, marginVertical: 20 }}>
 					<TouchableOpacity
 						style={styles.signInContainer}
-						onPress={() => navigation.navigate('Signup')}>
+						onPress={() =>
+							navigation.navigate('Signup', {
+								destination: destination || 'Homepage',
+							})
+						}>
 						<View style={styles.signInView}>
 							<Text style={[styles.signIn, { color: '#7F7FD5' }]}>
 								Register

@@ -39,9 +39,11 @@ const borderProps = {
 
 export default function Homepage({ navigation, route }) {
 	const dispatch = useDispatch();
-	// const { location, locationAvailable } = route.params;
-	const location = 'Your Location',
-		locationAvailable = true;
+	const locationData = useSelector((state) => state.location);
+
+	useEffect(() => {
+		console.log(locationData);
+	});
 
 	const categoriesData = useSelector((state) => state.categories);
 	const featuredProducts = useSelector((state) => state.products);
@@ -82,7 +84,7 @@ export default function Homepage({ navigation, route }) {
 								marginEnd: 10,
 							}}
 						/>
-						{locationAvailable ? (
+						{locationData.locationAvailable ? (
 							<Text
 								style={{
 									fontSize: 14,
@@ -95,7 +97,7 @@ export default function Homepage({ navigation, route }) {
 										fontFamily: Fonts.bold,
 									}}>
 									{' '}
-									{location}
+									{locationData.location}
 								</Text>
 							</Text>
 						) : (
@@ -104,7 +106,7 @@ export default function Homepage({ navigation, route }) {
 									fontSize: 14,
 									fontFamily: Fonts.bold,
 								}}>
-								{location}
+								{locationData.location}
 							</Text>
 						)}
 					</View>

@@ -22,18 +22,14 @@ export default function Card({ navigation }) {
 	useEffect(() => {
 		setCart(cartData);
 		console.log('Setting Cart Data');
+		console.log(cartData);
 	}, [cartData]);
 	const [cart, setCart] = useState(cartData);
-	console.log(cart);
 
 	const ProductItem = ({ item, index }) => {
 		const [heartChecked, heartToggle] = useState(false);
 		const [count, setCount] = useState(item.quantity);
 		const [btnEnabled, btnToggle] = useState(item.quantity !== 0);
-
-		// if (cart !== null && cart.length === 0) {
-		// 	console.log('Cart is empty!');
-		// }
 
 		const cartAction = (action) => {
 			dispatch({
@@ -152,7 +148,7 @@ export default function Card({ navigation }) {
 					<View>
 						{item.selected.on_sale && (
 							<Text style={styles.oldPrice}>
-								MRP: ₹ {item.oldPrice}
+								MRP: ₹ {item.regular_price}
 							</Text>
 						)}
 						<Text style={styles.price}>₹ {item.price}</Text>

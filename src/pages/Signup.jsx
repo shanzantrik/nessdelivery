@@ -20,12 +20,15 @@ import {
 import { Colors, Fonts, Shadow } from '../constants';
 import LinearGradient from 'react-native-linear-gradient';
 import { URL } from '../constants';
+import axios from 'axios';
 
 const borderProps = {
 	borderColor: 'black',
 	borderWidth: 1,
 };
-export default function Signup({ navigation }) {
+export default function Signup({ navigation, route }) {
+	const { destination } = route.params;
+
 	const [passwordVisible, setPasswordVisible] = useState(false);
 	const [confPasswordVisible, setConfPasswordVisible] = useState(false);
 
@@ -40,33 +43,49 @@ export default function Signup({ navigation }) {
 
 	const signUpUsingApi = () => {
 		setLoading(true);
-		fetch(
-			`${URL}/wp-json/digits/v1/send_otp?countrycode=+91&mobileNo=${phone}&type=register`,
-			{
-				method: 'POST',
-			}
-		)
+		const formData = new FormData();
+
+		formData.append('countrycode', '+91');
+		formData.append('mobileNo', phone);
+		formData.append('type', 'register');
+
+		fetch(`${URL}/wp-json/digits/v1/send_otp`, {
+			method: 'POST',
+			body: formData,
+		})
+			.then((response) => response.text())
 			.then((res) => {
-				ToastAndroid.show(
-					'OTP has been sent to the specified mobile number',
-					ToastAndroid.LONG
-				);
-				setLoading(false);
-				setTimeout(() => {
-					navigation.navigate('OTPScreen', {
-						data: {
-							fullName: firstName + ' ' + lastName,
-							email: email,
-							phone: phone,
-							password: password,
-							confirmPassword: confirmPassword,
-							countrycode: '+91',
-							type: 'register',
-						},
-					});
-				}, 2000);
+				res = JSON.parse(res);
+				if (res.code === '1') {
+					ToastAndroid.show(
+						`OTP has been sent to ${phone}`,
+						ToastAndroid.LONG
+					);
+					setLoading(false);
+					setTimeout(() => {
+						navigation.navigate('OTPScreen', {
+							data: {
+								fullName: firstName + ' ' + lastName,
+								email: email,
+								phone: phone,
+								password: password,
+								confirmPassword: confirmPassword,
+								countrycode: '+91',
+								type: 'register',
+								destination: destination || 'Homepage',
+							},
+						});
+					}, 1000);
+				} else {
+					Alert.alert(
+						'Some Error Occurred',
+						res.message || 'Please Try Again'
+					);
+					setLoading(false);
+				}
 			})
 			.catch((error) => {
+				console.log(error);
 				setLoading(false);
 				ToastAndroid.show(
 					'Unable to send otp. Please try again',
@@ -284,7 +303,6 @@ export default function Signup({ navigation }) {
 						flex: 1,
 						alignItems: 'center',
 						justifyContent: 'center',
-						backgroundColor: '#00000033',
 					}}>
 					<ActivityIndicator color={Colors.royalBlue} size="large" />
 					<Text

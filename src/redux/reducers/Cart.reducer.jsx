@@ -6,22 +6,24 @@ const initialState = {
 
 const Cart = (state = initialState, action) => {
 	//INSIDE HOME COMPONENT
-	console.log(action);
-	console.log(state);
 	if (action.type === Actions.ADD_TO_CART) {
 		let addedItem = action.payload;
 		//check if the action id exists in the addedItems
 		let existed_item = state.addedItems.find(
-			(item) => action.payload.id === item.id
+			(item) => item.id === action.payload.id
 		);
-		console.log('Existed Item: ' + existed_item);
+
+		console.log('ExistedItem');
+		console.log(existed_item);
+
 		if (existed_item) {
-			addedItem.quantity += 1;
-			console.log(addedItem.quantity);
+			existed_item.quantity += 1;
+			console.log(existed_item.quantity);
 			return {
 				...state,
 				total:
-					parseInt(state.total, 10) + parseInt(addedItem.price, 10),
+					parseInt(state.total, 10) +
+					parseInt(existed_item.price, 10),
 			};
 		} else {
 			addedItem.quantity = 1;

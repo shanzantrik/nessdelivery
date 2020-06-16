@@ -361,7 +361,7 @@ export default function ProductDetail({ navigation, route }) {
 				</View>
 			</ScrollView>
 			<View style={{ position: 'absolute', bottom: 0 }}>
-				<AddToCart />
+				<AddToCart item={item} price={price} />
 			</View>
 		</View>
 	);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
 	View,
 	Text,
@@ -20,6 +20,9 @@ import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Fonts, Colors } from '../constants';
 import { URL } from '../constants';
+import { useDispatch } from 'react-redux';
+import Actions from '../redux/Actions';
+import API from '../API';
 
 export default function OTPScreen({ route, navigation }) {
 	const { data } = route.params;
@@ -27,11 +30,19 @@ export default function OTPScreen({ route, navigation }) {
 	const [otpValue, setOtpValue] = useState('');
 	const [loading, setLoading] = useState(false);
 
+	const dispatch = useDispatch();
+
 	let timer = null;
 	useEffect(() => {
 		tick();
 		return () => clearInterval(timer);
 	});
+
+	useEffect(() => {
+		if (otpValue.length === 6) {
+			verifyOtp();
+		}
+	}, [otpValue, verifyOtp]);
 
 	const tick = () => {
 		timer = setInterval(() => {
@@ -41,30 +52,70 @@ export default function OTPScreen({ route, navigation }) {
 		}, 1000);
 	};
 
-	const verifyOtp = () => {
+	const fetchProfile = async (user_id) => {
+		try {
+			const res = await API.get(`customers/${user_id}`);
+			if (res.status === 200) {
+				console.log(res);
+				dispatch({ type: Actions.PROFILE, payload: res.data });
+				navigation.navigate(data.destination || 'Homepage');
+			}
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
+	const verifyOtp = useCallback(() => {
 		if (otpValue.length === 6 && !isNaN(otpValue)) {
 			setLoading(true);
-			fetch(
-				`${URL}/wp-json/digits/v1/verify_otp?countrycode=${data.countrycode}&mobileNo=${data.phone}&type=${data.type}&otp=${otpValue}`,
-				{
-					method: 'POST',
-				}
-			)
+
+			const formDataOtp = new FormData();
+
+			formDataOtp.append('countrycode', data.countrycode);
+			formDataOtp.append('mobileNo', data.phone);
+			formDataOtp.append('type', data.type);
+			formDataOtp.append('otp', otpValue);
+
+			fetch(`${URL}/wp-json/digits/v1/verify_otp`, {
+				method: 'POST',
+				body: formDataOtp,
+			})
+				.then((response) => response.text())
 				.then((res) => {
-					if (res.data.code === 1) {
-						// TODO: Signup not working
-						fetch(
-							`${URL}/wp-json/digits/v1/create_user?digits_reg_name=${data.fullName}&digits_reg_countrycode=${data.countrycode}&digits_reg_mobile=${data.phone}&digits_reg_password=${data.password}&digits_reg_email=${data.email}&digits_reg_meta_key=shan`
-						)
-							.then((data) => {
-								ToastAndroid.show(
-									'Registration is Successfull. Please Login to Continue',
-									ToastAndroid.LONG
-								);
-								setTimeout(() => {
-									navigation.navigate('Login');
-								}, 1000);
-								setLoading(false);
+					res = JSON.parse(res);
+					if (res.code === 1) {
+						const formData = new FormData();
+
+						formData.append(
+							'digits_reg_countrycode',
+							data.countrycode
+						);
+						formData.append('digits_reg_mobile', data.phone);
+						formData.append('type', data.type);
+						formData.append('otp', otpValue);
+						formData.append('digits_reg_name', data.fullName);
+						formData.append('digits_reg_password', data.password);
+						formData.append('digits_reg_email', data.email);
+
+						fetch(`${URL}/wp-json/digits/v1/create_user`, {
+							method: 'POST',
+							body: formData,
+						})
+							.then((response) => response.text())
+							.then((resNew) => {
+								resNew = JSON.parse(resNew);
+								if (resNew.success) {
+									ToastAndroid.show(
+										'Registration is Successful.',
+										ToastAndroid.LONG
+									);
+									dispatch({
+										type: Actions.LOGIN,
+										payload: resNew.data,
+									});
+									fetchProfile(resNew.data.user_id);
+									setLoading(false);
+								}
 							})
 							.catch((error) => {
 								console.log(error);
@@ -76,29 +127,40 @@ export default function OTPScreen({ route, navigation }) {
 							});
 					} else {
 						Alert.alert('Invalid OTP', 'Please Enter a Valid OTP');
+						setLoading(false);
+						console.log(res);
 					}
 				})
 				.catch((error) => {
 					Alert.alert('Unable to Verify OTP.', 'Please Try Again.');
 					setLoading(false);
+					console.log(error);
 				});
 		} else {
 			Alert.alert('Invalid OTP.', 'Please Enter a Valid OTP.');
+			setLoading(false);
+			console.log('Not a valid otp: ' + otpValue);
 		}
-	};
+	});
 
 	const resendOTP = () => {
-		fetch(
-			`${URL}/wp-json/digits/v1/resend_otp?countrycode=${data.countrycode}&mobileNo=${data.phone}&type=${data.type}`,
-			{
-				method: 'POST',
-			}
-		)
+		const formData = new FormData();
+
+		formData.append('countrycode', data.countrycode);
+		formData.append('mobileNo', data.phone);
+		formData.append('type', data.type);
+
+		fetch(`${URL}/wp-json/digits/v1/resend_otp`, {
+			method: 'POST',
+			body: formData,
+		})
 			.then((res) => {
-				ToastAndroid.show('OTP has been sent', ToastAndroid.LONG);
-				clearInterval(timer);
-				setCounter(30);
-				tick();
+				if (res.status === 200) {
+					ToastAndroid.show('OTP has been sent', ToastAndroid.LONG);
+					clearInterval(timer);
+					setCounter(30);
+					tick();
+				}
 			})
 			.catch((error) => {
 				console.log(error);
@@ -248,31 +310,34 @@ export default function OTPScreen({ route, navigation }) {
 						</View>
 					</TouchableOpacity>
 				</LinearGradient>
-			</View>
-			<Modal
-				style={StyleSheet.absoluteFill}
-				animationType="fade"
-				transparent
-				visible={loading}>
-				<View
-					style={{
-						flex: 1,
-						alignItems: 'center',
-						justifyContent: 'center',
-						backgroundColor: '#00000033',
-					}}>
-					<ActivityIndicator color={Colors.royalBlue} size="large" />
-					<Text
+				<Modal
+					style={StyleSheet.absoluteFill}
+					animationType="fade"
+					transparent
+					visible={loading}>
+					<View
 						style={{
-							marginTop: 20,
-							fontSize: 16,
-							fontFamily: Fonts.semiBold,
-							color: Colors.royalBlue,
+							flex: 1,
+							alignItems: 'center',
+							justifyContent: 'center',
+							backgroundColor: '#00000033',
 						}}>
-						Loading
-					</Text>
-				</View>
-			</Modal>
+						<ActivityIndicator
+							color={Colors.royalBlue}
+							size="large"
+						/>
+						<Text
+							style={{
+								marginTop: 20,
+								fontSize: 16,
+								fontFamily: Fonts.semiBold,
+								color: Colors.royalBlue,
+							}}>
+							Loading
+						</Text>
+					</View>
+				</Modal>
+			</View>
 		</TouchableWithoutFeedback>
 	);
 }

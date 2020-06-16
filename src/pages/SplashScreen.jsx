@@ -10,6 +10,8 @@ import {
 	ToastAndroid,
 	Modal,
 	ActivityIndicator,
+	Alert,
+	StatusBar,
 } from 'react-native';
 import {
 	widthPercentageToDP as wp,
@@ -27,10 +29,28 @@ import axios from 'axios';
 import API from '../API';
 import Actions from '../redux/Actions';
 import FastImage from 'react-native-fast-image';
+import { useSelector } from 'react-redux/lib/hooks/useSelector';
 
-function SplashScreen({ navigation, categories }) {
+function SplashScreen({ navigation }) {
 	const dispatch = useDispatch();
 	const [loading, setLoading] = useState(false);
+	const [locationData, setLocationData] = useState({
+		location: 'Not Available in your location',
+		locationAvailale: false,
+	});
+
+	const navigateToHomepage = (data) => {
+		if (loading) {
+			setLoading(false);
+		}
+
+		dispatch({
+			type: Actions.LOCATION,
+			payload: data,
+		});
+
+		navigation.navigate('Homepage', data);
+	};
 
 	useEffect(() => {
 		Animated.loop(
@@ -97,14 +117,10 @@ function SplashScreen({ navigation, categories }) {
 						});
 
 						setReady(true);
-						setLoading(false);
 						console.log('Ready: ' + true);
 
 						if (loading) {
-							navigation.navigate('Homepage', {
-								locationAvailable: true,
-								location: 'Gardanibagh, Patna',
-							});
+							navigateToHomepage(locationData);
 						}
 					})
 					.catch((error) => console.log(error));
@@ -151,13 +167,26 @@ function SplashScreen({ navigation, categories }) {
 				var addressComponent =
 					json.results[0].address_components[0].long_name;
 
-				setLoading(false);
-				console.log('Set Loading to False');
-
-				navigation.navigate('Homepage', {
-					location: addressComponent,
-					locationAvailale: true,
+				dispatch({
+					type: Actions.LOCATION,
+					payload: {
+						location: addressComponent,
+						locationAvailale: true,
+					},
 				});
+
+				if (ready) {
+					navigateToHomepage({
+						location: addressComponent,
+						locationAvailale: true,
+					});
+				} else {
+					setLocationData({
+						location: addressComponent,
+						locationAvailale: true,
+					});
+					setLoading(true);
+				}
 			})
 
 			.catch((error) => {
@@ -169,22 +198,22 @@ function SplashScreen({ navigation, categories }) {
 
 	const checkGeofencing = () => {
 		Geolocation.getCurrentPosition(
-			//Will give you the current location
+			// Will give you the current location
 			(position) => {
 				let point = {
 					lat: position.coords.latitude,
 					lng: position.coords.longitude,
 				};
-				//getting the Latitude from the location json
 
+				// Getting the Latitude from the location json
 				GeoFencing.containsLocation(
 					point,
 					GEOFENCE.features[0].geometry.coordinates
 				)
 					.then(() => {
-						console.log("Welcome to Ness's Frozen Delivery");
+						console.log("Welcome to Nes's Frozen Delivery");
 						ToastAndroid.show(
-							"Welcome to Ness's Frozen Delivery",
+							"Welcome to Nes's Frozen Delivery",
 							ToastAndroid.LONG
 						);
 
@@ -199,19 +228,33 @@ function SplashScreen({ navigation, categories }) {
 							ToastAndroid.LONG
 						);
 
-						setLoading(false);
-						console.log('Set Loading to False');
-
-						navigation.navigate('Homepage', {
-							location: 'Not Available in your location',
-							locationAvailable: false,
+						dispatch({
+							type: Actions.LOCATION,
+							payload: {
+								location: 'Not Available in your location',
+								locationAvailale: false,
+							},
 						});
+
+						if (ready) {
+							navigateToHomepage({
+								location: 'Not Available in your location',
+								locationAvailale: false,
+							});
+						} else {
+							setLocationData({
+								location: 'Not Available in your location',
+								locationAvailale: false,
+							});
+							setLoading(true);
+						}
 					});
 			},
 			(error) => {
-				alert(error.message);
+				Alert.alert('Some Error Occurred', error.message);
 
 				setLoading(false);
+				console.log(error);
 				console.log('Set Loading to False');
 			},
 			{
@@ -220,7 +263,6 @@ function SplashScreen({ navigation, categories }) {
 				maximumAge: 1000,
 			}
 		);
-		// navigation.navigate('Homepage');
 	};
 
 	const checkLocationPermission = () => {
@@ -289,6 +331,12 @@ function SplashScreen({ navigation, categories }) {
 
 	return (
 		<View style={styles.container}>
+			<StatusBar
+				animated
+				backgroundColor={'#161616'}
+				barStyle={'light-content'}
+				networkActivityIndicatorVisible
+			/>
 			<View
 				style={{
 					width: wp(80),
@@ -332,18 +380,10 @@ function SplashScreen({ navigation, categories }) {
 				}}>
 				<TouchableOpacity
 					style={styles.signInContainer}
-					// onPress={() => {
-					// 	console.log('Ready: ' + ready);
-					// 	if (ready) {
-					// 		navigation.navigate('Homepage', {
-					// 			locationAvailable: true,
-					// 			location: 'Gardanibagh, Patna',
-					// 		});
-					// 	} else {
-					// 		setLoading(true);
-					// 	}
-					// }}
-					onPress={checkLocationPermission}>
+					// onPress={checkLocationPermission}
+					onPress={() => {
+						checkLocationPermission();
+					}}>
 					<View style={styles.signInView}>
 						<Text style={[styles.signIn, { color: '#7F7FD5' }]}>
 							Continue
@@ -359,16 +399,15 @@ function SplashScreen({ navigation, categories }) {
 				<View
 					style={{
 						flex: 1,
+						top: hp(15),
 						alignItems: 'center',
 						justifyContent: 'center',
-						backgroundColor: '#00000033',
 					}}>
-					<ActivityIndicator color={Colors.lightBlue} size="large" />
+					<ActivityIndicator color={Colors.royalBlue} size="large" />
 					<Text
 						style={{
 							marginTop: 20,
 							fontSize: 16,
-							fontFamily: Fonts.semiBold,
 							color: Colors.white,
 						}}>
 						Loading
