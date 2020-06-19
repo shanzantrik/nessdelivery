@@ -12,6 +12,8 @@ import PackSizes from './PackSizes';
 import AboutProduct from './AboutProduct';
 import RatingsAndReviews from './RatingsAndReviews';
 import AddButton from './AddButton';
+import AddToCart from './AddToCart';
+import Address from './Address';
 
 export {
 	CircularCategories,
@@ -28,4 +30,6 @@ export {
 	AboutProduct,
 	RatingsAndReviews,
 	AddButton,
+	AddToCart,
+	Address,
 };

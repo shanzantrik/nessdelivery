@@ -95,33 +95,9 @@ export default function Signup({ navigation, route }) {
 	};
 
 	const signup = () => {
-		if (
-			firstName.length !== 0 &&
-			phone.length !== 0 &&
-			password.length !== 0 &&
-			confirmPassword.length !== 0
-		) {
+		if (firstName.length !== 0 && phone.length !== 0) {
 			if (phone.length === 10 && !isNaN(phone)) {
-				if (password === confirmPassword) {
-					if (email.length !== 0) {
-						const EMAIL_REGEX = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
-						if (EMAIL_REGEX.test(email)) {
-							signUpUsingApi();
-						} else {
-							Alert.alert(
-								'Invalid Email',
-								'Please Enter a Valid Email to Continue'
-							);
-						}
-					} else {
-						signUpUsingApi();
-					}
-				} else {
-					Alert.alert(
-						'Password Mismatch',
-						'Password and Confirm Password do not match'
-					);
-				}
+				signUpUsingApi();
 			} else {
 				Alert.alert(
 					'Invalid Phone',
@@ -129,10 +105,7 @@ export default function Signup({ navigation, route }) {
 				);
 			}
 		} else {
-			Alert.alert(
-				'Empty Fields',
-				"First Name, Phone, Password and Confirm Password can't be empty"
-			);
+			Alert.alert('Empty Fields', "First Name and Phone can't be empty");
 		}
 	};
 
@@ -177,7 +150,7 @@ export default function Signup({ navigation, route }) {
 							onChangeText={(val) => setLastName(val)}
 						/>
 					</View>
-					<View style={styles.emailContainer}>
+					{/* <View style={styles.emailContainer}>
 						<Input
 							placeholder="Email (Optional)"
 							inputStyle={styles.email}
@@ -193,10 +166,11 @@ export default function Signup({ navigation, route }) {
 							value={email}
 							onChangeText={(val) => setEmail(val)}
 						/>
-					</View>
+					</View> */}
 					<View style={styles.emailContainer}>
 						<Input
 							placeholder="Phone Number"
+							keyboardType={'numeric'}
 							inputStyle={styles.email}
 							label={'Enter your Phone'}
 							leftIcon={
@@ -210,7 +184,7 @@ export default function Signup({ navigation, route }) {
 							onChangeText={(val) => setPhone(val)}
 						/>
 					</View>
-					<View style={styles.emailContainer}>
+					{/* <View style={styles.emailContainer}>
 						<Input
 							placeholder="Password"
 							inputStyle={styles.email}
@@ -277,7 +251,7 @@ export default function Signup({ navigation, route }) {
 							value={confirmPassword}
 							onChangeText={(val) => setConfirmPassword(val)}
 						/>
-					</View>
+					</View> */}
 					<LinearGradient
 						colors={['#f953c6', '#b91d73']}
 						start={{ x: 0.0, y: 1.0 }}
@@ -322,7 +296,7 @@ export default function Signup({ navigation, route }) {
 
 const styles = StyleSheet.create({
 	container: {
-		paddingTop: hp(2),
+		paddingTop: hp(5),
 		alignItems: 'center',
 		justifyContent: 'center',
 	},

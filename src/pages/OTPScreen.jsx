@@ -83,7 +83,7 @@ export default function OTPScreen({ route, navigation }) {
 				.then((response) => response.text())
 				.then((res) => {
 					res = JSON.parse(res);
-					if (res.code === 1) {
+					if (res.code === 1 && data.type === 'register') {
 						const formData = new FormData();
 
 						formData.append(
@@ -122,6 +122,41 @@ export default function OTPScreen({ route, navigation }) {
 								Alert.alert(
 									'Registration Unsuccessful',
 									'Registration is not successful. Please Try Again'
+								);
+								setLoading(false);
+							});
+					} else if (res.code == '1' && data.type === 'login') {
+						const formData = new FormData();
+
+						formData.append('user', data.phone);
+						formData.append('countrycode', data.countrycode);
+						formData.append('otp', otpValue);
+
+						fetch(`${URL}/wp-json/digits/v1/login_user`, {
+							method: 'POST',
+							body: formData,
+						})
+							.then((response) => response.text())
+							.then((resNew) => {
+								resNew = JSON.parse(resNew);
+								if (resNew.success) {
+									ToastAndroid.show(
+										'Login Successful.',
+										ToastAndroid.LONG
+									);
+									dispatch({
+										type: Actions.LOGIN,
+										payload: resNew.data,
+									});
+									fetchProfile(resNew.data.user_id);
+									setLoading(false);
+								}
+							})
+							.catch((error) => {
+								console.log(error);
+								Alert.alert(
+									'Login Unsuccessful',
+									'Login is not successful. Please Try Again'
 								);
 								setLoading(false);
 							});

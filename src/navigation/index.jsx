@@ -27,10 +27,13 @@ import {
 	Payment,
 	CardPage,
 	SearchList,
+	Profile,
+	Location,
+	AddAddress,
 } from '../pages';
 import { Colors, Fonts } from '../constants';
 import Actions from '../redux/Actions';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import API from '../API';
 
 const HomeStack = createStackNavigator();
@@ -130,11 +133,12 @@ function AuthStackNavigator({ navigation }) {
 	);
 }
 
-function HomeStackNavigation({ navigation }) {
-	const dispatch = useDispatch();
+const ProfileStack = createStackNavigator();
+
+function ProfileStackNavigator({ navigation }) {
 	return (
-		<HomeStack.Navigator
-			initialRouteName="SplashScreen"
+		<ProfileStack.Navigator
+			initialRouteName="Profile"
 			screenOptions={{
 				cardStyle: {
 					backgroundColor: 'white',
@@ -145,6 +149,43 @@ function HomeStackNavigation({ navigation }) {
 				},
 				cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
 			}}>
+			<ProfileStack.Screen name="Profile" component={Profile} />
+			<ProfileStack.Screen
+				name="AddAddress"
+				component={AddAddress}
+				options={{
+					headerTitle: 'Add Address',
+				}}
+			/>
+		</ProfileStack.Navigator>
+	);
+}
+
+function HomeStackNavigation({ navigation }) {
+	const dispatch = useDispatch();
+	const user = useSelector((state) => state.login);
+	return (
+		<HomeStack.Navigator
+			initialRouteName={
+				user !== null && user.token !== '' ? 'Homepage' : 'Location'
+			}
+			screenOptions={{
+				cardStyle: {
+					backgroundColor: 'white',
+				},
+				transitionSpec: {
+					open: config,
+					close: config,
+				},
+				cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+			}}>
+			<HomeStack.Screen
+				name="Location"
+				component={Location}
+				options={{
+					headerShown: false,
+				}}
+			/>
 			<HomeStack.Screen
 				name="SplashScreen"
 				component={SplashScreen}
@@ -161,12 +202,12 @@ function HomeStackNavigation({ navigation }) {
 				}}
 			/> */}
 
-			<AuthStack.Screen
+			<HomeStack.Screen
 				name="Login"
 				component={Login}
 				options={{ headerShown: false }}
 			/>
-			<AuthStack.Screen name="Signup" component={Signup} />
+			<HomeStack.Screen name="Signup" component={Signup} />
 			<HomeStack.Screen
 				name="OTPScreen"
 				component={OTPScreen}
@@ -281,6 +322,14 @@ function HomeStackNavigation({ navigation }) {
 					),
 				}}
 			/>
+			<HomeStack.Screen name="Profile" component={Profile} />
+			<HomeStack.Screen
+				name="AddAddress"
+				component={AddAddress}
+				options={{
+					headerTitle: 'Add Address',
+				}}
+			/>
 		</HomeStack.Navigator>
 	);
 }
@@ -288,15 +337,6 @@ function HomeStackNavigation({ navigation }) {
 function DrawerNavigator() {
 	return (
 		<Drawer.Navigator initialRouteName="Home" drawerType="front">
-			<Drawer.Screen
-				name="Profile"
-				component={HomeStackNavigation}
-				options={{
-					drawerIcon: ({ focused, color }) => (
-						<Icon name="user" color={color} size={20} solid />
-					),
-				}}
-			/>
 			<Drawer.Screen
 				name="Home"
 				component={HomeStackNavigation}
@@ -307,11 +347,11 @@ function DrawerNavigator() {
 				}}
 			/>
 			<Drawer.Screen
-				name="Wishlist"
-				component={HomeStackNavigation}
+				name="Profile"
+				component={ProfileStackNavigator}
 				options={{
 					drawerIcon: ({ focused, color }) => (
-						<Icon name="heart" color={color} size={20} solid />
+						<Icon name="user" color={color} size={20} solid />
 					),
 				}}
 			/>
@@ -321,33 +361,6 @@ function DrawerNavigator() {
 				options={{
 					drawerIcon: ({ focused, color }) => (
 						<Icon name="shopping-cart" color={color} size={20} />
-					),
-				}}
-			/>
-			<Drawer.Screen
-				name="Login"
-				component={HomeStackNavigation}
-				options={{
-					drawerIcon: ({ focused, color }) => (
-						<Icon name="sign-in-alt" color={color} size={20} />
-					),
-				}}
-			/>
-			<Drawer.Screen
-				name="Register"
-				component={Signup}
-				options={{
-					drawerIcon: ({ focused, color }) => (
-						<Icon name="link" color={color} size={20} solid />
-					),
-				}}
-			/>
-			<Drawer.Screen
-				name="Logout"
-				component={LogoutComponent}
-				options={{
-					drawerIcon: ({ focused, color }) => (
-						<Icon name="sign-out-alt" color={color} size={20} />
 					),
 				}}
 			/>

@@ -11,6 +11,9 @@ import Cart from './Cart';
 import Payment from './Payment';
 import CardPage from './CardPage';
 import SearchList from './SearchList';
+import Profile from './Profile';
+import Location from './LocationPage';
+import AddAddress from './AddAddress';
 
 export {
 	SplashScreen,
@@ -26,4 +29,7 @@ export {
 	Payment,
 	CardPage,
 	SearchList,
+	Profile,
+	Location,
+	AddAddress,
 };

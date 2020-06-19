@@ -12,4 +12,6 @@ export default {
 	greenBackground: '#e9f2e1',
 	redPrimary: '#ff0000',
 	redSecondary: '#fab8bf',
+	payNow: '#ea5f62',
+	addToCart: '#4a4a4a',
 };

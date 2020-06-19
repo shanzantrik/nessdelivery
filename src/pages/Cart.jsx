@@ -114,27 +114,21 @@ export default function Card({ navigation }) {
 		};
 		return (
 			<View style={styles.cardContainer}>
-				<TouchableWithoutFeedback
-					onPress={() => navigation.navigate('ProductDetail')}>
-					<View style={{ width: '30%', margin: 5 }}>
-						<FastImage
-							source={{ uri: item.image }}
-							style={styles.image}
-							resizeMode={FastImage.resizeMode.contain}
-						/>
-					</View>
-				</TouchableWithoutFeedback>
+				<View style={{ width: '30%', margin: 5 }}>
+					<FastImage
+						source={{ uri: item.image }}
+						style={styles.image}
+						resizeMode={FastImage.resizeMode.contain}
+					/>
+				</View>
 				<View
 					style={{
 						width: '70%',
 					}}>
-					<TouchableWithoutFeedback
-						onPress={() => navigation.navigate('ProductDetail')}>
-						<View>
-							<Text style={styles.brand}>{item.brand}</Text>
-							<Text style={styles.title}>{item.name}</Text>
-						</View>
-					</TouchableWithoutFeedback>
+					<View>
+						<Text style={styles.brand}>{item.brand}</Text>
+						<Text style={styles.title}>{item.name}</Text>
+					</View>
 					<View style={styles.pickerContainer}>
 						<Text style={styles.weightText}>
 							{item.type === 'variable'

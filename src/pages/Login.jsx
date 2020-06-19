@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
 	View,
 	Text,
@@ -10,6 +10,7 @@ import {
 	Modal,
 	ActivityIndicator,
 	ToastAndroid,
+	BackHandler,
 } from 'react-native';
 import { Input } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome5';
@@ -31,23 +32,38 @@ const borderProps = {
 export default function Login({ navigation, route }) {
 	const { destination } = route.params;
 
+	const backAction = () => {
+		return true;
+	};
+	useEffect(() => {
+		BackHandler.addEventListener('hardwareBackPress', backAction);
+
+		return () =>
+			BackHandler.removeEventListener('hardwareBackPress', backAction);
+	}, []);
+
 	const [signInFocused, setSignInFocused] = useState(false);
 	const [phone, setPhone] = useState('');
-	const [password, setPassword] = useState('');
-	const [passwordVisible, setPasswordVisible] = useState(false);
 	const [loading, setLoading] = useState(false);
 
 	const dispatch = useDispatch();
+
+	function capitalizeFLetter(input) {
+		var string = input.toString();
+		var x = string[0].toUpperCase() + string.slice(1);
+
+		return x;
+	}
 
 	const signInUsingApi = () => {
 		setLoading(true);
 		const formData = new FormData();
 
 		formData.append('countrycode', '+91');
-		formData.append('user', phone);
-		formData.append('password', password);
+		formData.append('mobileNo', phone);
+		formData.append('type', 'login');
 
-		fetch(`${URL}/wp-json/digits/v1/login_user`, {
+		fetch(`${URL}/wp-json/digits/v1/send_otp`, {
 			method: 'POST',
 			body: formData,
 		})
@@ -57,15 +73,22 @@ export default function Login({ navigation, route }) {
 
 				res = JSON.parse(res);
 				console.log(res);
-				if (res.success) {
-					ToastAndroid.show('Login Successful', ToastAndroid.LONG);
-					dispatch({ type: Actions.LOGIN, payload: res.data });
-					fetchProfile(res.data.user_id);
-				} else {
-					Alert.alert(
-						'Please Enter Correct Credentials',
-						'Invalid Phone/Email or Password'
+				if (res.code === '1') {
+					ToastAndroid.show(
+						`OTP has been sent to ${phone}`,
+						ToastAndroid.LONG
 					);
+					setLoading(false);
+					navigation.navigate('OTPScreen', {
+						data: {
+							phone: phone,
+							countrycode: '+91',
+							type: 'login',
+							destination: destination || 'Homepage',
+						},
+					});
+				} else {
+					Alert.alert('Error', capitalizeFLetter(res.message));
 				}
 				setLoading(false);
 			})
@@ -76,47 +99,18 @@ export default function Login({ navigation, route }) {
 				setLoading(false);
 			});
 	};
-
-	const fetchProfile = async (user_id) => {
-		try {
-			const res = await API.get(`customers/${user_id}`);
-			if (res.status === 200) {
-				console.log(res);
-				dispatch({ type: Actions.PROFILE, payload: res.data });
-				navigation.navigate(destination || 'Homepage');
-			}
-		} catch (error) {
-			console.log(error);
-		}
-	};
-
 	const signIn = () => {
-		if (phone.includes('@')) {
-			const EMAIL_REGEX = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
-			if (EMAIL_REGEX.test(phone)) {
+		if (phone.length !== 0) {
+			if (phone.length === 10 && !isNaN(phone)) {
 				signInUsingApi();
 			} else {
 				Alert.alert(
-					'Invalid Email Address.',
-					'Please Enter Valid Email Address.'
+					'Invalid Phone Number.',
+					'Please Enter Valid Phone Number.'
 				);
 			}
 		} else {
-			if (phone.length !== 0 || password.length !== 0) {
-				if (phone.length === 10 && !isNaN(phone)) {
-					signInUsingApi();
-				} else {
-					Alert.alert(
-						'Invalid Phone Number.',
-						'Please Enter Valid Phone Number.'
-					);
-				}
-			} else {
-				Alert.alert(
-					'Empty Fields',
-					"Phone Number/Email or Password Can't be Empty."
-				);
-			}
+			Alert.alert('Empty Field', "Phone Number can't be Empty.");
 		}
 	};
 	return (
@@ -185,10 +179,10 @@ export default function Login({ navigation, route }) {
 				</View>
 				<View style={styles.emailContainer}>
 					<Input
-						placeholder="Phone Number / Email Address"
+						placeholder="Phone Number"
 						inputStyle={styles.email}
-						label={'Enter your Phone or Email'}
-						keyboardType={'email-address'}
+						label={'Enter your Phone'}
+						keyboardType={'number-pad'}
 						leftIcon={
 							<Icon
 								name="mobile-alt"
@@ -199,7 +193,7 @@ export default function Login({ navigation, route }) {
 						onChangeText={(text) => setPhone(text)}
 					/>
 				</View>
-				<View style={styles.emailContainer}>
+				{/* <View style={styles.emailContainer}>
 					<Input
 						placeholder="Password"
 						inputStyle={styles.email}
@@ -222,10 +216,10 @@ export default function Login({ navigation, route }) {
 						}
 						onChangeText={(text) => setPassword(text)}
 					/>
-				</View>
-				<TouchableOpacity style={styles.forgotContainer}>
+				</View> */}
+				{/* <TouchableOpacity style={styles.forgotContainer}>
 					<Text style={styles.forgotText}>Forgot Password?</Text>
-				</TouchableOpacity>
+				</TouchableOpacity> */}
 				<LinearGradient
 					colors={['#DA22FF', '#9733EE']}
 					start={{ x: 0.0, y: 1.0 }}

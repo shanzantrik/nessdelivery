@@ -23,6 +23,7 @@ export default function CategoryItem(props) {
 	const {
 		item,
 		containerStyle,
+		parentContainerStyle,
 		imageContainerStyle,
 		imageStyle,
 		textStyle,
@@ -80,46 +81,63 @@ export default function CategoryItem(props) {
 					relatedProductsData: relatedProducts,
 				})
 			}>
-			<View style={[styles.container, containerStyle]}>
-				<View style={[styles.imageContainer, imageContainerStyle]}>
-					<FastImage
-						source={{ uri: item.images[0].src }}
-						style={[styles.image, imageStyle]}
-						resizeMode={FastImage.resizeMode.contain}
-					/>
-				</View>
-				<View style={styles.textContainer}>
-					<Text
-						style={[styles.textStyle, textStyle]}
-						numberOfLines={2}
-						adjustsFontSizeToFit={true}>
-						{item.name}
-					</Text>
-					<Text
-						style={[
-							styles.priceStyle,
-							item.sale_price === '' && { marginTop: 5 },
-							priceStyle,
-						]}>
-						₹ {item.price}
-					</Text>
-					{item.sale_price !== '' && (
-						<Text style={[styles.oldPriceStyle, oldPriceStyle]}>
-							₹ {item.regular_price}
-						</Text>
-					)}
-				</View>
-				{item.sale_price !== '' && (
-					<View
-						style={[
-							styles.discountTextContainer,
-							discountContainerStyle,
-						]}>
-						<Text style={[styles.discountText, discountTextStyle]}>
-							₹ {item.regular_price - item.price} off
+			<View style={parentContainerStyle}>
+				<View style={[styles.container, containerStyle]}>
+					<View style={[styles.imageContainer, imageContainerStyle]}>
+						<FastImage
+							source={{ uri: item.images[0].src }}
+							style={[styles.image, imageStyle]}
+							resizeMode={FastImage.resizeMode.contain}
+						/>
+					</View>
+					<View style={styles.textContainer}>
+						<Text
+							style={[styles.textStyle, textStyle]}
+							numberOfLines={2}
+							adjustsFontSizeToFit={true}>
+							{item.name}
 						</Text>
 					</View>
-				)}
+					<View
+						style={{
+							alignSelf: 'flex-start',
+							marginStart: 10,
+							position: 'absolute',
+							bottom: 5,
+						}}>
+						<Text
+							style={[
+								styles.priceStyle,
+								{
+									marginBottom:
+										item.sale_price !== '' ? 0 : 5,
+								},
+								priceStyle,
+							]}>
+							₹ {item.price}
+						</Text>
+						{item.sale_price !== '' && (
+							<Text style={[styles.oldPriceStyle, oldPriceStyle]}>
+								₹ {item.regular_price}
+							</Text>
+						)}
+					</View>
+					{item.sale_price !== '' && (
+						<View
+							style={[
+								styles.discountTextContainer,
+								discountContainerStyle,
+							]}>
+							<Text
+								style={[
+									styles.discountText,
+									discountTextStyle,
+								]}>
+								₹ {item.regular_price - item.price} off
+							</Text>
+						</View>
+					)}
+				</View>
 			</View>
 		</TouchableWithoutFeedback>
 	);
@@ -127,7 +145,7 @@ export default function CategoryItem(props) {
 
 CategoryItem.propTypes = {
 	item: PropTypes.object.isRequired,
-	containerStyle: PropTypes.object,
+	containerStyle: PropTypes.oneOf([PropTypes.object, PropTypes.array]),
 	imageContainerStyle: PropTypes.object,
 	imageStyle: PropTypes.object,
 	textStyle: PropTypes.object,

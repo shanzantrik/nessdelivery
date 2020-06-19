@@ -41,7 +41,8 @@ export default function SubCategories({ navigation, route }) {
 			.then((res) => {
 				setLoading(false);
 				navigation.navigate('ProductList', {
-					data: res.data,
+					listData: res.data,
+					parent: id,
 				});
 			})
 			.catch((error) => {
@@ -220,7 +221,7 @@ export default function SubCategories({ navigation, route }) {
 						justifyContent: 'center',
 						backgroundColor: '#00000033',
 					}}>
-					<ActivityIndicator color={Colors.lightBlue} size="large" />
+					<ActivityIndicator color={Colors.royalBlue} size="large" />
 					<Text
 						style={{
 							marginTop: 20,

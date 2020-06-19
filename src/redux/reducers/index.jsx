@@ -11,6 +11,8 @@ import payments from './Payments.reducer';
 import location from './Location.reducer';
 import login from './Login.reducer';
 import profile from './Profile.reducer';
+import shipping from './Shipping.reducer';
+import coupons from './Coupons.reducer';
 
 const rootReducer = combineReducers({
 	categories,
@@ -24,6 +26,8 @@ const rootReducer = combineReducers({
 	location,
 	login,
 	profile,
+	shipping,
+	coupons,
 });
 
 export default rootReducer;

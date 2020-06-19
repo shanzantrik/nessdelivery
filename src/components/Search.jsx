@@ -16,10 +16,9 @@ export default function Search({ setSearchValue }) {
 	const navigation = useNavigation();
 
 	const [searchText, setSearchText] = useState('');
-	setSearchValue &&
-		useEffect(() => {
-			setSearchValue(searchText);
-		}, [searchText, setSearchValue]);
+	useEffect(() => {
+		setSearchValue && setSearchValue(searchText);
+	}, [searchText, setSearchValue]);
 	const [title, setTitle] = useState(
 		useSelector((state) => state.searchCategory)
 	);

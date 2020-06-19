@@ -10,21 +10,31 @@ import {
 	TouchableHighlight,
 	ToastAndroid,
 	Alert,
+	Modal,
 } from 'react-native';
+import { Input } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome5';
-import { Colors, Fonts } from '../constants';
+import { Colors, Fonts, Shadow } from '../constants';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { encode as btoa } from 'base-64';
-
+import API from '../API';
 import RazorpayCheckout from 'react-native-razorpay';
 import { useDispatch } from 'react-redux';
 import Actions from '../redux/Actions';
+import { Address } from '../components';
 
 export default function Payment({ navigation }) {
 	const user = useSelector((state) => state.login);
 	const profile = useSelector((state) => state.profile);
+	const location = useSelector((state) => state.location);
+	const couponData = useSelector((state) => state.coupons);
+	const [show, setShow] = useState(false);
+	const [address, setAddress] = useState({
+		currentLocation: true,
+		address: location.location,
+	});
 
 	useEffect(() => {
 		if (user === null || user.token === null) {
@@ -37,10 +47,25 @@ export default function Payment({ navigation }) {
 			});
 		}
 	});
+
+	const applyCoupon = () => {
+		const val = couponData.find((item) => item.code === coupon);
+		if (val) {
+			setSaving(parseInt(val.amount, 10));
+		} else {
+			Alert.alert(
+				'Invalid Coupon',
+				"The coupon you've applied is not valid"
+			);
+		}
+	};
+
 	const [cart] = useState(useSelector((state) => state.cart));
 	const [payments] = useState(useSelector((state) => state.payments));
 	const [orderId, setOrderId] = useState('');
 	const [current, setCurrent] = useState(payments[0]);
+	const [coupon, setCoupon] = useState('');
+	const [saving, setSaving] = useState(0);
 
 	const dispatch = useDispatch();
 
@@ -114,6 +139,8 @@ export default function Payment({ navigation }) {
 						],
 						{ cancelable: false }
 					);
+					//Create an order for woocommerce
+					API.get();
 					console.log(data);
 					dispatch({ type: Actions.CLEAR_CART });
 				})
@@ -139,10 +166,46 @@ export default function Payment({ navigation }) {
 		}
 	};
 
+	const createOrder = async (payment_method, title) => {
+		const data = {
+			payment_method: payment_method,
+			payment_method_title: title,
+			shipping: address.address,
+			line_items: cart.map((item) => {
+				if (item.id === item.selected.id) {
+					return {
+						product_id: item.id,
+						quantity: item.quantity,
+					};
+				} else {
+					return {
+						product_id: item.id,
+						variation_id: item.selected.id,
+						quantity: item.quantity,
+					};
+				}
+			}),
+		};
+
+		const res = await API.post('orders', data);
+		if (res.status === 200) {
+			Alert.alert(
+				'Order Successful',
+				"You're order has been successfully placed"
+			);
+		} else {
+			Alert.alert(
+				'Some Error Occurred',
+				'The order was not placed successfully'
+			);
+		}
+	};
+
 	const processPayment = () => {
 		switch (current.id) {
 			case 'razorpay':
 				razorpayOrder(current);
+				createOrder('razorpay', 'Payment done using Razorpay');
 				break;
 			case 'cheque':
 				Alert.alert(
@@ -156,6 +219,7 @@ export default function Payment({ navigation }) {
 					],
 					{ cancelable: false }
 				);
+				createOrder('cheque', 'Payment done using Cheque');
 				break;
 			case 'bacs':
 				Alert.alert(
@@ -169,6 +233,7 @@ export default function Payment({ navigation }) {
 					],
 					{ cancelable: false }
 				);
+				createOrder('bacs', 'Payment done using BACS');
 				break;
 			case 'cod':
 				Alert.alert(
@@ -254,52 +319,106 @@ export default function Payment({ navigation }) {
 		<View style={{ flex: 1 }}>
 			<ScrollView>
 				<View>
-					<View style={styles.cardContainer}>
-						<View
-							style={{
-								flexDirection: 'row',
-								alignItems: 'center',
-								justifyContent: 'center',
-							}}>
+					<View>
+						<View style={styles.cardContainer}>
 							<View
 								style={{
-									width: 25,
-									height: 25,
+									flexDirection: 'row',
 									alignItems: 'center',
 									justifyContent: 'center',
-									borderColor: Colors.greenText,
-									borderWidth: 1,
-									borderRadius: 12,
-									marginEnd: 10,
 								}}>
-								<Icon
-									name="percent"
+								<View
 									style={{
-										margin: 5,
-										fontSize: 12,
-										fontFamily: Fonts.semiBold,
-										textAlign: 'center',
-										color: Colors.greenText,
-									}}
-								/>
-							</View>
-							<Text
-								style={{
-									fontSize: 14,
-									fontFamily: Fonts.semiBold,
-									color: Colors.greenText,
-								}}>
-								Vouchers Available
-							</Text>
-						</View>
-						<TouchableOpacity>
-							<View>
+										width: 25,
+										height: 25,
+										alignItems: 'center',
+										justifyContent: 'center',
+										borderColor: Colors.greenText,
+										borderWidth: 1,
+										borderRadius: 12,
+										marginEnd: 10,
+									}}>
+									<Icon
+										name="percent"
+										style={{
+											margin: 5,
+											fontSize: 12,
+											fontFamily: Fonts.semiBold,
+											textAlign: 'center',
+											color: Colors.greenText,
+										}}
+									/>
+								</View>
 								<Text
-									style={{ fontSize: 14, color: '#ea5f62' }}>
-									View
+									style={{
+										fontSize: 14,
+										fontFamily: Fonts.semiBold,
+										color: Colors.greenText,
+									}}>
+									Vouchers Available
 								</Text>
 							</View>
-						</TouchableOpacity>
+							<TouchableOpacity>
+								<View>
+									<Text
+										style={{
+											fontSize: 14,
+											color: '#ea5f62',
+										}}>
+										View
+									</Text>
+								</View>
+							</TouchableOpacity>
+						</View>
+						<Input
+							placeholder={'Enter Coupon'}
+							value={coupon}
+							onChangeText={(val) => setCoupon(val)}
+							inputContainerStyle={{
+								flexDirection: 'row',
+								alignItems: 'center',
+								justifyContent: 'space-between',
+								marginHorizontal: 20,
+								backgroundColor: Colors.white,
+								borderRadius: 8,
+								borderBottomWidth: 0,
+							}}
+							containerStyle={{
+								paddingHorizontal: 0,
+							}}
+							inputStyle={{
+								fontSize: 14,
+								paddingStart: 10,
+							}}
+							rightIcon={
+								<TouchableOpacity
+									onPress={() => applyCoupon()}
+									style={{
+										height: '80%',
+										aspectRatio: 1,
+										marginEnd: 10,
+										alignItems: 'center',
+										justifyContent: 'center',
+										display:
+											coupon.length === 0
+												? 'none'
+												: 'flex',
+									}}>
+									<Icon
+										name="check"
+										style={{
+											height: '80%',
+											aspectRatio: 1,
+											borderRadius: 25,
+											borderColor: Colors.black,
+											borderWidth: 1,
+											textAlign: 'center',
+											textAlignVertical: 'center',
+										}}
+									/>
+								</TouchableOpacity>
+							}
+						/>
 					</View>
 					<View
 						style={{
@@ -353,56 +472,132 @@ export default function Payment({ navigation }) {
 									fontSize: 14,
 									fontFamily: Fonts.semiBold,
 								}}>
-								₹ {cart.total + 50}
+								₹ {cart.total + 50 - saving}
+							</Text>
+						</View>
+						{saving !== 0 && (
+							<View
+								style={[
+									styles.basketItem,
+									{
+										backgroundColor: Colors.greenBackground,
+										marginHorizontal: 10,
+										paddingHorizontal: 5,
+										borderRadius: 6,
+									},
+								]}>
+								<Text
+									style={{
+										fontSize: 14,
+										fontFamily: Fonts.semiBold,
+										color: Colors.greenText,
+									}}>
+									Total Savings
+								</Text>
+								<Text
+									style={{
+										fontSize: 14,
+										fontFamily: Fonts.semiBold,
+										color: Colors.greenText,
+									}}>
+									₹ {saving}
+								</Text>
+							</View>
+						)}
+					</View>
+					<View
+						style={{
+							marginHorizontal: 20,
+							marginVertical: 10,
+							backgroundColor: Colors.white,
+							borderRadius: 8,
+							paddingStart: 10,
+							paddingTop: 10,
+						}}>
+						<View
+							style={{
+								paddingBottom: 20,
+							}}>
+							<Text
+								style={{
+									fontSize: 16,
+									fontFamily: Fonts.semiBold,
+								}}>
+								Deliver To:
 							</Text>
 						</View>
 						<View
-							style={[
-								styles.basketItem,
-								{
-									backgroundColor: Colors.greenBackground,
-									marginHorizontal: 10,
-									paddingHorizontal: 5,
-									borderRadius: 6,
-								},
-							]}>
-							<Text
+							style={{
+								flexDirection: 'row',
+								justifyContent: 'space-between',
+							}}>
+							{address.currentLocation ? (
+								<Text
+									style={{
+										fontSize: 16,
+										fontFamily: Fonts.primary,
+										marginBottom: 10,
+										color: Colors.black,
+									}}>
+									{address.address}
+								</Text>
+							) : (
+								<Address data={address.address} />
+							)}
+							<View
 								style={{
-									fontSize: 14,
-									fontFamily: Fonts.semiBold,
-									color: Colors.greenText,
+									marginEnd: 20,
+									alignSelf: 'flex-start',
 								}}>
-								Total Savings
-							</Text>
-							<Text
-								style={{
-									fontSize: 14,
-									fontFamily: Fonts.semiBold,
-									color: Colors.greenText,
-								}}>
-								₹ 20
-							</Text>
+								<TouchableOpacity
+									onPress={() => setShow(true)}
+									style={{
+										paddingHorizontal: 10,
+										paddingVertical: 5,
+										borderRadius: 4,
+										backgroundColor: Colors.payNow,
+									}}>
+									<View>
+										<Text style={{ color: Colors.white }}>
+											Change
+										</Text>
+									</View>
+								</TouchableOpacity>
+							</View>
 						</View>
 					</View>
-					<View style={{ marginHorizontal: 25, marginVertical: 20 }}>
-						<Text
-							style={{
-								fontSize: 16,
-								fontFamily: Fonts.semiBold,
-							}}>
-							Please Select Payment Option
-						</Text>
-					</View>
+					{profile.role === 'LFB Role' && (
+						<>
+							<View
+								style={{
+									marginHorizontal: 25,
+									marginVertical: 20,
+								}}>
+								<Text
+									style={{
+										fontSize: 16,
+										fontFamily: Fonts.semiBold,
+									}}>
+									Please Select Payment Option
+								</Text>
+							</View>
 
-					<FlatList
-						contentContainerStyle={{
-							marginHorizontal: 20,
-							backgroundColor: Colors.white,
-						}}
-						data={payments}
-						renderItem={(object) => <RenderPack {...object} />}
-						keyExtractor={(index, item) => index.toString()}
-					/>
+							<FlatList
+								contentContainerStyle={{
+									marginHorizontal: 20,
+									backgroundColor: Colors.white,
+								}}
+								data={payments}
+								renderItem={(object) => (
+									<RenderPack {...object} />
+								)}
+								keyExtractor={(index, item) => index.toString()}
+							/>
+						</>
+					)}
+					{profile.role === 'LFB Role' && (
+						<Text>Payment will be offline</Text>
+					)}
 					<TouchableOpacity onPress={processPayment}>
 						<View
 							style={{
@@ -420,12 +615,99 @@ export default function Payment({ navigation }) {
 									fontFamily: Fonts.semiBold,
 									color: Colors.white,
 								}}>
-								Place Order & Pay
+								{profile.role === 'LFB Role'
+									? 'Place Order'
+									: 'Place Order & Pay'}
 							</Text>
 						</View>
 					</TouchableOpacity>
 				</View>
 			</ScrollView>
+			<Modal
+				style={StyleSheet.absoluteFill}
+				animationType="fade"
+				transparent
+				visible={show}>
+				<View
+					style={{
+						flex: 1,
+						justifyContent: 'center',
+					}}>
+					<View
+						style={{
+							backgroundColor: Colors.white,
+							marginHorizontal: 20,
+							borderRadius: 8,
+							paddingVertical: 20,
+							...Shadow.medium,
+						}}>
+						<TouchableOpacity
+							onPress={() => {
+								setAddress({
+									currentLocation: true,
+									address: location.location,
+								});
+								setShow(false);
+							}}>
+							<View style={{ marginHorizontal: 20 }}>
+								<Text
+									style={{
+										fontSize: 18,
+										fontFamily: Fonts.semiBold,
+									}}>
+									Current Location
+								</Text>
+								<Text
+									style={{
+										fontSize: 16,
+										fontFamily: Fonts.primary,
+										marginBottom: 10,
+									}}>
+									{location.location}
+								</Text>
+							</View>
+						</TouchableOpacity>
+						<View
+							style={{
+								width: '100%',
+								height: 1,
+								backgroundColor: 'gray',
+							}}
+						/>
+						{profile.shipping.first_name !== null && (
+							<TouchableOpacity
+								onPress={() => {
+									setAddress({
+										currentLocation: false,
+										address: profile.shipping,
+									});
+									setShow(false);
+								}}>
+								<Address data={profile.shipping} />
+							</TouchableOpacity>
+						)}
+						<View
+							style={{
+								width: '100%',
+								height: 1,
+								backgroundColor: 'gray',
+							}}
+						/>
+						{profile.billing.first_name !== null && (
+							<TouchableOpacity
+								onPress={() => {
+									setAddress({
+										currentLocation: false,
+										address: profile.billing,
+									});
+									setShow(false);
+								}}>
+								<Address data={profile.billing} />
+							</TouchableOpacity>
+						)}
+					</View>
+				</View>
+			</Modal>
 		</View>
 	);
 }

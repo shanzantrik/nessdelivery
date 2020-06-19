@@ -8,6 +8,8 @@ import {
 	Easing,
 	TouchableWithoutFeedback,
 	ToastAndroid,
+	Modal,
+	ActivityIndicator,
 } from 'react-native';
 import {
 	widthPercentageToDP as wp,
@@ -15,7 +17,7 @@ import {
 } from 'react-native-responsive-screen';
 import { SharedElement } from 'react-native-shared-element';
 import { Colors, Fonts, Shadow } from '../constants';
-import { AddButton as AddToCart, Search } from '../components';
+import { AddToCart, Search } from '../components';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Picker } from '@react-native-community/picker';
 import Animated from 'react-native-reanimated';
@@ -23,37 +25,86 @@ import API from '../API';
 import { useDispatch } from 'react-redux';
 import Actions from '../redux/Actions';
 import FastImage from 'react-native-fast-image';
-import { useSelector } from 'react-redux/lib/hooks/useSelector';
+import { useSelector } from 'react-redux';
 
 export default function SearchList({ navigation, route }) {
 	// const { data } = route.params;
 
 	const dispatch = useDispatch();
 
-	useEffect(() => {
-		console.log('Searching');
-		API.get(
-			`products?per_page=100&category=${searchCategory}&search=${searchText}`
-		)
-			.then((res) => {
-				setSearchProducts(res.data);
-				console.log(res.data);
-			})
-			.catch((error) => console.error(error));
-	}, [searchText, searchCategory]);
-
 	const searchCategory = useSelector((state) => state.searchCategory);
 	const products = useSelector((state) => state.products);
 	const [searchText, setSearchText] = useState('');
 
-	const [searchProducts, setSearchProducts] = useState(null);
+	const [searchProducts, setSearchProducts] = useState([]);
+	const [loading, setLoading] = useState(false);
+
+	useEffect(() => {
+		console.log('Searching');
+		setLoading(true);
+		API.get(
+			searchCategory.id !== -1
+				? `products?per_page=100&category=${searchCategory.id}&search=${searchText}`
+				: `products?per_page=100&search=${searchText}`
+		)
+			.then((res) => {
+				setSearchProducts(res.data);
+				setLoading(false);
+				console.log(res.data);
+			})
+			.catch((error) => console.error(error));
+
+		// const searchList = [];
+		// products.forEach((element) => {
+		// 	if (
+		// 		element.name
+		// 			.toString()
+		// 			.toLowerCase()
+		// 			.includes(searchText.toLowerCase())
+		// 	) {
+		// 		if (searchCategory.id !== -1) {
+		// 			const categoryContains = element.categories.find(
+		// 				(item) => item.id === searchCategory.id
+		// 			);
+		// 			if (categoryContains) {
+		// 				console.log('Pushing');
+		// 				searchList.push(element);
+		// 			}
+		// 		} else {
+		// 			searchList.push(element);
+		// 		}
+		// 	}
+		// });
+
+		console.log('SearchList');
+		// console.log(searchList);
+
+		// setSearchProducts(searchList);
+	}, [searchText, searchCategory, products]);
 
 	const setSearchValue = (val) => {
 		setSearchText(val);
+		console.log('SearchText', val);
 	};
 
 	const ProductItem = ({ item, index }) => {
+		const cartData = useSelector((state) => state.cart);
 		useEffect(() => {
+			setCart(cartData);
+			console.log('Setting Cart Data');
+			const cartItem = cartData.addedItems.find(
+				(val) => val.id === item.id
+			);
+			if (cartItem) {
+				setCount(cartItem.quantity);
+				btnToggle(true);
+			} else {
+				setCount(0);
+				btnToggle(false);
+			}
+			console.log('CartItem');
+			console.log(cartItem);
+
 			if (item.related_ids.length !== 0) {
 				const relatedProds = [];
 
@@ -76,11 +127,31 @@ export default function SearchList({ navigation, route }) {
 						);
 					});
 			}
-		});
+			// eslint-disable-next-line react-hooks/exhaustive-deps
+		}, []);
 
 		const [heartChecked, heartToggle] = useState(false);
-		const [btnEnabled, btnToggle] = useState(false);
+
+		useEffect(() => {
+			setCart(cartData);
+			console.log('Setting Cart Data');
+			const cartItem = cartData.addedItems.find(
+				(val) => val.id === item.id
+			);
+			if (cartItem) {
+				setCount(cartItem.quantity);
+			} else {
+				setCount(0);
+				btnToggle(false);
+			}
+			console.log('CartItem');
+			console.log(cartItem);
+		}, [cartData, cart, item.id, btnEnabled]);
+		const [cart, setCart] = useState(cartData);
+
 		const [count, setCount] = useState(0);
+		const [btnEnabled, btnToggle] = useState(count !== 0);
+
 		const [price, setPrice] = useState(
 			item.type === 'variable'
 				? item.product_variations[0].on_sale
@@ -118,17 +189,35 @@ export default function SearchList({ navigation, route }) {
 			}).start();
 		};
 
+		const cartAction = (action) => {
+			dispatch({
+				type: action,
+				payload: {
+					...item,
+					brand: item.brands[0].name,
+					image: item.images[0].src,
+					price: price,
+					selected: selectedQuantity,
+					quantity: count,
+				},
+			});
+		};
+
 		const AddButton = () => {
 			if (btnEnabled) {
 				return (
 					<Animated.View style={styles.itemCounterContainer}>
 						<TouchableOpacity
-							style={{ flex: 1 }}
+							style={{
+								flex: 1,
+							}}
 							onPress={() => {
 								if (count === 1) {
 									btnToggle(!btnEnabled);
+									cartAction(Actions.REMOVE_FROM_CART);
+								} else {
+									cartAction(Actions.SUB_QUANTITY);
 								}
-								setCount(count - 1);
 							}}>
 							<View style={styles.countContainer}>
 								<Text style={styles.count}>−</Text>
@@ -140,17 +229,12 @@ export default function SearchList({ navigation, route }) {
 							</Animated.Text>
 						</Animated.View>
 						<TouchableOpacity
-							style={{ flex: 1 }}
+							style={{
+								flex: 1,
+							}}
 							onPress={() => {
-								setCount(count + 1);
-								dispatch({
-									type: Actions.ADD_TO_CART,
-									payload: {
-										item: item,
-										quantity: count + 1,
-										selectedQuantity: selectedQuantity,
-									},
-								});
+								console.log('Updating in cart');
+								cartAction(Actions.ADD_QUANTITY);
 							}}>
 							<Animated.View style={styles.countContainer}>
 								<Text style={styles.count}>+</Text>
@@ -162,8 +246,9 @@ export default function SearchList({ navigation, route }) {
 				return (
 					<TouchableOpacity
 						onPress={() => {
-							setCount(count + 1);
 							btnToggle(!btnEnabled);
+							cartAction(Actions.ADD_TO_CART);
+							console.log('Adding to Cart');
 						}}>
 						<View style={styles.addBtnContainer}>
 							<Text style={styles.addBtnText}>Add</Text>
@@ -172,6 +257,7 @@ export default function SearchList({ navigation, route }) {
 				);
 			}
 		};
+
 		return (
 			<View style={styles.cardContainer} key={index}>
 				<TouchableWithoutFeedback onPress={navigateToProductDetail}>
@@ -254,19 +340,6 @@ export default function SearchList({ navigation, route }) {
 							justifyContent: 'space-between',
 							marginHorizontal: 10,
 						}}>
-						<TouchableOpacity
-							onPress={() => heartToggle(!heartChecked)}>
-							<Icon
-								name="heart"
-								style={[
-									styles.loveIcon,
-									heartChecked && {
-										color: '#ff0000',
-									},
-								]}
-								solid={heartChecked}
-							/>
-						</TouchableOpacity>
 						<AddButton />
 					</View>
 				</View>
@@ -274,10 +347,10 @@ export default function SearchList({ navigation, route }) {
 		);
 	};
 
-	if (searchProducts !== null) {
-		return (
-			<View style={styles.container}>
-				<Search setSearchValue={setSearchText} />
+	return (
+		<View style={styles.container}>
+			<Search setSearchValue={setSearchText} />
+			{!loading ? (
 				<FlatList
 					data={searchProducts}
 					renderItem={(object) => <ProductItem {...object} />}
@@ -293,12 +366,35 @@ export default function SearchList({ navigation, route }) {
 						/>
 					)}
 				/>
+			) : (
+				<View style={StyleSheet.absoluteFill}>
+					<View
+						style={{
+							flex: 1,
+							alignItems: 'center',
+							justifyContent: 'center',
+						}}>
+						<ActivityIndicator
+							color={Colors.royalBlue}
+							size="large"
+						/>
+						<Text
+							style={{
+								marginTop: 20,
+								fontSize: 16,
+								fontFamily: Fonts.semiBold,
+								color: Colors.royalBlue,
+							}}>
+							Loading
+						</Text>
+					</View>
+				</View>
+			)}
+			<View style={{ position: 'absolute', bottom: 0 }}>
 				<AddToCart />
 			</View>
-		);
-	} else {
-		return <Search setSearchValue={setSearchValue} />;
-	}
+		</View>
+	);
 }
 
 const styles = StyleSheet.create({
@@ -329,7 +425,7 @@ const styles = StyleSheet.create({
 		textTransform: 'capitalize',
 	},
 	flatListContainer: {
-		paddingBottom: 10,
+		paddingBottom: 30,
 	},
 	image: {
 		height: 100,

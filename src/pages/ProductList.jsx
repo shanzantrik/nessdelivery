@@ -8,6 +8,7 @@ import {
 	Easing,
 	TouchableWithoutFeedback,
 	ToastAndroid,
+	RefreshControl,
 } from 'react-native';
 import {
 	widthPercentageToDP as wp,
@@ -15,7 +16,7 @@ import {
 } from 'react-native-responsive-screen';
 import { SharedElement } from 'react-native-shared-element';
 import { Colors, Fonts, Shadow } from '../constants';
-import { AddButton as AddToCart } from '../components';
+import { AddToCart } from '../components';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Picker } from '@react-native-community/picker';
 import Animated from 'react-native-reanimated';
@@ -23,13 +24,108 @@ import API from '../API';
 import { useDispatch, useSelector } from 'react-redux';
 import Actions from '../redux/Actions';
 import FastImage from 'react-native-fast-image';
+import axios from 'axios';
 
 export default function ProductList({ navigation, route }) {
-	const { data } = route.params;
+	let { listData, parent } = route.params;
 
 	let relatedProducts = [];
 
 	const dispatch = useDispatch();
+
+	const [loading, setLoading] = useState(false);
+
+	const [data, setData] = useState(listData);
+
+	const setProductList = () => {
+		setLoading(true);
+		API.get(`products?category=${parent}`)
+			.then((res) => {
+				setData(res.data);
+				setLoading(false);
+			})
+			.catch((error) => {
+				ToastAndroid.show('Some Error Occurred, Pls Try Again');
+				setLoading(false);
+			});
+	};
+
+	function RefreshData() {
+		const subCategories = [];
+		setLoading(true);
+		API.get('products/categories?per_page=100')
+			.then((cats) => {
+				Promise.all([
+					cats.data
+						.filter((cat_item) => cat_item.display === 'default')
+						.map((cat_id) => {
+							return API.get(
+								`products/categories?parent=${cat_id.id}`
+							);
+						}),
+					API.get('products?per_page=100'),
+					axios.get(
+						'https://nessfrozenhub.in/wp-json/wp/v2/media?categories=1'
+					),
+					API.get('payment_gateways'),
+				])
+					.then((values) => {
+						values[0].map((sub_cat) => {
+							sub_cat.then((subCategoryValues) => {
+								subCategories.push(...subCategoryValues.data);
+							});
+						});
+						dispatch({
+							type: Actions.CATEGORIES,
+							payload: cats.data.sort(compare),
+						});
+						dispatch({
+							type: Actions.SUB_CATEGORIES,
+							payload: subCategories.sort(compareReverse),
+						});
+						dispatch({
+							type: Actions.PRODUCTS,
+							payload: values[1].data.sort(compare),
+						});
+						dispatch({
+							type: Actions.CAROUSEL,
+							payload: values[2].data.sort(compare),
+						});
+						dispatch({
+							type: Actions.PAYMENTS,
+							payload: values[3].data.filter(
+								(item) => item.id !== 'paypal'
+							),
+						});
+
+						setProductList();
+					})
+					.catch((error) => console.log(error));
+			})
+			.catch((error) => console.error(error));
+	}
+
+	const compare = (a, b) => {
+		let comparison = 0;
+		if (a.id > b.id) {
+			comparison = 1;
+		} else {
+			comparison = -1;
+		}
+
+		return comparison; // Multiplying it with -1 reverses the sorting order
+	};
+
+	const compareReverse = (a, b) => {
+		let comparison = 0;
+		if (a.id > b.id) {
+			comparison = 1;
+		} else {
+			comparison = -1;
+		}
+
+		return comparison * -1; // Multiplying it with -1 reverses the sorting order
+	};
 
 	const ProductItem = ({ item, index }) => {
 		const cartData = useSelector((state) => state.cart);
@@ -68,7 +164,8 @@ export default function ProductList({ navigation, route }) {
 						);
 					});
 			}
-		});
+			// eslint-disable-next-line react-hooks/exhaustive-deps
+		}, []);
 
 		const [heartChecked, heartToggle] = useState(false);
 
@@ -257,11 +354,10 @@ export default function ProductList({ navigation, route }) {
 						</View>
 					)}
 					<View
-						style={
-							!item.sale_price && {
-								marginTop: 20,
-							}
-						}>
+						style={{
+							position: 'absolute',
+							bottom: 0,
+						}}>
 						{item.sale_price !== '' ||
 							(item.on_sale && (
 								<Text
@@ -286,19 +382,6 @@ export default function ProductList({ navigation, route }) {
 							justifyContent: 'space-between',
 							marginHorizontal: 10,
 						}}>
-						<TouchableOpacity
-							onPress={() => heartToggle(!heartChecked)}>
-							<Icon
-								name="heart"
-								style={[
-									styles.loveIcon,
-									heartChecked && {
-										color: '#ff0000',
-									},
-								]}
-								solid={heartChecked}
-							/>
-						</TouchableOpacity>
 						<AddButton />
 					</View>
 				</View>
@@ -322,8 +405,19 @@ export default function ProductList({ navigation, route }) {
 						}}
 					/>
 				)}
+				refreshControl={
+					<RefreshControl
+						enabled
+						refreshing={loading}
+						onRefresh={() => RefreshData(setLoading)}
+						colors={[Colors.royalBlue]}
+					/>
+				}
+				horizontal={false}
 			/>
-			{/* <AddToCart item={} price={price} /> */}
+			<View style={{ position: 'absolute', bottom: 0 }}>
+				<AddToCart />
+			</View>
 		</View>
 	);
 }
@@ -397,7 +491,7 @@ const styles = StyleSheet.create({
 	pickerContainer: {
 		borderWidth: 1,
 		borderColor: '#8d8d8d',
-		width: '70%',
+		width: '50%',
 		marginVertical: 6,
 	},
 	picker: {

@@ -8,7 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import Actions from '../redux/Actions';
 
-export default function AddButton({ item, price }) {
+export default function AddButton({ item, price, simple }) {
 	const navigation = useNavigation();
 	const dispatch = useDispatch();
 
