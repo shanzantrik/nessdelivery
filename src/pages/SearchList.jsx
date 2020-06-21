@@ -40,8 +40,9 @@ export default function SearchList({ navigation, route }) {
 	const [loading, setLoading] = useState(false);
 
 	useEffect(() => {
-		console.log('Searching');
 		setLoading(true);
+		// console.time('search');
+		console.log(searchCategory.name + ': ' + searchCategory.id);
 		API.get(
 			searchCategory.id !== -1
 				? `products?per_page=100&category=${searchCategory.id}&search=${searchText}`
@@ -49,10 +50,10 @@ export default function SearchList({ navigation, route }) {
 		)
 			.then((res) => {
 				setSearchProducts(res.data);
-				setLoading(false);
-				console.log(res.data);
+				// console.timeLog('search');
 			})
-			.catch((error) => console.error(error));
+			.catch((error) => console.error(error))
+			.finally(() => setLoading(false));
 
 		// const searchList = [];
 		// products.forEach((element) => {
@@ -67,7 +68,6 @@ export default function SearchList({ navigation, route }) {
 		// 				(item) => item.id === searchCategory.id
 		// 			);
 		// 			if (categoryContains) {
-		// 				console.log('Pushing');
 		// 				searchList.push(element);
 		// 			}
 		// 		} else {
@@ -75,8 +75,7 @@ export default function SearchList({ navigation, route }) {
 		// 		}
 		// 	}
 		// });
-
-		console.log('SearchList');
+		// setLoading(false);
 		// console.log(searchList);
 
 		// setSearchProducts(searchList);
@@ -91,7 +90,6 @@ export default function SearchList({ navigation, route }) {
 		const cartData = useSelector((state) => state.cart);
 		useEffect(() => {
 			setCart(cartData);
-			console.log('Setting Cart Data');
 			const cartItem = cartData.addedItems.find(
 				(val) => val.id === item.id
 			);
@@ -102,8 +100,6 @@ export default function SearchList({ navigation, route }) {
 				setCount(0);
 				btnToggle(false);
 			}
-			console.log('CartItem');
-			console.log(cartItem);
 
 			if (item.related_ids.length !== 0) {
 				const relatedProds = [];
@@ -133,8 +129,6 @@ export default function SearchList({ navigation, route }) {
 		const [heartChecked, heartToggle] = useState(false);
 
 		useEffect(() => {
-			setCart(cartData);
-			console.log('Setting Cart Data');
 			const cartItem = cartData.addedItems.find(
 				(val) => val.id === item.id
 			);
@@ -144,8 +138,6 @@ export default function SearchList({ navigation, route }) {
 				setCount(0);
 				btnToggle(false);
 			}
-			console.log('CartItem');
-			console.log(cartItem);
 		}, [cartData, cart, item.id, btnEnabled]);
 		const [cart, setCart] = useState(cartData);
 
@@ -233,7 +225,6 @@ export default function SearchList({ navigation, route }) {
 								flex: 1,
 							}}
 							onPress={() => {
-								console.log('Updating in cart');
 								cartAction(Actions.ADD_QUANTITY);
 							}}>
 							<Animated.View style={styles.countContainer}>
@@ -248,7 +239,6 @@ export default function SearchList({ navigation, route }) {
 						onPress={() => {
 							btnToggle(!btnEnabled);
 							cartAction(Actions.ADD_TO_CART);
-							console.log('Adding to Cart');
 						}}>
 						<View style={styles.addBtnContainer}>
 							<Text style={styles.addBtnText}>Add</Text>
@@ -325,10 +315,10 @@ export default function SearchList({ navigation, route }) {
 										styles.oldPrice,
 										!item.sale_price && { display: 'none' },
 									]}>
-									MRP: ₹ {item.price}
+									₹ {item.price}
 								</Text>
 							))}
-						<Text style={styles.price}>₹ {price}</Text>
+						<Text style={styles.price}>MRP: ₹ {price}</Text>
 					</View>
 					<View
 						style={{
@@ -337,7 +327,7 @@ export default function SearchList({ navigation, route }) {
 							top: 0,
 							height: '100%',
 							alignItems: 'flex-end',
-							justifyContent: 'space-between',
+							justifyContent: 'flex-end',
 							marginHorizontal: 10,
 						}}>
 						<AddButton />
@@ -349,12 +339,12 @@ export default function SearchList({ navigation, route }) {
 
 	return (
 		<View style={styles.container}>
-			<Search setSearchValue={setSearchText} />
+			<Search setSearchValue={setSearchValue} />
 			{!loading ? (
 				<FlatList
 					data={searchProducts}
 					renderItem={(object) => <ProductItem {...object} />}
-					keyExtractor={(index, item) => index.toString()}
+					keyExtractor={(item, index) => item.id.toString()}
 					contentContainerStyle={styles.flatListContainer}
 					ItemSeparatorComponent={(leadingItem, section) => (
 						<View

@@ -31,6 +31,7 @@ export default function CategoryItem(props) {
 		oldPriceStyle,
 		discountContainerStyle,
 		discountTextStyle,
+		navigateTo,
 	} = props;
 	let relatedProducts = [];
 	const [selectedQuantity, setSelectedQuantity] = React.useState(
@@ -69,11 +70,12 @@ export default function CategoryItem(props) {
 					);
 				});
 		}
-	});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 	return (
 		<TouchableWithoutFeedback
 			onPress={() =>
-				navigation.navigate('ProductDetail', {
+				navigation.navigate(navigateTo || 'ProductDetail', {
 					item: item,
 					type: item.type,
 					selected: selectedQuantity,
@@ -104,7 +106,8 @@ export default function CategoryItem(props) {
 							marginStart: 10,
 							position: 'absolute',
 							bottom: 5,
-						}}>
+						}}
+						adjustsFontSizeToFit={true}>
 						<Text
 							style={[
 								styles.priceStyle,
@@ -114,11 +117,11 @@ export default function CategoryItem(props) {
 								},
 								priceStyle,
 							]}>
-							₹ {item.price}
+							MRP: ₹ {Math.round(item.price)}
 						</Text>
 						{item.sale_price !== '' && (
 							<Text style={[styles.oldPriceStyle, oldPriceStyle]}>
-								₹ {item.regular_price}
+								₹ {Math.round(item.regular_price)}
 							</Text>
 						)}
 					</View>
@@ -133,7 +136,8 @@ export default function CategoryItem(props) {
 									styles.discountText,
 									discountTextStyle,
 								]}>
-								₹ {item.regular_price - item.price} off
+								₹ {Math.round(item.regular_price - item.price)}{' '}
+								off
 							</Text>
 						</View>
 					)}
@@ -145,7 +149,6 @@ export default function CategoryItem(props) {
 
 CategoryItem.propTypes = {
 	item: PropTypes.object.isRequired,
-	containerStyle: PropTypes.oneOf([PropTypes.object, PropTypes.array]),
 	imageContainerStyle: PropTypes.object,
 	imageStyle: PropTypes.object,
 	textStyle: PropTypes.object,
@@ -184,7 +187,7 @@ const styles = StyleSheet.create({
 		fontFamily: Fonts.bold,
 	},
 	priceStyle: {
-		fontSize: 18,
+		fontSize: 13,
 		fontFamily: Fonts.semiBold,
 	},
 	oldPriceStyle: {
@@ -203,7 +206,7 @@ const styles = StyleSheet.create({
 		borderRadius: 10,
 	},
 	discountText: {
-		fontSize: 12,
+		fontSize: 10,
 		color: 'white',
 		fontFamily: Fonts.semiBold,
 	},

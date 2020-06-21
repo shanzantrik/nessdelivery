@@ -5,6 +5,8 @@ import {
 	Text,
 	StyleSheet,
 	RefreshControl,
+	BackHandler,
+	ToastAndroid,
 } from 'react-native';
 import { CategoriesFlatList, Carousel, CategoriesSimple } from '../components';
 import {
@@ -28,6 +30,35 @@ export default function Homepage({ navigation, route }) {
 	const locationData = useSelector((state) => state.location);
 	const user = useSelector((state) => state.login);
 	const [loading, setLoading] = useState(false);
+	const [exitApp, setExitApp] = useState(0);
+	const featuredNonVeg = useSelector((state) => state.featuredNonVeg);
+	const featuredVeg = useSelector((state) => state.featuredVeg);
+
+	// useEffect(() => {
+	// 	const backHandler = BackHandler.addEventListener(
+	// 		'hardwareBackPress',
+	// 		backAction
+	// 	);
+	// 	return () => backHandler.remove();
+	// });
+
+	// const backAction = () => {
+	// 	setTimeout(() => {
+	// 		setExitApp(0);
+	// 	}, 2000); // 2 seconds to tap second-time
+
+	// 	if (exitApp === 0) {
+	// 		setExitApp(exitApp + 1);
+
+	// 		ToastAndroid.show(
+	// 			'Press back button 2 times to exit the app',
+	// 			ToastAndroid.SHORT
+	// 		);
+	// 	} else if (exitApp === 1) {
+	// 		BackHandler.exitApp();
+	// 	}
+	// 	return true;
+	// };
 
 	function RefreshData() {
 		setLoading(true);
@@ -147,14 +178,14 @@ export default function Homepage({ navigation, route }) {
 		<View style={{ flex: 1 }}>
 			<ScrollView
 				contentContainerStyle={styles.container}
-				refreshControl={
-					<RefreshControl
-						enabled
-						refreshing={loading}
-						onRefresh={() => RefreshData()}
-						colors={[Colors.royalBlue]}
-					/>
-				}
+				// refreshControl={
+				// 	<RefreshControl
+				// 		enabled
+				// 		refreshing={loading}
+				// 		onRefresh={() => RefreshData()}
+				// 		colors={[Colors.royalBlue]}
+				// 	/>
+				// }
 				horizontal={false}>
 				<View style={{ alignItems: 'center' }}>
 					<View
@@ -207,13 +238,13 @@ export default function Homepage({ navigation, route }) {
 					/>
 					<Carousel />
 					<CategoriesFlatList
-						data={featuredProducts}
-						title={'Featured Products'}
+						data={featuredVeg}
+						title={'FEATURED VEG'}
 						containerStyle={styles.flatListStyle}
 					/>
 					<CategoriesFlatList
-						data={featuredProducts}
-						title={'Latest Products'}
+						data={featuredNonVeg}
+						title={'FEATURED NON VEG'}
 						containerStyle={styles.flatListStyle}
 					/>
 					<CategoriesFlatList

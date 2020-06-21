@@ -79,6 +79,8 @@ target 'NessDelivery' do
 
   pod 'RNSharedElement', :path => '../node_modules/react-native-shared-element'
 
+  pod 'react-native-razorpay', :path => '../node_modules/react-native-razorpay'
+
   target 'NessDeliveryTests' do
     inherit! :complete
     # Pods for testing

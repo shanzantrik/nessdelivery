@@ -71,18 +71,18 @@ export default function ProductDetail({ navigation, route }) {
 		<View style={styles.container}>
 			<ScrollView
 				contentContainerStyle={{ paddingBottom: 30 }}
-				refreshControl={
-					<RefreshControl
-						enabled
-						refreshing={loading}
-						onRefresh={() => RefreshData(setLoading)}
-						colors={[
-							Colors.royalBlue,
-							Colors.gradientPrimary,
-							Colors.lightBlue,
-						]}
-					/>
-				}
+				// refreshControl={
+				// 	<RefreshControl
+				// 		enabled
+				// 		refreshing={loading}
+				// 		onRefresh={() => RefreshData(setLoading)}
+				// 		colors={[
+				// 			Colors.royalBlue,
+				// 			Colors.gradientPrimary,
+				// 			Colors.lightBlue,
+				// 		]}
+				// 	/>
+				// }
 				horizontal={false}>
 				<View
 					style={{
@@ -91,8 +91,9 @@ export default function ProductDetail({ navigation, route }) {
 					<View style={{ marginHorizontal: 20 }}>
 						<View
 							style={{
+								alignSelf: 'flex-start',
+								minWidth: '30%',
 								backgroundColor: '#f2f9e9',
-								width: '30%',
 								borderRadius: 5,
 								borderWidth: 1,
 								borderColor: Colors.greenText,
@@ -103,7 +104,7 @@ export default function ProductDetail({ navigation, route }) {
 									fontSize: 14,
 									fontFamily: Fonts.bold,
 									paddingVertical: 5,
-									paddingHorizontal: 10,
+									paddingHorizontal: 20,
 									textAlign: 'center',
 									color: Colors.black,
 								}}>
@@ -132,7 +133,7 @@ export default function ProductDetail({ navigation, route }) {
 									fontSize: 16,
 									fontFamily: Fonts.bold,
 								}}>
-								₹ {price}
+								MRP: ₹ {price}
 							</Text>
 							<View
 								style={
@@ -151,7 +152,7 @@ export default function ProductDetail({ navigation, route }) {
 										textDecorationLine: 'line-through',
 										marginEnd: 20,
 									}}>
-									MRP: ₹ {regularPrice}
+									₹ {regularPrice}
 								</Text>
 								<View
 									style={{
@@ -275,7 +276,7 @@ export default function ProductDetail({ navigation, route }) {
 								style={{ fontSize: 14, marginEnd: 10 }}
 							/>
 							<Text>
-								Standard Delivery: Tomorrow 8:00 AM - 10:00 AM
+								Same Day Delivery: Delivery within 24 hrs
 							</Text>
 						</View>
 					</View>
@@ -311,6 +312,7 @@ export default function ProductDetail({ navigation, route }) {
 								title={'Related Products'}
 								data={relatedProducts}
 								viewAll={false}
+								navigateTo={'RelatedProductDetail'}
 							/>
 						</View>
 					)}

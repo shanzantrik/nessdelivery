@@ -18,12 +18,18 @@ import {
 	widthPercentageToDP as wp,
 	heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import { Colors, Fonts, Shadow } from '../constants';
+import { Colors, Fonts, Shadow, URL } from '../constants';
 import LinearGradient from 'react-native-linear-gradient';
 import { Address } from '../components';
 import axios from 'axios';
-import { useSelector } from 'react-redux';
-import { CommonActions, useNavigation } from '@react-navigation/native';
+import { useSelector, useDispatch } from 'react-redux';
+import {
+	useNavigation,
+	StackActions,
+	CommonActions,
+} from '@react-navigation/native';
+import Actions from '../redux/Actions';
+import API from '../API';
 
 const borderProps = {
 	borderColor: 'black',
@@ -47,15 +53,21 @@ const billing = {
 export default function Profile({ route }) {
 	const navigation = useNavigation();
 	const profileData = useSelector((state) => state.profile);
+	const dispatch = useDispatch();
 	useEffect(() => {
 		if (profileData === null) {
 			ToastAndroid.show('Please Login to View Profile');
 			navigation.navigate('Login');
 		} else {
 			setProfile(profileData);
+			setTimeout(() => {
+				setEditable(true);
+			}, 100);
 		}
 	}, [navigation, profileData]);
 	console.log(profileData);
+
+	const user = useSelector((state) => state.login);
 
 	const [profile, setProfile] = useState(profileData);
 
@@ -73,6 +85,64 @@ export default function Profile({ route }) {
 	);
 
 	const [loading, setLoading] = useState(false);
+
+	const [editable, setEditable] = React.useState(false);
+
+	const saveUser = async () => {
+		if (firstName !== '') {
+			const res = await API.put(`customers/${user.user_id}`, {
+				first_name: firstName,
+				last_name: lastName,
+				email: email,
+			});
+
+			if (res.status === 200) {
+				dispatch({ type: Actions.PROFILE, payload: res.data });
+				Alert.alert('Success', 'Your Profile has been updated');
+			}
+		} else {
+			Alert.alert('Empty Fields', 'First Name should not be blank');
+		}
+	};
+
+	const logoutUser = async () => {
+		try {
+			const res = await axios.post(
+				`${URL}/wp-json/digits/v1/logout`,
+				null,
+				{
+					headers: {
+						Authorization: `Bearer ${user.access_token}`,
+					},
+				}
+			);
+			if (res.status === 200) {
+				// const resetAction = StackActions.reset({
+				// 	index: 1,
+				// 	actions: [
+				// 		CommonActions.navigate({ routeName: 'Login' }),
+				// 		CommonActions.navigate({ routeName: 'Signup' }),
+				// 	],
+				// });
+				// navigation.dispatch(resetAction);
+				// const resetAction = CommonActions.reset({
+				// 	index: 0,
+				// 	actions: [
+				// 		CommonActions.navigate({
+				// 			routeName: 'Login',
+				// 		}),
+				// 	],
+				// });
+				// navigation.dispatch(resetAction);
+
+				navigation.navigate('Login');
+				dispatch({ type: Actions.LOGOUT });
+			}
+		} catch (error) {
+			console.log(error);
+			Alert.alert('Some error occurred', 'Unable to logout');
+		}
+	};
 
 	// const [current, setCurrent] = useState();
 
@@ -178,6 +248,7 @@ export default function Profile({ route }) {
 							placeholder="Email (Optional)"
 							inputStyle={styles.email}
 							keyboardType={'email-address'}
+							editable={editable}
 							leftIcon={
 								<Icon
 									name="envelope"
@@ -200,6 +271,7 @@ export default function Profile({ route }) {
 									solid
 								/>
 							}
+							editable={false}
 							value={phone}
 							onChangeText={(val) => setPhone(val)}
 						/>
@@ -220,25 +292,30 @@ export default function Profile({ route }) {
 								Saved Addresses
 							</Text>
 						</View>
-						<TouchableOpacity
-							onPress={() => navigation.navigate('AddAddress')}>
-							<View
-								style={{
-									padding: 10,
-									paddingHorizontal: 20,
-									borderRadius: 5,
-									backgroundColor: Colors.payNow,
-								}}>
-								<Text
+						{(profileData.billing.first_name === '' ||
+							profileData.shipping.first_name === '') && (
+							<TouchableOpacity
+								onPress={() =>
+									navigation.navigate('AddAddress')
+								}>
+								<View
 									style={{
-										fontSize: 16,
-										fontFamily: Fonts.semiBold,
-										color: Colors.white,
+										padding: 10,
+										paddingHorizontal: 20,
+										borderRadius: 5,
+										backgroundColor: Colors.payNow,
 									}}>
-									Add Address
-								</Text>
-							</View>
-						</TouchableOpacity>
+									<Text
+										style={{
+											fontSize: 16,
+											fontFamily: Fonts.semiBold,
+											color: Colors.white,
+										}}>
+										Add Address
+									</Text>
+								</View>
+							</TouchableOpacity>
+						)}
 					</View>
 					<View
 						style={{
@@ -272,7 +349,9 @@ export default function Profile({ route }) {
 						start={{ x: 0.0, y: 1.0 }}
 						end={{ x: 1.0, y: 1.0 }}
 						style={{ borderRadius: 32, marginTop: 20 }}>
-						<TouchableOpacity style={styles.signInContainer}>
+						<TouchableOpacity
+							style={styles.signInContainer}
+							onPress={saveUser}>
 							<View style={styles.signInView}>
 								<Text
 									style={[
@@ -289,7 +368,9 @@ export default function Profile({ route }) {
 						start={{ x: 0.0, y: 1.0 }}
 						end={{ x: 1.0, y: 1.0 }}
 						style={{ borderRadius: 32, marginVertical: 20 }}>
-						<TouchableOpacity style={styles.signInContainer}>
+						<TouchableOpacity
+							style={styles.signInContainer}
+							onPress={() => logoutUser()}>
 							<View style={styles.signInView}>
 								<Text
 									style={[

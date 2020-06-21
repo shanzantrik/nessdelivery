@@ -20,6 +20,7 @@ export default function CategoriesFlatList({
 	itemContainerStyle,
 	contentContainerStyle,
 	itemParentContainerStyle,
+	navigateTo,
 }) {
 	const _renderCircularItem = ({ item, index }) => {
 		return (
@@ -33,6 +34,7 @@ export default function CategoriesFlatList({
 				backgroundColor={item.backgroundColor}
 				imageContainerStyle={styles.circularImageStyle}
 				parentContainerStyle={itemParentContainerStyle}
+				navigateTo={navigateTo}
 			/>
 		);
 	};

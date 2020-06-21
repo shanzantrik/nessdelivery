@@ -16,100 +16,100 @@ import {
 	widthPercentageToDP as wp,
 	heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import { Colors, Fonts } from '../constants';
+import { Colors, Fonts, URL } from '../constants';
 import { useSelector } from 'react-redux';
 import API from '../API';
+import { encode as btoa } from 'base-64';
+import { sausage } from '../static';
 
 export default function SubCategories({ navigation, route }) {
-	useEffect(() => {
-		if (Platform.OS === 'android') {
-			UIManager.setLayoutAnimationEnabledExperimental(true);
-		}
-	});
 	const { itemId } = route.params;
 	const categories = useSelector((state) => state.categories);
 	const subCategories = useSelector((state) => state.subCategories);
+	const subCategoriesData = useSelector((state) => state.subCategoriesData);
 	const [loading, setLoading] = useState(false);
 	const borderProps = {
 		borderWidth: 2,
 		borderColor: 'black',
 	};
 
-	const getProductList = (id) => {
-		setLoading(true);
-		API.get(`products?category=${id}`)
-			.then((res) => {
-				setLoading(false);
-				navigation.navigate('ProductList', {
-					listData: res.data,
-					parent: id,
-				});
-			})
-			.catch((error) => {
-				ToastAndroid.show('Some Error Occurred, Pls Try Again');
-				navigation.pop();
-				setLoading(false);
-				console.error(error);
-			});
+	const getProductList = async (id) => {
+		// setLoading(true);
+		// console.time('subCatData');
+		// const res = await API.get('products', {
+		// 	category: id,
+		// });
+		// console.timeLog('subCatData', res);
+		// console.log(subCategoriesData.find((sub) => sub.id === id).data);
+
+		navigation.navigate('ProductList', {
+			listData: subCategoriesData.find((sub) => sub.id === id).data,
+			parent: id,
+		});
 	};
-	const RenderItem = ({ index, item, selected }) => {
+
+	const _renderSubCategories = React.memo(({ index, item }) => {
+		return (
+			<TouchableWithoutFeedback onPress={() => getProductList(item.id)}>
+				<View
+					style={{
+						width: wp(50) - 20,
+						flexDirection: 'row',
+						height: 70,
+						borderColor: 'gray',
+						borderWidth: 1,
+						borderRadius: 8,
+						margin: 5,
+						marginBottom: 20,
+					}}>
+					<View
+						style={{
+							alignItems: 'center',
+							justifyContent: 'center',
+							marginHorizontal: 10,
+						}}>
+						<FastImage
+							source={{ uri: item?.image?.src }}
+							style={{
+								height: '70%',
+								aspectRatio: 1,
+							}}
+						/>
+					</View>
+					<View
+						style={{
+							width: 0,
+							flexGrow: 1,
+							flex: 1,
+							justifyContent: 'center',
+						}}>
+						<Text
+							style={{
+								textAlign: 'left',
+								textTransform: 'capitalize',
+							}}
+							adjustsFontSizeToFit={true}
+							numberOfLines={2}>
+							{item.name}
+						</Text>
+					</View>
+				</View>
+			</TouchableWithoutFeedback>
+		);
+	});
+
+	const _keyExtractor = (item, index) =>
+		index.toString() + item.id.toString();
+
+	const _listKey = (item, index) => 'D' + item.id.toString();
+
+	const RenderItem = React.memo(({ index, item, selected }) => {
 		const [isExpanded, toggleExpanded] = useState(
 			selected === 'None' ? false : selected === item.id
 		);
 
 		const showSubCategories = () => {
 			toggleExpanded(!isExpanded);
-		};
-
-		const _renderSubCategories = ({ index, item }) => {
-			return (
-				<TouchableWithoutFeedback
-					onPress={() => getProductList(item.id)}>
-					<View
-						style={{
-							width: wp(50) - 20,
-							flexDirection: 'row',
-							height: 70,
-							borderColor: 'gray',
-							borderWidth: 1,
-							borderRadius: 8,
-							margin: 5,
-							marginBottom: 20,
-						}}>
-						<View
-							style={{
-								alignItems: 'center',
-								justifyContent: 'center',
-								marginHorizontal: 10,
-							}}>
-							<FastImage
-								source={{ uri: item?.image?.src }}
-								style={{
-									height: '70%',
-									aspectRatio: 1,
-								}}
-							/>
-						</View>
-						<View
-							style={{
-								width: 0,
-								flexGrow: 1,
-								flex: 1,
-								justifyContent: 'center',
-							}}>
-							<Text
-								style={{
-									textAlign: 'left',
-									textTransform: 'capitalize',
-								}}
-								adjustsFontSizeToFit={true}
-								numberOfLines={2}>
-								{item.name}
-							</Text>
-						</View>
-					</View>
-				</TouchableWithoutFeedback>
-			);
 		};
 
 		return (
@@ -167,13 +167,23 @@ export default function SubCategories({ navigation, route }) {
 							!isExpanded && { height: 0 },
 						]}>
 						<FlatList
-							data={subCategories.filter(
-								(category) => category.parent === item.id
+							data={subCategories
+								.filter(
+									(category) => category.parent === item.id
+								)
+								.sort(compare)}
+							renderItem={(object) => (
+								<_renderSubCategories
+									{...object}
+									key={
+										object.index.toString() +
+										object.item.name
+									}
+								/>
 							)}
-							renderItem={_renderSubCategories}
-							keyExtractor={(index, item) => index.toString()}
-							listKey={({ item, index }) =>
-								'D' + index.toString()
+							// keyExtractor={_keyExtractor}
+							listKey={(itemSub, indexSub) =>
+								'D' + itemSub.id.toString()
 							}
 							numColumns={2}
 						/>
@@ -181,7 +191,19 @@ export default function SubCategories({ navigation, route }) {
 				</View>
 			</TouchableWithoutFeedback>
 		);
+	});
+
+	const compare = (a, b) => {
+		let comparison = 0;
+		if (a.slug > b.slug) {
+			comparison = 1;
+		} else {
+			comparison = -1;
+		}
+
+		return comparison; // Multiplying it with -1 reverses the sorting order
 	};
+
 	return (
 		<View style={styles.container}>
 			<View style={{ paddingHorizontal: 20, marginTop: 20 }}>
@@ -194,9 +216,15 @@ export default function SubCategories({ navigation, route }) {
 					(category) => category.display === 'default'
 				)}
 				renderItem={(object) => (
-					<RenderItem {...object} selected={itemId} />
+					<RenderItem
+						{...object}
+						selected={itemId}
+						key={object.index.toString() + object.item.slug}
+					/>
 				)}
-				keyExtractor={(index, item) => index.toString()}
+				keyExtractor={(indexOrig, itemOrig) =>
+					indexOrig.toString() + itemOrig.slug
+				}
 				contentContainerStyle={styles.flatListContainer}
 				ItemSeparatorComponent={() => (
 					<View
@@ -227,7 +255,7 @@ export default function SubCategories({ navigation, route }) {
 							marginTop: 20,
 							fontSize: 16,
 							fontFamily: Fonts.semiBold,
-							color: Colors.white,
+							color: Colors.royalBlue,
 						}}>
 						Loading
 					</Text>

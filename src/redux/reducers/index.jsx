@@ -13,6 +13,9 @@ import login from './Login.reducer';
 import profile from './Profile.reducer';
 import shipping from './Shipping.reducer';
 import coupons from './Coupons.reducer';
+import subCategoriesData from './SubCategoriesData.reducer';
+import featuredVeg from './FeaturedVeg.reducer';
+import featuredNonVeg from './FeaturedNonVeg.reducer';
 
 const rootReducer = combineReducers({
 	categories,
@@ -22,12 +25,15 @@ const rootReducer = combineReducers({
 	searchCategory,
 	carousel,
 	subCategories,
+	subCategoriesData,
 	payments,
 	location,
 	login,
 	profile,
 	shipping,
 	coupons,
+	featuredVeg,
+	featuredNonVeg,
 });
 
 export default rootReducer;

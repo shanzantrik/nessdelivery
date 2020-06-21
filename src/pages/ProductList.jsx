@@ -29,6 +29,8 @@ import axios from 'axios';
 export default function ProductList({ navigation, route }) {
 	let { listData, parent } = route.params;
 
+	const subCategoriesData = useSelector((state) => state.subCategoriesData);
+
 	let relatedProducts = [];
 
 	const dispatch = useDispatch();
@@ -37,22 +39,13 @@ export default function ProductList({ navigation, route }) {
 
 	const [data, setData] = useState(listData);
 
-	const setProductList = () => {
-		setLoading(true);
-		API.get(`products?category=${parent}`)
-			.then((res) => {
-				setData(res.data);
-				setLoading(false);
-			})
-			.catch((error) => {
-				ToastAndroid.show('Some Error Occurred, Pls Try Again');
-				setLoading(false);
-			});
-	};
+	useEffect(() => {
+		setData(subCategoriesData.find((item) => item.id === parent).data);
+	}, [subCategoriesData, parent]);
 
 	function RefreshData() {
-		const subCategories = [];
-		setLoading(true);
+		console.time('refreshDataTimer');
+
 		API.get('products/categories?per_page=100')
 			.then((cats) => {
 				Promise.all([
@@ -70,18 +63,10 @@ export default function ProductList({ navigation, route }) {
 					API.get('payment_gateways'),
 				])
 					.then((values) => {
-						values[0].map((sub_cat) => {
-							sub_cat.then((subCategoryValues) => {
-								subCategories.push(...subCategoryValues.data);
-							});
-						});
+						getSubCategoriesData(values[0]);
 						dispatch({
 							type: Actions.CATEGORIES,
 							payload: cats.data.sort(compare),
-						});
-						dispatch({
-							type: Actions.SUB_CATEGORIES,
-							payload: subCategories.sort(compareReverse),
 						});
 						dispatch({
 							type: Actions.PRODUCTS,
@@ -97,13 +82,51 @@ export default function ProductList({ navigation, route }) {
 								(item) => item.id !== 'paypal'
 							),
 						});
-
-						setProductList();
 					})
 					.catch((error) => console.log(error));
 			})
 			.catch((error) => console.error(error));
 	}
+
+	const getSubCategoriesData = async (categories) => {
+		const subCategories = [];
+		await categories.map((sub_cat) => {
+			sub_cat.then((subCategoryValues) => {
+				subCategories.push(...subCategoryValues.data);
+			});
+		});
+		dispatch({
+			type: Actions.SUB_CATEGORIES,
+			payload: subCategories.sort(compareReverse),
+		});
+		const subCatData = await Promise.all(
+			subCategories.map(async (item) => {
+				return API.get('products', {
+					category: item.id,
+					per_page: 100,
+				});
+			})
+		);
+
+		const SubCatJSON = subCatData.map((sub) => {
+			const subItem = {};
+			subItem.id = sub.config.params.category;
+			subItem.data = sub.data;
+			return {
+				...subItem,
+			};
+		});
+
+		dispatch({
+			type: Actions.SUB_CATEGORIES_DATA,
+			payload: SubCatJSON.sort(compareReverse),
+		});
+
+		console.timeLog('refreshDataTimer');
+		console.timeEnd('refreshDataTimer');
+
+		setLoading(false);
+	};
 
 	const compare = (a, b) => {
 		let comparison = 0;
@@ -127,11 +150,11 @@ export default function ProductList({ navigation, route }) {
 		return comparison * -1; // Multiplying it with -1 reverses the sorting order
 	};
 
-	const ProductItem = ({ item, index }) => {
+	const ProductItem = React.memo(({ item, index }) => {
 		const cartData = useSelector((state) => state.cart);
 		useEffect(() => {
 			setCart(cartData);
-			console.log('Setting Cart Data');
+			// console.log('Setting Cart Data');
 			const cartItem = cartData.addedItems.find(
 				(val) => val.id === item.id
 			);
@@ -142,36 +165,33 @@ export default function ProductList({ navigation, route }) {
 				setCount(0);
 				btnToggle(false);
 			}
-			console.log('CartItem');
-			console.log(cartItem);
+			// console.log('CartItem');
+			// console.log(cartItem);
 
-			if (item.related_ids.length !== 0) {
-				Promise.all(
-					item.related_ids.map((product_id) => {
-						return API.get(`products/${product_id}`);
-					})
-				)
-					.then((res) => {
-						res.map((data) => {
-							relatedProducts.push(data.data);
-						});
-					})
-					.catch((error) => {
-						console.error(error);
-						ToastAndroid.show(
-							'Error getting related products',
-							ToastAndroid.LONG
-						);
-					});
-			}
+			// if (item.related_ids.length !== 0) {
+			// 	Promise.all(
+			// 		item.related_ids.map((product_id) => {
+			// 			return API.get(`products/${product_id}`);
+			// 		})
+			// 	)
+			// 		.then((res) => {
+			// 			res.map((val) => {
+			// 				relatedProducts.push(val.data);
+			// 			});
+			// 		})
+			// 		.catch((error) => {
+			// 			console.error(error);
+			// 			ToastAndroid.show(
+			// 				'Error getting related products',
+			// 				ToastAndroid.LONG
+			// 			);
+			// 		});
+			// }
 			// eslint-disable-next-line react-hooks/exhaustive-deps
 		}, []);
 
-		const [heartChecked, heartToggle] = useState(false);
-
 		useEffect(() => {
 			setCart(cartData);
-			console.log('Setting Cart Data');
 			const cartItem = cartData.addedItems.find(
 				(val) => val.id === item.id
 			);
@@ -181,8 +201,6 @@ export default function ProductList({ navigation, route }) {
 				setCount(0);
 				btnToggle(false);
 			}
-			console.log('CartItem');
-			console.log(cartItem);
 		}, [cartData, cart, item.id, btnEnabled]);
 		const [cart, setCart] = useState(cartData);
 
@@ -196,7 +214,6 @@ export default function ProductList({ navigation, route }) {
 					: item.product_variations[0].sale_price
 				: item.price
 		);
-		const countTimer = new Animated.Value(10);
 		const [selectedQuantity, setSelectedQuantity] = useState(
 			item.type === 'variable' ? item.product_variations[0] : item
 		);
@@ -367,10 +384,10 @@ export default function ProductList({ navigation, route }) {
 											display: 'none',
 										},
 									]}>
-									MRP: ₹ {item.price}
+									₹ {item.price}
 								</Text>
 							))}
-						<Text style={styles.price}>₹ {price}</Text>
+						<Text style={styles.price}>MRP ₹ {price}</Text>
 					</View>
 					<View
 						style={{
@@ -379,7 +396,7 @@ export default function ProductList({ navigation, route }) {
 							top: 0,
 							height: '100%',
 							alignItems: 'flex-end',
-							justifyContent: 'space-between',
+							justifyContent: 'flex-end',
 							marginHorizontal: 10,
 						}}>
 						<AddButton />
@@ -387,14 +404,15 @@ export default function ProductList({ navigation, route }) {
 				</View>
 			</View>
 		);
-	};
+	});
 
 	return (
 		<View style={styles.container}>
 			<FlatList
 				data={data}
+				initialNumToRender={10}
 				renderItem={(object) => <ProductItem {...object} />}
-				keyExtractor={(index, item) => index.toString()}
+				keyExtractor={(item, index) => item.id.toString()}
 				contentContainerStyle={styles.flatListContainer}
 				ItemSeparatorComponent={(leadingItem, section) => (
 					<View
@@ -405,14 +423,14 @@ export default function ProductList({ navigation, route }) {
 						}}
 					/>
 				)}
-				refreshControl={
-					<RefreshControl
-						enabled
-						refreshing={loading}
-						onRefresh={() => RefreshData(setLoading)}
-						colors={[Colors.royalBlue]}
-					/>
-				}
+				// refreshControl={
+				// 	<RefreshControl
+				// 		enabled
+				// 		refreshing={loading}
+				// 		onRefresh={() => RefreshData(setLoading)}
+				// 		colors={[Colors.royalBlue]}
+				// 	/>
+				// }
 				horizontal={false}
 			/>
 			<View style={{ position: 'absolute', bottom: 0 }}>
@@ -450,7 +468,7 @@ const styles = StyleSheet.create({
 		textTransform: 'capitalize',
 	},
 	flatListContainer: {
-		paddingBottom: 10,
+		paddingBottom: 80,
 	},
 	image: {
 		height: 100,

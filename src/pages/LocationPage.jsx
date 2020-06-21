@@ -261,8 +261,6 @@ export default function LocationPage({ navigation }) {
 	};
 
 	const checkLocationPermission = () => {
-		setLoading(true);
-		console.log('Set Loading to True');
 		check(
 			Platform.OS === 'ios'
 				? PERMISSIONS.IOS.LOCATION_ALWAYS
@@ -299,15 +297,12 @@ export default function LocationPage({ navigation }) {
 							'Location permission is required\n\nPlease enable it by going into app settings',
 							ToastAndroid.LONG
 						);
-						setLoading(false);
 						console.log('Set Loading to False');
 						break;
 				}
 			})
 			.catch((error) => {
 				console.log(error);
-
-				setLoading(false);
 				console.log('Set Loading to False');
 			});
 	};

@@ -1,3 +1,4 @@
+/* eslint-disable no-mixed-spaces-and-tabs */
 import React, { useState, useEffect } from 'react';
 import {
 	View,
@@ -35,6 +36,10 @@ export default function Payment({ navigation }) {
 		currentLocation: true,
 		address: location.location,
 	});
+	const [qrCode, setQrCode] = useState(null);
+	const [showQRCode, setShowQRCode] = useState(false);
+
+	const razorPayTest = false;
 
 	useEffect(() => {
 		if (user === null || user.token === null) {
@@ -45,8 +50,18 @@ export default function Payment({ navigation }) {
 			navigation.navigate('Login', {
 				destination: 'Payment',
 			});
+		} else {
+			axios
+				.get(
+					'https://nessfrozenhub.in/wp-json/wp/v2/media?categories=126'
+				)
+				.then((res) => {
+					console.log(res.data[0]);
+					setQrCode(res.data[0]);
+				})
+				.catch((error) => console.log(error));
 		}
-	});
+	}, []);
 
 	const applyCoupon = () => {
 		const val = couponData.find((item) => item.code === coupon);
@@ -77,9 +92,13 @@ export default function Payment({ navigation }) {
 					Authorization:
 						'Basic ' +
 						btoa(
-							razorpay.settings.key_id.value +
-								':' +
-								razorpay.settings.key_secret.value
+							razorPayTest
+								? 'rzp_test_pU3kt7puzNQ2qs'
+								: razorpay.settings.key_id.value +
+								  ':' +
+								  razorPayTest
+								? '1WA3RbhuQ06iUsy9TFSXvFRr'
+								: razorpay.settings.key_secret.value
 						),
 				},
 				body: {
@@ -95,7 +114,7 @@ export default function Payment({ navigation }) {
 				},
 			});
 
-			if (response.status === 200) {
+			if (response.status === 201) {
 				setOrderId(response.data.id);
 			}
 			//  else {
@@ -110,8 +129,10 @@ export default function Payment({ navigation }) {
 				image:
 					'https://nessfrozenhub.in/wp-content/uploads/2020/06/IMG-20200526-WA0011-2-3.png',
 				currency: 'INR',
-				key: razorpay.settings.key_id.value,
-				amount: cart.total * 100,
+				key: razorPayTest
+					? 'rzp_test_pU3kt7puzNQ2qs'
+					: razorpay.settings.key_id.value,
+				amount: (cart.total + 50) * 100,
 				name: 'Ness Frozen Hub',
 				order_id: orderId, //Replace this with an order_id created using Orders API. Learn more at https://razorpay.com/docs/api/orders.
 				prefill: {
@@ -139,10 +160,8 @@ export default function Payment({ navigation }) {
 						],
 						{ cancelable: false }
 					);
-					//Create an order for woocommerce
-					API.get();
-					console.log(data);
-					dispatch({ type: Actions.CLEAR_CART });
+
+					createOrder('Razorpay', 'Payment done using Razorpay');
 				})
 				.catch((error) => {
 					// handle failure
@@ -170,8 +189,10 @@ export default function Payment({ navigation }) {
 		const data = {
 			payment_method: payment_method,
 			payment_method_title: title,
+			set_paid: payment_method === 'Razorpay' ? true : false,
+			customer_id: user.user_id,
 			shipping: address.address,
-			line_items: cart.map((item) => {
+			line_items: cart.addedItems.map((item) => {
 				if (item.id === item.selected.id) {
 					return {
 						product_id: item.id,
@@ -187,17 +208,28 @@ export default function Payment({ navigation }) {
 			}),
 		};
 
-		const res = await API.post('orders', data);
-		if (res.status === 200) {
-			Alert.alert(
-				'Order Successful',
-				"You're order has been successfully placed"
-			);
-		} else {
-			Alert.alert(
-				'Some Error Occurred',
-				'The order was not placed successfully'
-			);
+		try {
+			console.log(data);
+
+			const res = await API.post('orders', data);
+			console.log(res);
+
+			if (res.status === 201) {
+				Alert.alert(
+					'Order Successful',
+					"You're order has been successfully placed"
+				);
+
+				dispatch({ type: Actions.CLEAR_CART });
+				navigation.navigate('Homepage');
+			} else {
+				Alert.alert(
+					'Some Error Occurred',
+					'The order was not placed successfully'
+				);
+			}
+		} catch (error) {
+			console.log(error);
 		}
 	};
 
@@ -205,21 +237,24 @@ export default function Payment({ navigation }) {
 		switch (current.id) {
 			case 'razorpay':
 				razorpayOrder(current);
-				createOrder('razorpay', 'Payment done using Razorpay');
 				break;
 			case 'cheque':
-				Alert.alert(
-					`${current.title}`,
-					`${current?.settings?.instructions?.value}`,
-					[
-						{
-							text: 'OK',
-							onPress: () => console.log('OK Pressed'),
-						},
-					],
-					{ cancelable: false }
-				);
-				createOrder('cheque', 'Payment done using Cheque');
+				// Alert.alert(
+				// 	`${current.title}`,
+				// 	`${current?.settings?.instructions?.value}`,
+				// 	[
+				// 		{
+				// 			text: 'OK',
+				// 			onPress: () => console.log('OK Pressed'),
+				// 		},
+				// 	],
+				// 	{ cancelable: false }
+				// );
+				setShowQRCode(true);
+				setTimeout(() => {
+					setShowQRCode(false);
+					createOrder('cheque', 'Payment using QR Code');
+				}, 3000);
 				break;
 			case 'bacs':
 				Alert.alert(
@@ -317,7 +352,7 @@ export default function Payment({ navigation }) {
 	};
 	return (
 		<View style={{ flex: 1 }}>
-			<ScrollView>
+			<ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
 				<View>
 					<View>
 						<View style={styles.cardContainer}>
@@ -566,7 +601,7 @@ export default function Payment({ navigation }) {
 							</View>
 						</View>
 					</View>
-					{profile.role === 'LFB Role' && (
+					{profile.role !== 'LFB Role' && (
 						<>
 							<View
 								style={{
@@ -683,7 +718,12 @@ export default function Payment({ navigation }) {
 									});
 									setShow(false);
 								}}>
-								<Address data={profile.shipping} />
+								<Address
+									data={profile.shipping}
+									containerStyle={{
+										paddingStart: 20,
+									}}
+								/>
 							</TouchableOpacity>
 						)}
 						<View
@@ -702,9 +742,33 @@ export default function Payment({ navigation }) {
 									});
 									setShow(false);
 								}}>
-								<Address data={profile.billing} />
+								<Address
+									data={profile.billing}
+									containerStyle={{
+										paddingStart: 20,
+									}}
+								/>
 							</TouchableOpacity>
 						)}
+					</View>
+				</View>
+			</Modal>
+			<Modal
+				style={StyleSheet.absoluteFill}
+				animationType="fade"
+				transparent
+				visible={showQRCode}>
+				<View
+					style={{
+						flex: 1,
+						alignItems: 'center',
+						justifyContent: 'center',
+					}}>
+					<View style={{ width: '90%', aspectRatio: 1 }}>
+						<Image
+							source={{ uri: qrCode?.source_url }}
+							style={{ width: '100%', height: '100%' }}
+						/>
 					</View>
 				</View>
 			</Modal>

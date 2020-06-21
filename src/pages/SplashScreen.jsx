@@ -26,11 +26,162 @@ import Geocoder from 'react-native-geocoding';
 import { useDispatch, useSelector } from 'react-redux';
 import GEOFENCE from '../assets/map.json';
 import axios from 'axios';
-import API from '../API';
+import API, { RefreshData } from '../API';
 import Actions from '../redux/Actions';
 import FastImage from 'react-native-fast-image';
 
 function SplashScreen({ navigation }) {
+	const dispatch = useDispatch();
+	const [loading, setLoading] = useState(false);
+	useEffect(() => {
+		Animated.loop(
+			Animated.timing(spinValue, {
+				toValue: 1,
+				duration: 2500,
+				easing: Easing.linear,
+				useNativeDriver: true,
+			})
+		).start();
+
+		dispatch({
+			type: Actions.SEARCH_CATEGORY,
+			payload: {
+				id: -1,
+				name: 'Categories',
+			},
+		});
+
+		API.get('products/categories?per_page=100')
+			.then((cats) => {
+				const simpleCats = cats.data.filter(
+					(cat_item) => cat_item.display === 'default'
+				);
+				Promise.all([
+					simpleCats.map((cat_id) => {
+						return API.get(
+							`products/categories?parent=${cat_id.id}`
+						);
+					}),
+					API.get('products?per_page=100'),
+					axios.get(
+						'https://nessfrozenhub.in/wp-json/wp/v2/media?categories=1'
+					),
+					API.get('payment_gateways'),
+					API.get('products', {
+						category: simpleCats.find(
+							(sim_cat) => sim_cat.slug === 'chicken'
+						).id,
+						per_page: 100,
+						featured: true,
+					}),
+					API.get('products', {
+						category: simpleCats.find(
+							(sim_cat) => sim_cat.slug === 'veg'
+						).id,
+						per_page: 100,
+						featured: true,
+					}),
+				])
+					.then((values) => {
+						dispatch({
+							type: Actions.CATEGORIES,
+							payload: cats.data.sort(compare),
+						});
+						dispatch({
+							type: Actions.PRODUCTS,
+							payload: values[1].data.sort(compare),
+						});
+						dispatch({
+							type: Actions.CAROUSEL,
+							payload: values[2].data.sort(compare),
+						});
+						dispatch({
+							type: Actions.PAYMENTS,
+							payload: values[3].data.filter(
+								(item) => item.id !== 'paypal'
+							),
+						});
+						dispatch({
+							type: Actions.FEATURED_NON_VEG,
+							payload: values[4].data.sort(compare),
+						});
+						dispatch({
+							type: Actions.FEATURED_VEG,
+							payload: values[5].data.sort(compare),
+						});
+						GetSubCategoriesData(values[0]);
+					})
+					.catch((error) => console.log(error));
+			})
+			.catch((error) => console.error(error));
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
+	const GetSubCategoriesData = async (categories) => {
+		const subCategories = [];
+		await categories.map((sub_cat) => {
+			sub_cat.then((subCategoryValues) => {
+				subCategories.push(...subCategoryValues.data);
+			});
+		});
+		dispatch({
+			type: Actions.SUB_CATEGORIES,
+			payload: subCategories.sort(compareReverse),
+		});
+		const subCatData = await Promise.all(
+			subCategories.map(async (item) => {
+				return API.get('products', {
+					category: item.id,
+					per_page: 100,
+				});
+			})
+		);
+		const SubCatJSON = subCatData.map((sub) => {
+			const subItem = {};
+			subItem.id = sub.config.params.category;
+			subItem.data = sub.data;
+			return {
+				...subItem,
+			};
+		});
+
+		dispatch({
+			type: Actions.SUB_CATEGORIES_DATA,
+			payload: SubCatJSON.sort(compareReverse),
+		});
+
+		navigation.navigate('Homepage');
+	};
+
+	const compare = (a, b) => {
+		let comparison = 0;
+		if (a.id > b.id) {
+			comparison = 1;
+		} else {
+			comparison = -1;
+		}
+
+		return comparison; // Multiplying it with -1 reverses the sorting order
+	};
+
+	const compareReverse = (a, b) => {
+		let comparison = 0;
+		if (a.id > b.id) {
+			comparison = 1;
+		} else {
+			comparison = -1;
+		}
+
+		return comparison * -1; // Multiplying it with -1 reverses the sorting order
+	};
+
+	const spinValue = new Animated.Value(0);
+
+	const spin = spinValue.interpolate({
+		inputRange: [0, 1],
+		outputRange: ['0deg', '360deg'],
+	});
+
 	return (
 		<View style={styles.container}>
 			<StatusBar
@@ -53,7 +204,7 @@ function SplashScreen({ navigation }) {
 				<View
 					style={{
 						position: 'absolute',
-						left: 10,
+						left: 2,
 						top: 0,
 						alignItems: 'center',
 						justifyContent: 'center',
@@ -71,7 +222,21 @@ function SplashScreen({ navigation }) {
 					/>
 				</View>
 			</View>
-			<LinearGradient
+			<View style={{ marginTop: hp(5), paddingHorizontal: hp(5) }}>
+				<Text
+					style={{
+						fontSize: 16,
+						lineHeight: 30,
+						fontFamily: Fonts.semiBold,
+						color: Colors.white,
+						textTransform: 'capitalize',
+						textAlign: 'center',
+					}}>
+					we are loading the products for you.{'\n'}thank you for your
+					patience
+				</Text>
+			</View>
+			{/* <LinearGradient
 				colors={['#86A8E7', '#7F7FD5']}
 				start={{ x: 0.0, y: 1.0 }}
 				end={{ x: 1.0, y: 1.0 }}
@@ -83,16 +248,14 @@ function SplashScreen({ navigation }) {
 				<TouchableOpacity
 					style={styles.signInContainer}
 					// onPress={checkLocationPermission}
-					onPress={() => {
-						checkLocationPermission();
-					}}>
+				>
 					<View style={styles.signInView}>
 						<Text style={[styles.signIn, { color: '#7F7FD5' }]}>
 							Continue
 						</Text>
 					</View>
 				</TouchableOpacity>
-			</LinearGradient>
+			</LinearGradient> */}
 			<Modal
 				style={StyleSheet.absoluteFill}
 				animationType="fade"

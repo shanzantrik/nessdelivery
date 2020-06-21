@@ -32,15 +32,17 @@ const borderProps = {
 export default function Login({ navigation, route }) {
 	const { destination } = route.params;
 
-	const backAction = () => {
-		return true;
-	};
-	useEffect(() => {
-		BackHandler.addEventListener('hardwareBackPress', backAction);
+	// const backAction = () => {
+	// 	return true;
+	// };
+	// useEffect(() => {
+	// 	const backHandler = BackHandler.addEventListener(
+	// 		'hardwareBackPress',
+	// 		backAction
+	// 	);
 
-		return () =>
-			BackHandler.removeEventListener('hardwareBackPress', backAction);
-	}, []);
+	// 	return () => backHandler.remove();
+	// }, []);
 
 	const [signInFocused, setSignInFocused] = useState(false);
 	const [phone, setPhone] = useState('');

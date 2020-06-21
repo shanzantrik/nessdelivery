@@ -20,15 +20,20 @@ import Actions from '../redux/Actions';
 import API from '../API';
 
 export default function AddAddress({ navigation, route }) {
-	const { data, type } = route.params;
+	console.log(route.params);
+	let data, type;
+	if (route.params !== undefined) {
+		data = route.params.data;
+		type = route.params.type;
+	}
 
-	const [firstName, setFirstName] = useState(data.first_name || '');
-	const [lastName, setLastName] = useState(data.last_name || '');
-	const [addressLine1, setAddressLine1] = useState(data.address_1 || '');
-	const [addressLine2, setAddressLine2] = useState(data.address_2 || '');
-	const [state, setState] = useState(data.state || '');
-	const [city, setCity] = useState(data.city || '');
-	const [pincode, setPincode] = useState(data.postcode || '');
+	const [firstName, setFirstName] = useState(data?.first_name || '');
+	const [lastName, setLastName] = useState(data?.last_name || '');
+	const [addressLine1, setAddressLine1] = useState(data?.address_1 || '');
+	const [addressLine2, setAddressLine2] = useState(data?.address_2 || '');
+	const [state, setState] = useState(data?.state || '');
+	const [city, setCity] = useState(data?.city || '');
+	const [pincode, setPincode] = useState(data?.postcode || '');
 	const [loading, setLoading] = useState(false);
 
 	const user = useSelector((states) => states.login);
@@ -36,74 +41,71 @@ export default function AddAddress({ navigation, route }) {
 	const dispatch = useDispatch();
 
 	const addressPost = async () => {
-		if (
-			firstName !== '' &&
-			addressLine1 !== '' &&
-			addressLine2 !== '' &&
-			state !== '' &&
-			city !== '' &&
-			pincode !== ''
-		) {
-			if (pincode.length === 6) {
-				setLoading(true);
-				let res =
-					type === 'shipping' || profile.shipping.first_name === ''
-						? API.put(`customers/${user.user_id}`, {
-								shipping: {
-									first_name: firstName,
-									last_name: lastName,
-									company: '',
-									address_1: addressLine1,
-									address_2: addressLine2,
-									city: city,
-									state: state,
-									postcode: pincode,
-									country: 'IN',
-								},
-						  })
-						: API.put(`customers/${user.user_id}`, {
-								billing: {
-									first_name: firstName,
-									last_name: lastName,
-									company: '',
-									address_1: addressLine1,
-									address_2: addressLine2,
-									city: city,
-									state: state,
-									postcode: pincode,
-									country: 'IN',
-								},
-						  });
-
-				console.log(res);
-
-				await fetchProfile();
-
-				setLoading(false);
-
-				navigation.navigate('Profile');
-
-				Alert.alert('Address Updated', 'Address Successfully Added');
-			} else {
-				Alert.alert('Pincode Invalid', 'Please Enter a Valid Pincode');
-			}
-		} else {
-			Alert.alert(
-				'Empty Fields',
-				'Please fill all the fields to continue'
-			);
-		}
-	};
-
-	const fetchProfile = async (user_id) => {
 		try {
-			const res = await API.get(`customers/${user_id}`);
-			if (res.status === 200) {
-				console.log(res);
-				dispatch({ type: Actions.PROFILE, payload: res.data });
+			if (
+				firstName !== '' &&
+				addressLine1 !== '' &&
+				addressLine2 !== '' &&
+				state !== '' &&
+				city !== '' &&
+				pincode !== ''
+			) {
+				if (pincode.length === 6) {
+					setLoading(true);
+					let res =
+						type === 'shipping' ||
+						profile.shipping.first_name === ''
+							? await API.put(`customers/${user.user_id}`, {
+									shipping: {
+										first_name: firstName,
+										last_name: lastName,
+										company: '',
+										address_1: addressLine1,
+										address_2: addressLine2,
+										city: city,
+										state: state,
+										postcode: pincode,
+										country: 'IN',
+									},
+							  })
+							: await API.put(`customers/${user.user_id}`, {
+									billing: {
+										first_name: firstName,
+										last_name: lastName,
+										company: '',
+										address_1: addressLine1,
+										address_2: addressLine2,
+										city: city,
+										state: state,
+										postcode: pincode,
+										country: 'IN',
+									},
+							  });
+
+					if (res.status === 200) {
+						console.log(res);
+						dispatch({ type: Actions.PROFILE, payload: res.data });
+						setLoading(false);
+						Alert.alert(
+							'Address Updated',
+							'Address Successfully Added'
+						);
+						navigation.navigate('Profile');
+					}
+				} else {
+					Alert.alert(
+						'Pincode Invalid',
+						'Please Enter a Valid Pincode'
+					);
+				}
+			} else {
+				Alert.alert(
+					'Empty Fields',
+					'Please fill all the fields to continue'
+				);
 			}
-		} catch (error) {
-			console.log(error);
+		} catch (err) {
+			console.log(err);
 		}
 	};
 

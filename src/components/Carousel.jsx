@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import {
@@ -8,7 +8,7 @@ import {
 import FastImage from 'react-native-fast-image';
 import { useSelector } from 'react-redux';
 
-export default function CarouselComponent({ containerStyle }) {
+function CarouselComponent({ containerStyle }) {
 	const [data] = useState(useSelector((state) => state.carousel));
 	var _carousel = React.createRef();
 	const sliderWidth = wp(100),
@@ -18,9 +18,9 @@ export default function CarouselComponent({ containerStyle }) {
 		return (
 			<View>
 				<FastImage
-					source={{ uri: item?.guid?.rendered }}
+					source={{ uri: item.source_url }}
 					style={styles.image}
-					resizeMode={'contain'}
+					resizeMode={FastImage.resizeMode.contain}
 				/>
 			</View>
 		);
@@ -91,3 +91,5 @@ const styles = StyleSheet.create({
 		paddingVertical: 15,
 	},
 });
+
+export default memo(CarouselComponent);

@@ -15,7 +15,6 @@ export default function AddButton({ item, price, simple }) {
 	const cartData = useSelector((state) => state.cart);
 	useEffect(() => {
 		setCart(cartData);
-		console.log('Setting Cart Data');
 		const cartItem = cartData.addedItems.find((val) => val.id === item.id);
 		if (cartItem) {
 			setCount(cartItem.quantity);
@@ -23,8 +22,6 @@ export default function AddButton({ item, price, simple }) {
 			setCount(0);
 			btnToggle(false);
 		}
-		console.log('CartItem');
-		console.log(cartItem);
 	}, [cartData, cart, item.id, btnEnabled]);
 	const [cart, setCart] = useState(cartData);
 

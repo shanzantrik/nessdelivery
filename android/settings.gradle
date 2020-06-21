@@ -1,4 +1,8 @@
 rootProject.name = 'NessDelivery'
+include ':react-native-geo-fencing'
+project(':react-native-geo-fencing').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-geo-fencing/android')
+include ':react-native-razorpay'
+project(':react-native-razorpay').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-razorpay/android')
 include ':react-native-shared-element'
 project(':react-native-shared-element').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-shared-element/android')
 apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)

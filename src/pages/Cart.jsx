@@ -142,10 +142,12 @@ export default function Card({ navigation }) {
 					<View>
 						{item.selected.on_sale && (
 							<Text style={styles.oldPrice}>
-								MRP: ₹ {item.regular_price}
+								₹ {Math.round(item.regular_price)}
 							</Text>
 						)}
-						<Text style={styles.price}>₹ {item.price}</Text>
+						<Text style={styles.price}>
+							MRP: ₹ {Math.round(item.price)}
+						</Text>
 					</View>
 					<View
 						style={{
@@ -154,22 +156,9 @@ export default function Card({ navigation }) {
 							top: 0,
 							height: '100%',
 							alignItems: 'flex-end',
-							justifyContent: 'space-between',
+							justifyContent: 'flex-end',
 							marginHorizontal: 10,
 						}}>
-						<TouchableOpacity
-							onPress={() => heartToggle(!heartChecked)}>
-							<Icon
-								name="heart"
-								style={[
-									styles.loveIcon,
-									heartChecked && {
-										color: '#ff0000',
-									},
-								]}
-								solid={heartChecked}
-							/>
-						</TouchableOpacity>
 						<AddButton />
 					</View>
 				</View>

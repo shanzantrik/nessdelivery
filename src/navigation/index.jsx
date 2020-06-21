@@ -9,6 +9,8 @@ import {
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 
+import TestPage from '../pages/TestPage';
+
 //Shared Element Navigator
 import { createSharedElementStackNavigator } from 'react-navigation-shared-element';
 
@@ -23,6 +25,7 @@ import {
 	ProductList,
 	CategoriesModal,
 	ProductDetail,
+	RelatedProductDetail,
 	Cart,
 	Payment,
 	CardPage,
@@ -30,6 +33,7 @@ import {
 	Profile,
 	Location,
 	AddAddress,
+	YourOrders,
 } from '../pages';
 import { Colors, Fonts } from '../constants';
 import Actions from '../redux/Actions';
@@ -161,13 +165,40 @@ function ProfileStackNavigator({ navigation }) {
 	);
 }
 
+const OrdersStack = createStackNavigator();
+
+function OrdersStackNavigator({ navigation }) {
+	return (
+		<OrdersStack.Navigator
+			initialRouteName="Profile"
+			screenOptions={{
+				cardStyle: {
+					backgroundColor: 'white',
+				},
+				transitionSpec: {
+					open: config,
+					close: config,
+				},
+				cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+			}}>
+			<OrdersStack.Screen
+				name="YourOrders"
+				component={YourOrders}
+				options={{
+					headerTitle: 'My Orders',
+				}}
+			/>
+		</OrdersStack.Navigator>
+	);
+}
+
 function HomeStackNavigation({ navigation }) {
 	const dispatch = useDispatch();
 	const user = useSelector((state) => state.login);
 	return (
 		<HomeStack.Navigator
 			initialRouteName={
-				user !== null && user.token !== '' ? 'Homepage' : 'Location'
+				user !== null && user.token !== '' ? 'SplashScreen' : 'Location'
 			}
 			screenOptions={{
 				cardStyle: {
@@ -265,6 +296,19 @@ function HomeStackNavigation({ navigation }) {
 				}}
 			/>
 			<HomeStack.Screen
+				name="RelatedProductDetail"
+				component={RelatedProductDetail}
+				options={{
+					header: (props) => (
+						<HomepageToolbar
+							{...props}
+							navigation={navigation}
+							searchBar={false}
+						/>
+					),
+				}}
+			/>
+			<HomeStack.Screen
 				name="Cart"
 				component={Cart}
 				options={{
@@ -330,6 +374,7 @@ function HomeStackNavigation({ navigation }) {
 					headerTitle: 'Add Address',
 				}}
 			/>
+			<HomeStack.Screen name="TestPage" component={TestPage} />
 		</HomeStack.Navigator>
 	);
 }
@@ -349,6 +394,11 @@ function DrawerNavigator() {
 			<Drawer.Screen
 				name="Profile"
 				component={ProfileStackNavigator}
+				listeners={{
+					focus: () => {
+						console.log('Go to profile');
+					},
+				}}
 				options={{
 					drawerIcon: ({ focused, color }) => (
 						<Icon name="user" color={color} size={20} solid />
@@ -357,7 +407,7 @@ function DrawerNavigator() {
 			/>
 			<Drawer.Screen
 				name="My Orders"
-				component={Cart}
+				component={OrdersStackNavigator}
 				options={{
 					drawerIcon: ({ focused, color }) => (
 						<Icon name="shopping-cart" color={color} size={20} />

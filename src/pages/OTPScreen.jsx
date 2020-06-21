@@ -22,13 +22,15 @@ import { Fonts, Colors } from '../constants';
 import { URL } from '../constants';
 import { useDispatch } from 'react-redux';
 import Actions from '../redux/Actions';
-import API from '../API';
+import API, { RefreshData } from '../API';
+import axios from 'axios';
 
 export default function OTPScreen({ route, navigation }) {
 	const { data } = route.params;
 	const [counter, setCounter] = useState(30);
 	const [otpValue, setOtpValue] = useState('');
 	const [loading, setLoading] = useState(false);
+	const [ready, setReady] = useState(false);
 
 	const dispatch = useDispatch();
 
@@ -177,6 +179,139 @@ export default function OTPScreen({ route, navigation }) {
 			console.log('Not a valid otp: ' + otpValue);
 		}
 	});
+
+	useEffect(() => {
+		dispatch({
+			type: Actions.SEARCH_CATEGORY,
+			payload: {
+				id: -1,
+				name: 'Categories',
+			},
+		});
+
+		API.get('products/categories?per_page=100')
+			.then((cats) => {
+				const simpleCats = cats.data.filter(
+					(cat_item) => cat_item.display === 'default'
+				);
+				Promise.all([
+					simpleCats.map((cat_id) => {
+						return API.get(
+							`products/categories?parent=${cat_id.id}`
+						);
+					}),
+					API.get('products?per_page=100'),
+					axios.get(
+						'https://nessfrozenhub.in/wp-json/wp/v2/media?categories=1'
+					),
+					API.get('payment_gateways'),
+					API.get('products', {
+						category: simpleCats.find(
+							(sim_cat) => sim_cat.slug === 'chicken'
+						).id,
+						per_page: 100,
+						featured: true,
+					}),
+					API.get('products', {
+						category: simpleCats.find(
+							(sim_cat) => sim_cat.slug === 'veg'
+						).id,
+						per_page: 100,
+						featured: true,
+					}),
+				])
+					.then((values) => {
+						dispatch({
+							type: Actions.CATEGORIES,
+							payload: cats.data.sort(compare),
+						});
+						dispatch({
+							type: Actions.PRODUCTS,
+							payload: values[1].data.sort(compare),
+						});
+						dispatch({
+							type: Actions.CAROUSEL,
+							payload: values[2].data.sort(compare),
+						});
+						dispatch({
+							type: Actions.PAYMENTS,
+							payload: values[3].data.filter(
+								(item) => item.id !== 'paypal'
+							),
+						});
+						dispatch({
+							type: Actions.FEATURED_NON_VEG,
+							payload: values[4].data.sort(compare),
+						});
+						dispatch({
+							type: Actions.FEATURED_VEG,
+							payload: values[5].data.sort(compare),
+						});
+						GetSubCategoriesData(values[0]);
+					})
+					.catch((error) => console.log(error));
+			})
+			.catch((error) => console.error(error));
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
+	const GetSubCategoriesData = async (categories) => {
+		const subCategories = [];
+		await categories.map((sub_cat) => {
+			sub_cat.then((subCategoryValues) => {
+				subCategories.push(...subCategoryValues.data);
+			});
+		});
+		dispatch({
+			type: Actions.SUB_CATEGORIES,
+			payload: subCategories.sort(compareReverse),
+		});
+		const subCatData = await Promise.all(
+			subCategories.map(async (item) => {
+				return API.get('products', {
+					category: item.id,
+					per_page: 100,
+				});
+			})
+		);
+		const SubCatJSON = subCatData.map((sub) => {
+			const subItem = {};
+			subItem.id = sub.config.params.category;
+			subItem.data = sub.data;
+			return {
+				...subItem,
+			};
+		});
+
+		dispatch({
+			type: Actions.SUB_CATEGORIES_DATA,
+			payload: SubCatJSON.sort(compareReverse),
+		});
+
+		setReady(true);
+	};
+
+	const compare = (a, b) => {
+		let comparison = 0;
+		if (a.id > b.id) {
+			comparison = 1;
+		} else {
+			comparison = -1;
+		}
+
+		return comparison; // Multiplying it with -1 reverses the sorting order
+	};
+
+	const compareReverse = (a, b) => {
+		let comparison = 0;
+		if (a.id > b.id) {
+			comparison = 1;
+		} else {
+			comparison = -1;
+		}
+
+		return comparison * -1; // Multiplying it with -1 reverses the sorting order
+	};
 
 	const resendOTP = () => {
 		const formData = new FormData();
@@ -327,9 +462,11 @@ export default function OTPScreen({ route, navigation }) {
 						</Text>
 					</View>
 				</TouchableOpacity>
-				<View style={{ marginTop: 10 }}>
-					<Text>You can resend code in {counter} seconds</Text>
-				</View>
+				{counter !== 0 && (
+					<View style={{ marginTop: 10 }}>
+						<Text>You can resend code in {counter} seconds</Text>
+					</View>
+				)}
 				<LinearGradient
 					colors={['#86A8E7', '#7F7FD5']}
 					start={{ x: 0.0, y: 1.0 }}
