@@ -32,6 +32,7 @@ export default function YourOrders({ navigation }) {
 			<View
 				style={{
 					alignItems: 'center',
+					marginBottom: 20,
 				}}>
 				<View
 					style={{
@@ -76,7 +77,9 @@ export default function YourOrders({ navigation }) {
 									fontFamily: Fonts.primary,
 								}}>
 								{item.line_items[0].name} and{' '}
-								{item.line_items.length - 1} others
+								{item.line_items.length > 1
+									? item.line_items.length - 1 + ' others'
+									: ''}
 							</Text>
 						</Text>
 					</View>
@@ -115,13 +118,25 @@ export default function YourOrders({ navigation }) {
 					flex: 1,
 					backgroundColor: Colors.white,
 				}}>
-				<FlatList
-					data={orders}
-					renderItem={RenderOrders}
-					contentContainerStyle={{
-						paddingVertical: 30,
-					}}
-				/>
+				{orders.length !== 0 ? (
+					<FlatList
+						data={orders}
+						renderItem={RenderOrders}
+						contentContainerStyle={{
+							paddingVertical: 30,
+						}}
+					/>
+				) : (
+					<View style={{ alignItems: 'center', marginTop: 30 }}>
+						<Text
+							style={{
+								fontSize: 16,
+								fontFamily: Fonts.semiBold,
+							}}>
+							You don't have any orders
+						</Text>
+					</View>
+				)}
 			</View>
 		);
 	}
