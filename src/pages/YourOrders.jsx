@@ -76,9 +76,11 @@ export default function YourOrders({ navigation }) {
 									fontSize: 14,
 									fontFamily: Fonts.primary,
 								}}>
-								{item.line_items[0].name} and{' '}
+								{item.line_items[0].name}
 								{item.line_items.length > 1
-									? item.line_items.length - 1 + ' others'
+									? 'and ' +
+									  (item.line_items.length - 1) +
+									  ' others'
 									: ''}
 							</Text>
 						</Text>

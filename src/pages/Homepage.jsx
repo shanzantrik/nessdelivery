@@ -61,75 +61,7 @@ export default function Homepage({ navigation, route }) {
 	// };
 
 	function RefreshData() {
-		setLoading(true);
-		const subCategories = [];
-		API.get('products/categories?per_page=100')
-			.then((cats) => {
-				Promise.all([
-					cats.data
-						.filter((cat_item) => cat_item.display === 'default')
-						.map((cat_id) => {
-							return API.get(
-								`products/categories?parent=${cat_id.id}`
-							);
-						}),
-					API.get('products?per_page=100'),
-					axios.get(
-						'https://nessfrozenhub.in/wp-json/wp/v2/media?categories=1'
-					),
-					API.get('payment_gateways'),
-					API.get(`customers/${user.user_id}`),
-					API.get('coupons'),
-					API.get('shipping/zones'),
-				])
-					.then((values) => {
-						values[0].map((sub_cat) => {
-							sub_cat.then((subCategoryValues) => {
-								subCategories.push(...subCategoryValues.data);
-							});
-						});
-						dispatch({
-							type: Actions.CATEGORIES,
-							payload: cats.data.sort(compare),
-						});
-						dispatch({
-							type: Actions.SUB_CATEGORIES,
-							payload: subCategories.sort(compareReverse),
-						});
-						dispatch({
-							type: Actions.PRODUCTS,
-							payload: values[1].data.sort(compare),
-						});
-						dispatch({
-							type: Actions.CAROUSEL,
-							payload: values[2].data.sort(compare),
-						});
-						dispatch({
-							type: Actions.PAYMENTS,
-							payload: values[3].data.filter(
-								(item) => item.id !== 'paypal'
-							),
-						});
-						dispatch({
-							type: Actions.PROFILE,
-							payload: values[4].data,
-						});
-
-						dispatch({
-							type: Actions.COUPONS,
-							payload: values[5].data,
-						});
-						fetchLocations(values[5].data);
-					})
-					.catch((error) => {
-						console.log(error);
-						setLoading(false);
-					});
-			})
-			.catch((error) => {
-				console.error(error);
-				setLoading(false);
-			});
+		//Copy this from splashscreen or login
 	}
 
 	const compare = (a, b) => {

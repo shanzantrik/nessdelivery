@@ -36,20 +36,6 @@ const borderProps = {
 	borderWidth: 1,
 };
 
-const billing = {
-	first_name: 'Akshay',
-	last_name: 'Kumar',
-	company: '',
-	address_1: "Rd. No 6 'c' (South), Aam Bagicha",
-	address_2: 'Mahadeopuri, Gardanibagh',
-	city: 'Patna',
-	postcode: '800001',
-	country: 'India',
-	state: 'Bihar',
-	email: '',
-	phone: '',
-};
-
 export default function Profile({ route }) {
 	const navigation = useNavigation();
 	const profileData = useSelector((state) => state.profile);

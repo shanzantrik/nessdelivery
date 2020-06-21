@@ -16,7 +16,6 @@ import {
 import { Input } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { Colors, Fonts, Shadow } from '../constants';
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { encode as btoa } from 'base-64';
@@ -36,7 +35,7 @@ export default function Payment({ navigation }) {
 		currentLocation: true,
 		address: location.location,
 	});
-	const [qrCode, setQrCode] = useState(null);
+
 	const [showQRCode, setShowQRCode] = useState(false);
 
 	const razorPayTest = false;
@@ -50,27 +49,29 @@ export default function Payment({ navigation }) {
 			navigation.navigate('Login', {
 				destination: 'Payment',
 			});
-		} else {
-			axios
-				.get(
-					'https://nessfrozenhub.in/wp-json/wp/v2/media?categories=126'
-				)
-				.then((res) => {
-					console.log(res.data[0]);
-					setQrCode(res.data[0]);
-				})
-				.catch((error) => console.log(error));
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const applyCoupon = () => {
-		const val = couponData.find((item) => item.code === coupon);
-		if (val) {
-			setSaving(parseInt(val.amount, 10));
+		if (couponData !== null) {
+			const val = couponData.find((item) => item.code === coupon);
+			if (val) {
+				setSaving(parseInt(val.amount, 10));
+				Alert.alert(
+					'Coupon Applied',
+					'Coupon has been successfully applied'
+				);
+			} else {
+				Alert.alert(
+					'Invalid Coupon',
+					"The coupon you've applied is not valid"
+				);
+			}
 		} else {
 			Alert.alert(
-				'Invalid Coupon',
-				"The coupon you've applied is not valid"
+				'No Coupons Available',
+				'No Coupons is available at this time'
 			);
 		}
 	};
@@ -766,7 +767,7 @@ export default function Payment({ navigation }) {
 					}}>
 					<View style={{ width: '90%', aspectRatio: 1 }}>
 						<Image
-							source={{ uri: qrCode?.source_url }}
+							source={require('../assets/homepage/qr_code.jpg')}
 							style={{ width: '100%', height: '100%' }}
 						/>
 					</View>

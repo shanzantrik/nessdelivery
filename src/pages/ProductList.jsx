@@ -365,11 +365,7 @@ export default function ProductList({ navigation, route }) {
 								})}
 							</Picker>
 						</View>
-					) : (
-						<View>
-							<Text>{item.weight}</Text>
-						</View>
-					)}
+					) : null}
 					<View
 						style={{
 							position: 'absolute',
@@ -511,6 +507,7 @@ const styles = StyleSheet.create({
 		borderColor: '#8d8d8d',
 		width: '50%',
 		marginVertical: 6,
+		marginBottom: 35,
 	},
 	picker: {
 		height: 30,

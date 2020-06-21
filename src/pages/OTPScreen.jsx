@@ -219,6 +219,8 @@ export default function OTPScreen({ route, navigation }) {
 						per_page: 100,
 						featured: true,
 					}),
+					API.get('coupons'),
+					API.get('shipping/zones'),
 				])
 					.then((values) => {
 						dispatch({
@@ -246,6 +248,14 @@ export default function OTPScreen({ route, navigation }) {
 						dispatch({
 							type: Actions.FEATURED_VEG,
 							payload: values[5].data.sort(compare),
+						});
+						dispatch({
+							type: Actions.COUPONS,
+							payload: values[6].data.sort(compare),
+						});
+						dispatch({
+							type: Actions.SHIPPING_ZONES,
+							payload: values[7].data.sort(compare),
 						});
 						GetSubCategoriesData(values[0]);
 					})
