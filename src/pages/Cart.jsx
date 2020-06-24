@@ -7,9 +7,7 @@ import {
 	StyleSheet,
 	FlatList,
 	TouchableOpacity,
-	TouchableWithoutFeedback,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome5';
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { Fonts, Colors } from '../constants';
 import { useSelector, useDispatch } from 'react-redux';
@@ -21,13 +19,10 @@ export default function Card({ navigation }) {
 	const cartData = useSelector((state) => state.cart);
 	useEffect(() => {
 		setCart(cartData);
-		console.log('Setting Cart Data');
-		console.log(cartData);
 	}, [cartData]);
 	const [cart, setCart] = useState(cartData);
 
 	const ProductItem = ({ item, index }) => {
-		const [heartChecked, heartToggle] = useState(false);
 		const [count, setCount] = useState(item.quantity);
 		const [btnEnabled, btnToggle] = useState(item.quantity !== 0);
 

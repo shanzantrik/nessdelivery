@@ -16,6 +16,7 @@ import Profile from './Profile';
 import Location from './LocationPage';
 import AddAddress from './AddAddress';
 import YourOrders from './YourOrders';
+import CouponsPage from './CouponsPage';
 
 export {
 	SplashScreen,
@@ -36,4 +37,5 @@ export {
 	Location,
 	AddAddress,
 	YourOrders,
+	CouponsPage,
 };

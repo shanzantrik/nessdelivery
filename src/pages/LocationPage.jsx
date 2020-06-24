@@ -25,11 +25,13 @@ import Actions from '../redux/Actions';
 import { Colors, Fonts, Shadow } from '../constants';
 import { check, PERMISSIONS, RESULTS, request } from 'react-native-permissions';
 import { useDispatch } from 'react-redux';
+import { locationJSON } from '../static';
 
 export default function LocationPage({ navigation }) {
 	const dispatch = useDispatch();
 	const [loading, setLoading] = useState(false);
 	const [locationData, setLocationData] = useState({
+		locationJSON: null,
 		location: 'Not Available in your location',
 		locationAvailale: false,
 	});
@@ -38,11 +40,6 @@ export default function LocationPage({ navigation }) {
 		if (loading) {
 			setLoading(false);
 		}
-
-		dispatch({
-			type: Actions.LOCATION,
-			payload: data,
-		});
 
 		navigation.navigate('Login', data);
 	};
@@ -64,86 +61,7 @@ export default function LocationPage({ navigation }) {
 				name: 'Categories',
 			},
 		});
-
-		const subCategories = [];
-		API.get('products/categories?per_page=100')
-			.then((cats) => {
-				Promise.all([
-					cats.data
-						.filter((cat_item) => cat_item.display === 'default')
-						.map((cat_id) => {
-							return API.get(
-								`products/categories?parent=${cat_id.id}`
-							);
-						}),
-					API.get('products?per_page=100'),
-					axios.get(
-						'https://nessfrozenhub.in/wp-json/wp/v2/media?categories=1'
-					),
-					API.get('payment_gateways'),
-				])
-					.then((values) => {
-						values[0].map((sub_cat) => {
-							sub_cat.then((subCategoryValues) => {
-								subCategories.push(...subCategoryValues.data);
-							});
-						});
-						dispatch({
-							type: Actions.CATEGORIES,
-							payload: cats.data.sort(compare),
-						});
-						dispatch({
-							type: Actions.SUB_CATEGORIES,
-							payload: subCategories.sort(compareReverse),
-						});
-						dispatch({
-							type: Actions.PRODUCTS,
-							payload: values[1].data.sort(compare),
-						});
-						dispatch({
-							type: Actions.CAROUSEL,
-							payload: values[2].data.sort(compare),
-						});
-						dispatch({
-							type: Actions.PAYMENTS,
-							payload: values[3].data.filter(
-								(item) => item.id !== 'paypal'
-							),
-						});
-
-						setReady(true);
-						console.log('Ready: ' + true);
-
-						if (loading) {
-							navigateToHomepage(locationData);
-						}
-					})
-					.catch((error) => console.log(error));
-			})
-			.catch((error) => console.error(error));
 	});
-
-	const compare = (a, b) => {
-		let comparison = 0;
-		if (a.id > b.id) {
-			comparison = 1;
-		} else {
-			comparison = -1;
-		}
-
-		return comparison; // Multiplying it with -1 reverses the sorting order
-	};
-
-	const compareReverse = (a, b) => {
-		let comparison = 0;
-		if (a.id > b.id) {
-			comparison = 1;
-		} else {
-			comparison = -1;
-		}
-
-		return comparison * -1; // Multiplying it with -1 reverses the sorting order
-	};
 
 	const spinValue = new Animated.Value(0);
 
@@ -152,36 +70,55 @@ export default function LocationPage({ navigation }) {
 		outputRange: ['0deg', '360deg'],
 	});
 
-	const [ready, setReady] = useState(false);
+	const getAddress = (addressType, json) => {
+		var arr = json.results[0].address_components.find((item) => {
+			return item.types.includes(addressType);
+		});
+
+		var i = 1;
+		while (arr === undefined && i <= json.results.length) {
+			arr = json.results[i++].address_components.find((item) => {
+				return item.types.includes(addressType);
+			});
+		}
+
+		if (arr === undefined) {
+			return '';
+		} else {
+			return arr.long_name;
+		}
+	};
 
 	const getLocationName = (lat, lng) => {
 		Geocoder.init('AIzaSyDg1r3zd1vVKya0U63g1vacakzhR7DhblA');
 
 		Geocoder.from(lat, lng)
 			.then((json) => {
-				var addressComponent =
-					json.results[0].address_components[0].long_name;
-
 				dispatch({
 					type: Actions.LOCATION,
 					payload: {
-						location: addressComponent,
+						location: {
+							first_name: '',
+							last_name: '',
+							company: '',
+							address_1: getAddress('route', json),
+							address_2: getAddress('sublocality', json),
+							city: getAddress(
+								'administrative_area_level_2',
+								json
+							),
+							state: getAddress(
+								'administrative_area_level_1',
+								json
+							),
+							country: getAddress('country', json),
+							postcode: getAddress('postal_code', json),
+						},
 						locationAvailale: true,
 					},
 				});
 
-				if (ready) {
-					navigateToHomepage({
-						location: addressComponent,
-						locationAvailale: true,
-					});
-				} else {
-					setLocationData({
-						location: addressComponent,
-						locationAvailale: true,
-					});
-					setLoading(true);
-				}
+				navigateToHomepage();
 			})
 
 			.catch((error) => {
@@ -191,7 +128,7 @@ export default function LocationPage({ navigation }) {
 			});
 	};
 
-	const checkGeofencing = () => {
+	const checkGeofencing = async () => {
 		Geolocation.getCurrentPosition(
 			// Will give you the current location
 			(position) => {
@@ -226,23 +163,40 @@ export default function LocationPage({ navigation }) {
 						dispatch({
 							type: Actions.LOCATION,
 							payload: {
-								location: 'Not Available in your location',
-								locationAvailale: false,
+								location: {
+									first_name: '',
+									last_name: '',
+									company: '',
+									address_1: getAddress(
+										'route',
+										locationJSON
+									),
+									address_2: getAddress(
+										'sublocality',
+										locationJSON
+									),
+									city: getAddress(
+										'administrative_area_level_2',
+										locationJSON
+									),
+									state: getAddress(
+										'administrative_area_level_1',
+										locationJSON
+									),
+									country: getAddress(
+										'country',
+										locationJSON
+									),
+									postcode: getAddress(
+										'postal_code',
+										locationJSON
+									),
+								},
+								locationAvailale: true,
 							},
 						});
 
-						if (ready) {
-							navigateToHomepage({
-								location: 'Not Available in your location',
-								locationAvailale: false,
-							});
-						} else {
-							setLocationData({
-								location: 'Not Available in your location',
-								locationAvailale: false,
-							});
-							setLoading(true);
-						}
+						navigateToHomepage();
 					});
 			},
 			(error) => {
@@ -343,7 +297,8 @@ export default function LocationPage({ navigation }) {
 			</View>
 			<View style={styles.textContainer}>
 				<Text style={styles.subHeaderText}>
-					wants to access your location
+					wants to access your location{'\n'}to deliver at your
+					doorstep.
 				</Text>
 			</View>
 			<View style={styles.locationImageContainer}>
@@ -417,7 +372,7 @@ const styles = StyleSheet.create({
 	},
 	subHeaderText: {
 		color: Colors.black,
-		fontSize: 22,
+		fontSize: 20,
 		fontFamily: Fonts.semiBold,
 		textAlign: 'center',
 	},

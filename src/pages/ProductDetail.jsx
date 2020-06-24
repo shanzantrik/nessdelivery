@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
 	View,
 	ScrollView,
@@ -20,8 +20,6 @@ import FastImage from 'react-native-fast-image';
 import { SharedElement } from 'react-navigation-shared-element';
 import API from '../API';
 import { useDispatch } from 'react-redux';
-import Animated from 'react-native-reanimated';
-import Actions from '../redux/Actions';
 
 export default function ProductDetail({ navigation, route }) {
 	const {
@@ -306,11 +304,11 @@ export default function ProductDetail({ navigation, route }) {
 							{item.description.replace(/(<([^>]+)>)/gi, '')}
 						</Text>
 					</View>
-					{relatedProducts.length !== 0 && (
+					{relatedProducts.current.length !== 0 && (
 						<View style={{ marginTop: 20, marginBottom: 30 }}>
 							<CategoriesFlatList
 								title={'Related Products'}
-								data={relatedProducts}
+								data={relatedProducts.current}
 								viewAll={false}
 								navigateTo={'RelatedProductDetail'}
 							/>

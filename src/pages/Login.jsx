@@ -30,7 +30,11 @@ const borderProps = {
 	borderWidth: 1,
 };
 export default function Login({ navigation, route }) {
-	const { destination } = route.params;
+	var destination;
+
+	if (route.params !== undefined) {
+		destination = route.params.destination;
+	}
 
 	// const backAction = () => {
 	// 	return true;

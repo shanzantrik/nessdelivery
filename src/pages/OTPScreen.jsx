@@ -42,7 +42,7 @@ export default function OTPScreen({ route, navigation }) {
 
 	useEffect(() => {
 		if (otpValue.length === 6) {
-			verifyOtp();
+			verifyOtp(otpValue);
 		}
 	}, [otpValue, verifyOtp]);
 
@@ -67,8 +67,8 @@ export default function OTPScreen({ route, navigation }) {
 		}
 	};
 
-	const verifyOtp = useCallback(() => {
-		if (otpValue.length === 6 && !isNaN(otpValue)) {
+	const verifyOtp = useCallback((otpVal) => {
+		if (otpVal.length === 6 && !isNaN(otpVal)) {
 			setLoading(true);
 
 			const formDataOtp = new FormData();
@@ -76,7 +76,7 @@ export default function OTPScreen({ route, navigation }) {
 			formDataOtp.append('countrycode', data.countrycode);
 			formDataOtp.append('mobileNo', data.phone);
 			formDataOtp.append('type', data.type);
-			formDataOtp.append('otp', otpValue);
+			formDataOtp.append('otp', otpVal);
 
 			fetch(`${URL}/wp-json/digits/v1/verify_otp`, {
 				method: 'POST',
@@ -94,7 +94,7 @@ export default function OTPScreen({ route, navigation }) {
 						);
 						formData.append('digits_reg_mobile', data.phone);
 						formData.append('type', data.type);
-						formData.append('otp', otpValue);
+						formData.append('otp', otpVal);
 						formData.append('digits_reg_name', data.fullName);
 						formData.append('digits_reg_password', data.password);
 						formData.append('digits_reg_email', data.email);
@@ -132,7 +132,7 @@ export default function OTPScreen({ route, navigation }) {
 
 						formData.append('user', data.phone);
 						formData.append('countrycode', data.countrycode);
-						formData.append('otp', otpValue);
+						formData.append('otp', otpVal);
 
 						fetch(`${URL}/wp-json/digits/v1/login_user`, {
 							method: 'POST',
@@ -176,9 +176,9 @@ export default function OTPScreen({ route, navigation }) {
 		} else {
 			Alert.alert('Invalid OTP.', 'Please Enter a Valid OTP.');
 			setLoading(false);
-			console.log('Not a valid otp: ' + otpValue);
+			console.log('Not a valid otp: ' + otpVal);
 		}
-	});
+	}, []);
 
 	useEffect(() => {
 		dispatch({
@@ -200,27 +200,69 @@ export default function OTPScreen({ route, navigation }) {
 							`products/categories?parent=${cat_id.id}`
 						);
 					}),
-					API.get('products?per_page=100'),
 					axios.get(
 						'https://nessfrozenhub.in/wp-json/wp/v2/media?categories=1'
 					),
 					API.get('payment_gateways'),
+					API.get('coupons'),
+					API.get('shipping/zones/1/locations'),
+					API.get('shipping/zones/1/methods'),
 					API.get('products', {
 						category: simpleCats.find(
 							(sim_cat) => sim_cat.slug === 'chicken'
 						).id,
-						per_page: 100,
+						per_page: 30,
 						featured: true,
 					}),
 					API.get('products', {
 						category: simpleCats.find(
 							(sim_cat) => sim_cat.slug === 'veg'
 						).id,
-						per_page: 100,
+						per_page: 30,
 						featured: true,
 					}),
-					API.get('coupons'),
-					API.get('shipping/zones'),
+					API.get('products', {
+						category: simpleCats.find(
+							(sim_cat) => sim_cat.slug === 'pork'
+						).id,
+						per_page: 30,
+						featured: true,
+					}),
+					API.get('products', {
+						category: simpleCats.find(
+							(sim_cat) => sim_cat.slug === 'sea-food'
+						).id,
+						per_page: 30,
+						featured: true,
+					}),
+					API.get('products', {
+						category: simpleCats.find(
+							(sim_cat) => sim_cat.slug === 'ice-creams'
+						).id,
+						per_page: 30,
+						featured: true,
+					}),
+					API.get('products', {
+						category: simpleCats.find(
+							(sim_cat) => sim_cat.slug === 'cheese-and-creams'
+						).id,
+						per_page: 30,
+						featured: true,
+					}),
+					API.get('products', {
+						category: simpleCats.find(
+							(sim_cat) => sim_cat.slug === 'wonder-eggs'
+						).id,
+						per_page: 30,
+						featured: true,
+					}),
+					API.get('products', {
+						category: simpleCats.find(
+							(sim_cat) => sim_cat.slug === 'mithun'
+						).id,
+						per_page: 30,
+						featured: true,
+					}),
 				])
 					.then((values) => {
 						dispatch({
@@ -228,35 +270,60 @@ export default function OTPScreen({ route, navigation }) {
 							payload: cats.data.sort(compare),
 						});
 						dispatch({
-							type: Actions.PRODUCTS,
+							type: Actions.CAROUSEL,
 							payload: values[1].data.sort(compare),
 						});
 						dispatch({
-							type: Actions.CAROUSEL,
-							payload: values[2].data.sort(compare),
-						});
-						dispatch({
 							type: Actions.PAYMENTS,
-							payload: values[3].data.filter(
+							payload: values[2].data.filter(
 								(item) => item.id !== 'paypal'
 							),
 						});
 						dispatch({
-							type: Actions.FEATURED_NON_VEG,
-							payload: values[4].data.sort(compare),
-						});
-						dispatch({
-							type: Actions.FEATURED_VEG,
-							payload: values[5].data.sort(compare),
-						});
-						dispatch({
 							type: Actions.COUPONS,
-							payload: values[6].data.sort(compare),
+							payload: values[3].data.sort(compare),
 						});
 						dispatch({
 							type: Actions.SHIPPING_ZONES,
+							payload: values[4].data,
+						});
+						dispatch({
+							type: Actions.SHIPPING_METHODS,
+							payload: values[5].data,
+						});
+						dispatch({
+							type: Actions.FEATURED_NON_VEG,
+							payload: values[6].data.sort(compare),
+						});
+						dispatch({
+							type: Actions.FEATURED_VEG,
 							payload: values[7].data.sort(compare),
 						});
+						dispatch({
+							type: Actions.FEATURED_PORK,
+							payload: values[8].data.sort(compare),
+						});
+						dispatch({
+							type: Actions.FEATURED_SEA_FOOD,
+							payload: values[9].data.sort(compare),
+						});
+						dispatch({
+							type: Actions.FEATURED_ICE_CREAM,
+							payload: values[10].data.sort(compare),
+						});
+						dispatch({
+							type: Actions.FEATURED_CHEESE_AND_CREAMS,
+							payload: values[11].data.sort(compare),
+						});
+						dispatch({
+							type: Actions.FEATURED_WONDER_EGGS,
+							payload: values[12].data.sort(compare),
+						});
+						dispatch({
+							type: Actions.FEATURED_MITHUN,
+							payload: values[13].data.sort(compare),
+						});
+
 						GetSubCategoriesData(values[0]);
 					})
 					.catch((error) => console.log(error));

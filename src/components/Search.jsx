@@ -16,16 +16,16 @@ export default function Search({ setSearchValue }) {
 	const navigation = useNavigation();
 
 	const [searchText, setSearchText] = useState('');
-	useEffect(() => {
-		setSearchValue && setSearchValue(searchText);
-	}, [searchText, setSearchValue]);
+	// useEffect(() => {
+	// 	setSearchValue && setSearchValue(searchText);
+	// }, [searchText, setSearchValue]);
 	const [title, setTitle] = useState(
 		useSelector((state) => state.searchCategory)
 	);
 
 	const setSearchResult = (item) => {
-		setTitle(item);
-		dispatch({ type: Actions.SEARCH_CATEGORY, payload: item });
+		setSearchText(item);
+		setSearchValue && setSearchValue(item);
 	};
 
 	return (
@@ -33,9 +33,8 @@ export default function Search({ setSearchValue }) {
 			<TouchableOpacity
 				style={styles.categoriesContainer}
 				onPress={() =>
-					navigation.navigate('CategoriesModal', {
-						selected: searchText,
-						setSearchText: setSearchResult.bind(this),
+					navigation.navigate('SubCategories', {
+						itemId: -1,
 					})
 				}>
 				<View style={styles.categoriesTextContainer}>
@@ -52,7 +51,7 @@ export default function Search({ setSearchValue }) {
 					lightTheme
 					onFocus={() => navigation.navigate('SearchList')}
 					value={searchText}
-					onChangeText={(text) => setSearchText(text)}
+					onChangeText={(text) => setSearchResult(text)}
 					containerStyle={styles.searchBarContainer}
 					inputContainerStyle={styles.searchInputContainer}
 					inputStyle={styles.searchInput}

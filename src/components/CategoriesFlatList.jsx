@@ -5,6 +5,7 @@ import {
 	FlatListProps,
 	ViewStyle,
 	StyleSheet,
+	ViewPropTypes,
 } from 'react-native';
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { Header, CategoryItem } from './index';
@@ -21,6 +22,7 @@ export default function CategoriesFlatList({
 	contentContainerStyle,
 	itemParentContainerStyle,
 	navigateTo,
+	ListFooterComponent,
 }) {
 	const _renderCircularItem = ({ item, index }) => {
 		return (
@@ -38,7 +40,7 @@ export default function CategoriesFlatList({
 			/>
 		);
 	};
-	const _keyExtractor = (item, index) => index.toString();
+	const _keyExtractor = (item, index) => item.id.toString();
 	return (
 		<View style={[{ width: wp(100) }, containerStyle]}>
 			<Header title={title} viewAll={viewAll} />
@@ -49,7 +51,10 @@ export default function CategoriesFlatList({
 				renderItem={_renderCircularItem}
 				keyExtractor={_keyExtractor}
 				showsHorizontalScrollIndicator={false}
+				initialNumToRender={20}
+				removeClippedSubviews={true}
 				horizontal
+				ListFooterComponent={ListFooterComponent}
 				{...flatListProps}
 			/>
 		</View>
@@ -59,15 +64,12 @@ export default function CategoriesFlatList({
 CategoriesFlatList.propTypes = {
 	data: PropTypes.array.isRequired,
 	title: PropTypes.string.isRequired,
-	containerStyle: PropTypes.object,
-	itemParentContainerStyle: PropTypes.instanceOf(ViewStyle),
+	containerStyle: ViewPropTypes.style,
+	itemParentContainerStyle: ViewPropTypes.style,
 };
 
 CategoriesFlatList.defaultProps = {
 	viewAll: true,
-	flatListProps: FlatListProps,
-	itemContainerStyle: ViewStyle,
-	contentContainerStyle: ViewStyle,
 };
 
 const styles = StyleSheet.create({

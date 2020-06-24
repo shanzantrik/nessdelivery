@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
 	View,
 	Text,
@@ -26,6 +26,8 @@ import { useDispatch } from 'react-redux';
 import Actions from '../redux/Actions';
 import FastImage from 'react-native-fast-image';
 import { useSelector } from 'react-redux';
+import { OptimizedFlatList } from 'react-native-optimized-flatlist';
+import Axios from 'axios';
 
 export default function SearchList({ navigation, route }) {
 	// const { data } = route.params;
@@ -38,57 +40,75 @@ export default function SearchList({ navigation, route }) {
 
 	const [searchProducts, setSearchProducts] = useState([]);
 	const [loading, setLoading] = useState(false);
+	const [loadingMore, setLoadingMore] = useState(false);
 
-	useEffect(() => {
-		setLoading(true);
-		// console.time('search');
-		console.log(searchCategory.name + ': ' + searchCategory.id);
-		API.get(
-			searchCategory.id !== -1
-				? `products?per_page=100&category=${searchCategory.id}&search=${searchText}`
-				: `products?per_page=100&search=${searchText}`
-		)
-			.then((res) => {
-				setSearchProducts(res.data);
-				// console.timeLog('search');
-			})
-			.catch((error) => console.error(error))
-			.finally(() => setLoading(false));
+	var timer = useRef(null);
+	var cancelToken = useRef(null);
+	const currentPage = useRef(1);
 
-		// const searchList = [];
-		// products.forEach((element) => {
-		// 	if (
-		// 		element.name
-		// 			.toString()
-		// 			.toLowerCase()
-		// 			.includes(searchText.toLowerCase())
-		// 	) {
-		// 		if (searchCategory.id !== -1) {
-		// 			const categoryContains = element.categories.find(
-		// 				(item) => item.id === searchCategory.id
-		// 			);
-		// 			if (categoryContains) {
-		// 				searchList.push(element);
-		// 			}
-		// 		} else {
-		// 			searchList.push(element);
-		// 		}
-		// 	}
-		// });
-		// setLoading(false);
-		// console.log(searchList);
+	// const searchList = [];
+	// products.forEach((element) => {
+	// 	if (
+	// 		element.name
+	// 			.toString()
+	// 			.toLowerCase()
+	// 			.includes(searchText.toLowerCase())
+	// 	) {
+	// 		if (searchCategory.id !== -1) {
+	// 			const categoryContains = element.categories.find(
+	// 				(item) => item.id === searchCategory.id
+	// 			);
+	// 			if (categoryContains) {
+	// 				searchList.push(element);
+	// 			}
+	// 		} else {
+	// 			searchList.push(element);
+	// 		}
+	// 	}
+	// });
+	// setLoading(false);
+	// console.log(searchList);
 
-		// setSearchProducts(searchList);
-	}, [searchText, searchCategory, products]);
+	// setSearchProducts(searchList);
 
-	const setSearchValue = (val) => {
+	const setSearchValue = async (val) => {
 		setSearchText(val);
-		console.log('SearchText', val);
+		if (val !== undefined) {
+			clearTimeout(timer.current);
+			timer.current = setTimeout(async () => {
+				if (cancelToken.current) {
+					cancelToken.current.cancel();
+				}
+
+				cancelToken.current = Axios.CancelToken.source();
+				currentPage.current = 1;
+				setLoading(true);
+				try {
+					const res = await API.get('products', {
+						per_page: 50,
+						search: val,
+					});
+
+					if (res.status === 200) {
+						setSearchProducts(res.data);
+						currentPage.current = currentPage.current + 1;
+					}
+				} catch (error) {
+					console.log(error);
+				}
+				setLoading(false);
+			}, 1000);
+		}
 	};
 
 	const ProductItem = ({ item, index }) => {
+		const relatedProducts = useRef([]);
 		const cartData = useSelector((state) => state.cart);
 		useEffect(() => {
+			setFirstTimeCart();
+		}, [setFirstTimeCart]);
+
+		const setFirstTimeCart = useCallback(async () => {
 			setCart(cartData);
 			const cartItem = cartData.addedItems.find(
 				(val) => val.id === item.id
@@ -101,9 +121,12 @@ export default function SearchList({ navigation, route }) {
 				btnToggle(false);
 			}
 
+			getRelatedProds();
+		}, []);
+
+		const getRelatedProds = async () => {
 			if (item.related_ids.length !== 0) {
 				const relatedProds = [];
-
 				Promise.all(
 					item.related_ids.map((product_id) => {
 						return API.get(`products/${product_id}`);
@@ -113,7 +136,7 @@ export default function SearchList({ navigation, route }) {
 						res.map((data) => {
 							relatedProds.push(data.data);
 						});
-						setRelatedProducts(relatedProds);
+						relatedProducts.current = relatedProds;
 					})
 					.catch((error) => {
 						console.error(error);
@@ -123,10 +146,7 @@ export default function SearchList({ navigation, route }) {
 						);
 					});
 			}
-			// eslint-disable-next-line react-hooks/exhaustive-deps
-		}, []);
-
-		const [heartChecked, heartToggle] = useState(false);
+		};
 
 		useEffect(() => {
 			const cartItem = cartData.addedItems.find(
@@ -139,6 +159,7 @@ export default function SearchList({ navigation, route }) {
 				btnToggle(false);
 			}
 		}, [cartData, cart, item.id, btnEnabled]);
+
 		const [cart, setCart] = useState(cartData);
 
 		const [count, setCount] = useState(0);
@@ -155,8 +176,6 @@ export default function SearchList({ navigation, route }) {
 		const [selectedQuantity, setSelectedQuantity] = useState(
 			item.type === 'variable' ? item.product_variations[0] : item
 		);
-
-		const [relatedProducts, setRelatedProducts] = useState([]);
 
 		const changeQuantity = (val) => {
 			setSelectedQuantity(val);
@@ -415,7 +434,7 @@ const styles = StyleSheet.create({
 		textTransform: 'capitalize',
 	},
 	flatListContainer: {
-		paddingBottom: 30,
+		paddingBottom: 90,
 	},
 	image: {
 		height: 100,

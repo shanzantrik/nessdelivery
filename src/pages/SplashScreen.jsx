@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
 	View,
 	Text,
@@ -34,6 +34,10 @@ function SplashScreen({ navigation }) {
 	const dispatch = useDispatch();
 	const [loading, setLoading] = useState(false);
 	useEffect(() => {
+		fetchMyData();
+	}, [fetchMyData]);
+
+	const fetchMyData = useCallback(async () => {
 		Animated.loop(
 			Animated.timing(spinValue, {
 				toValue: 1,
@@ -62,27 +66,69 @@ function SplashScreen({ navigation }) {
 							`products/categories?parent=${cat_id.id}`
 						);
 					}),
-					API.get('products?per_page=100'),
 					axios.get(
 						'https://nessfrozenhub.in/wp-json/wp/v2/media?categories=1'
 					),
 					API.get('payment_gateways'),
+					API.get('coupons'),
+					API.get('shipping/zones/1/locations'),
+					API.get('shipping/zones/1/methods'),
 					API.get('products', {
 						category: simpleCats.find(
 							(sim_cat) => sim_cat.slug === 'chicken'
 						).id,
-						per_page: 100,
+						per_page: 30,
 						featured: true,
 					}),
 					API.get('products', {
 						category: simpleCats.find(
 							(sim_cat) => sim_cat.slug === 'veg'
 						).id,
-						per_page: 100,
+						per_page: 30,
 						featured: true,
 					}),
-					API.get('coupons'),
-					API.get('shipping/zones'),
+					API.get('products', {
+						category: simpleCats.find(
+							(sim_cat) => sim_cat.slug === 'pork'
+						).id,
+						per_page: 30,
+						featured: true,
+					}),
+					API.get('products', {
+						category: simpleCats.find(
+							(sim_cat) => sim_cat.slug === 'sea-food'
+						).id,
+						per_page: 30,
+						featured: true,
+					}),
+					API.get('products', {
+						category: simpleCats.find(
+							(sim_cat) => sim_cat.slug === 'ice-creams'
+						).id,
+						per_page: 30,
+						featured: true,
+					}),
+					API.get('products', {
+						category: simpleCats.find(
+							(sim_cat) => sim_cat.slug === 'cheese-and-creams'
+						).id,
+						per_page: 30,
+						featured: true,
+					}),
+					API.get('products', {
+						category: simpleCats.find(
+							(sim_cat) => sim_cat.slug === 'wonder-eggs'
+						).id,
+						per_page: 30,
+						featured: true,
+					}),
+					API.get('products', {
+						category: simpleCats.find(
+							(sim_cat) => sim_cat.slug === 'mithun'
+						).id,
+						per_page: 30,
+						featured: true,
+					}),
 				])
 					.then((values) => {
 						dispatch({
@@ -90,41 +136,65 @@ function SplashScreen({ navigation }) {
 							payload: cats.data.sort(compare),
 						});
 						dispatch({
-							type: Actions.PRODUCTS,
+							type: Actions.CAROUSEL,
 							payload: values[1].data.sort(compare),
 						});
 						dispatch({
-							type: Actions.CAROUSEL,
-							payload: values[2].data.sort(compare),
-						});
-						dispatch({
 							type: Actions.PAYMENTS,
-							payload: values[3].data.filter(
+							payload: values[2].data.filter(
 								(item) => item.id !== 'paypal'
 							),
 						});
 						dispatch({
-							type: Actions.FEATURED_NON_VEG,
-							payload: values[4].data.sort(compare),
-						});
-						dispatch({
-							type: Actions.FEATURED_VEG,
-							payload: values[5].data.sort(compare),
-						});
-						dispatch({
 							type: Actions.COUPONS,
-							payload: values[6].data.sort(compare),
+							payload: values[3].data.sort(compare),
 						});
 						dispatch({
 							type: Actions.SHIPPING_ZONES,
+							payload: values[4].data,
+						});
+						dispatch({
+							type: Actions.SHIPPING_METHODS,
+							payload: values[5].data,
+						});
+						dispatch({
+							type: Actions.FEATURED_NON_VEG,
+							payload: values[6].data.sort(compare),
+						});
+						dispatch({
+							type: Actions.FEATURED_VEG,
 							payload: values[7].data.sort(compare),
 						});
+						dispatch({
+							type: Actions.FEATURED_PORK,
+							payload: values[8].data.sort(compare),
+						});
+						dispatch({
+							type: Actions.FEATURED_SEA_FOOD,
+							payload: values[9].data.sort(compare),
+						});
+						dispatch({
+							type: Actions.FEATURED_ICE_CREAM,
+							payload: values[10].data.sort(compare),
+						});
+						dispatch({
+							type: Actions.FEATURED_CHEESE_AND_CREAMS,
+							payload: values[11].data.sort(compare),
+						});
+						dispatch({
+							type: Actions.FEATURED_WONDER_EGGS,
+							payload: values[12].data.sort(compare),
+						});
+						dispatch({
+							type: Actions.FEATURED_MITHUN,
+							payload: values[13].data.sort(compare),
+						});
+
 						GetSubCategoriesData(values[0]);
 					})
 					.catch((error) => console.log(error));
 			})
 			.catch((error) => console.error(error));
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const GetSubCategoriesData = async (categories) => {

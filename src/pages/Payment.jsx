@@ -26,19 +26,41 @@ import Actions from '../redux/Actions';
 import { Address } from '../components';
 
 export default function Payment({ navigation }) {
+	const [cart] = useState(useSelector((state) => state.cart));
+	const [payments] = useState(useSelector((state) => state.payments));
+	const [orderId, setOrderId] = useState('');
+	const [current, setCurrent] = useState(payments[0]);
+	const [coupon, setCoupon] = useState('');
+	const [saving, setSaving] = useState(0);
+	const [deliveryCharge, setDeliveryCharge] = useState(50);
+	const [totalAmount, setTotalAmount] = useState(cart.total);
+	const [convinienceCharge, setConvinienceCharge] = useState(0);
+
+	const dispatch = useDispatch();
+
 	const user = useSelector((state) => state.login);
 	const profile = useSelector((state) => state.profile);
 	const location = useSelector((state) => state.location);
 	const couponData = useSelector((state) => state.coupons);
 	const [show, setShow] = useState(false);
 	const [address, setAddress] = useState({
-		currentLocation: true,
+		type: 'current',
 		address: location.location,
 	});
+
+	const setUpdatedAddress = (addressValue) => {
+		setAddress(addressValue);
+	};
 
 	const [showQRCode, setShowQRCode] = useState(false);
 
 	const razorPayTest = false;
+
+	useEffect(() => {
+		setTotalAmount(
+			cart.total + deliveryCharge + convinienceCharge - saving
+		);
+	}, [cart.total, deliveryCharge, convinienceCharge, saving]);
 
 	useEffect(() => {
 		if (user === null || user.token === null) {
@@ -53,15 +75,23 @@ export default function Payment({ navigation }) {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	const applyCoupon = () => {
+	const applyCoupon = (couponValue) => {
 		if (couponData !== null) {
-			const val = couponData.find((item) => item.code === coupon);
+			const val = couponData.find((item) => item.code === couponValue);
+			const minAmount = parseInt(val.minimum_amount, 10);
 			if (val) {
-				setSaving(parseInt(val.amount, 10));
-				Alert.alert(
-					'Coupon Applied',
-					'Coupon has been successfully applied'
-				);
+				if (minAmount <= totalAmount) {
+					setSaving(parseInt(val.amount, 10));
+					Alert.alert(
+						'Coupon Applied',
+						'Coupon has been successfully applied'
+					);
+				} else {
+					Alert.alert(
+						'Invalid Coupon',
+						`The coupon requires minimum cart value of ₹ ${minAmount} to be applied`
+					);
+				}
 			} else {
 				Alert.alert(
 					'Invalid Coupon',
@@ -76,14 +106,10 @@ export default function Payment({ navigation }) {
 		}
 	};
 
-	const [cart] = useState(useSelector((state) => state.cart));
-	const [payments] = useState(useSelector((state) => state.payments));
-	const [orderId, setOrderId] = useState('');
-	const [current, setCurrent] = useState(payments[0]);
-	const [coupon, setCoupon] = useState('');
-	const [saving, setSaving] = useState(0);
-
-	const dispatch = useDispatch();
+	const setAndApplyCoupon = (val) => {
+		setCoupon(val);
+		applyCoupon(val);
+	};
 
 	const razorpayOrder = async (razorpay) => {
 		try {
@@ -103,7 +129,7 @@ export default function Payment({ navigation }) {
 						),
 				},
 				body: {
-					amount: cart.total * 100,
+					amount: totalAmount * 100,
 					currency: 'INR',
 					receipt: 'Receipt no. 1',
 					payment_capture: 1,
@@ -133,7 +159,7 @@ export default function Payment({ navigation }) {
 				key: razorPayTest
 					? 'rzp_test_pU3kt7puzNQ2qs'
 					: razorpay.settings.key_id.value,
-				amount: (cart.total + 50) * 100,
+				amount: totalAmount * 100,
 				name: 'Ness Frozen Hub',
 				order_id: orderId, //Replace this with an order_id created using Orders API. Learn more at https://razorpay.com/docs/api/orders.
 				prefill: {
@@ -300,6 +326,14 @@ export default function Payment({ navigation }) {
 	};
 
 	const RenderPack = ({ index, item }) => {
+		useEffect(() => {
+			if (current.id === 'razorpay') {
+				const charge = 0.03 * totalAmount;
+				setConvinienceCharge(Math.round(charge));
+			} else {
+				setConvinienceCharge(0);
+			}
+		});
 		const [selected] = useState(current.id === item.id);
 		return (
 			<TouchableOpacity onPress={() => setCurrent(item)}>
@@ -394,11 +428,17 @@ export default function Payment({ navigation }) {
 									Vouchers Available
 								</Text>
 							</View>
-							<TouchableOpacity>
+							<TouchableOpacity
+								onPress={() =>
+									navigation.navigate('CouponsPage', {
+										applyCoupon: setAndApplyCoupon,
+									})
+								}>
 								<View>
 									<Text
 										style={{
 											fontSize: 14,
+											fontFamily: Fonts.semiBold,
 											color: '#ea5f62',
 										}}>
 										View
@@ -428,7 +468,7 @@ export default function Payment({ navigation }) {
 							}}
 							rightIcon={
 								<TouchableOpacity
-									onPress={() => applyCoupon()}
+									onPress={() => applyCoupon(coupon)}
 									style={{
 										height: '80%',
 										aspectRatio: 1,
@@ -495,6 +535,24 @@ export default function Payment({ navigation }) {
 								₹ 50
 							</Text>
 						</View>
+						{convinienceCharge !== 0 && (
+							<View style={styles.basketItem}>
+								<Text
+									style={{
+										fontSize: 14,
+										fontFamily: Fonts.semiBold,
+									}}>
+									Convinience Charge (3%)
+								</Text>
+								<Text
+									style={{
+										fontSize: 14,
+										fontFamily: Fonts.semiBold,
+									}}>
+									₹ {convinienceCharge}
+								</Text>
+							</View>
+						)}
 						<View style={styles.basketItem}>
 							<Text
 								style={{
@@ -508,7 +566,7 @@ export default function Payment({ navigation }) {
 									fontSize: 14,
 									fontFamily: Fonts.semiBold,
 								}}>
-								₹ {cart.total + 50 - saving}
+								₹ {totalAmount}
 							</Text>
 						</View>
 						{saving !== 0 && (
@@ -552,7 +610,11 @@ export default function Payment({ navigation }) {
 						}}>
 						<View
 							style={{
+								flexDirection: 'row',
+								alignItems: 'center',
+								justifyContent: 'space-between',
 								paddingBottom: 20,
+								marginEnd: 10,
 							}}>
 							<Text
 								style={{
@@ -561,29 +623,49 @@ export default function Payment({ navigation }) {
 								}}>
 								Deliver To:
 							</Text>
+							<TouchableOpacity
+								style={{
+									borderRadius: 5,
+									backgroundColor: Colors.white,
+									...Shadow.light,
+								}}
+								onPress={() =>
+									navigation.navigate('AddAddress', {
+										type: address.type,
+										data: address.address,
+										setAddress: setUpdatedAddress,
+									})
+								}>
+								<View
+									style={{
+										padding: 10,
+										paddingHorizontal: 20,
+									}}>
+									<Text
+										style={{
+											fontSize: 12,
+											fontFamily: Fonts.semiBold,
+											color: Colors.black,
+										}}>
+										Update Address
+									</Text>
+								</View>
+							</TouchableOpacity>
 						</View>
 						<View
 							style={{
 								flexDirection: 'row',
 								justifyContent: 'space-between',
 							}}>
-							{address.currentLocation ? (
-								<Text
-									style={{
-										fontSize: 16,
-										fontFamily: Fonts.primary,
-										marginBottom: 10,
-										color: Colors.black,
-									}}>
-									{address.address}
-								</Text>
-							) : (
+							<View
+								style={{
+									width: '70%',
+								}}>
 								<Address data={address.address} />
-							)}
+							</View>
 							<View
 								style={{
 									marginEnd: 20,
-									alignSelf: 'flex-start',
 								}}>
 								<TouchableOpacity
 									onPress={() => setShow(true)}
@@ -680,8 +762,8 @@ export default function Payment({ navigation }) {
 						<TouchableOpacity
 							onPress={() => {
 								setAddress({
-									currentLocation: true,
 									address: location.location,
+									type: 'current',
 								});
 								setShow(false);
 							}}>
@@ -693,63 +775,62 @@ export default function Payment({ navigation }) {
 									}}>
 									Current Location
 								</Text>
-								<Text
-									style={{
-										fontSize: 16,
-										fontFamily: Fonts.primary,
-										marginBottom: 10,
-									}}>
-									{location.location}
-								</Text>
+								<Address data={location.location} />
 							</View>
 						</TouchableOpacity>
-						<View
-							style={{
-								width: '100%',
-								height: 1,
-								backgroundColor: 'gray',
-							}}
-						/>
-						{profile.shipping.first_name !== null && (
-							<TouchableOpacity
-								onPress={() => {
-									setAddress({
-										currentLocation: false,
-										address: profile.shipping,
-									});
-									setShow(false);
-								}}>
-								<Address
-									data={profile.shipping}
-									containerStyle={{
-										paddingStart: 20,
+
+						{profile.shipping.first_name !== '' && (
+							<>
+								<View
+									style={{
+										width: '100%',
+										height: 1,
+										backgroundColor: 'gray',
 									}}
 								/>
-							</TouchableOpacity>
+								<TouchableOpacity
+									onPress={() => {
+										setAddress({
+											address: profile.shipping,
+											type: 'shipping',
+										});
+										setShow(false);
+									}}>
+									<Address
+										data={profile.shipping}
+										containerStyle={{
+											paddingStart: 20,
+										}}
+									/>
+								</TouchableOpacity>
+							</>
 						)}
-						<View
-							style={{
-								width: '100%',
-								height: 1,
-								backgroundColor: 'gray',
-							}}
-						/>
-						{profile.billing.first_name !== null && (
-							<TouchableOpacity
-								onPress={() => {
-									setAddress({
-										currentLocation: false,
-										address: profile.billing,
-									});
-									setShow(false);
-								}}>
-								<Address
-									data={profile.billing}
-									containerStyle={{
-										paddingStart: 20,
+
+						{profile.billing.first_name !== '' && (
+							<>
+								<View
+									style={{
+										width: '100%',
+										height: 1,
+										backgroundColor: 'gray',
 									}}
 								/>
-							</TouchableOpacity>
+								<TouchableOpacity
+									onPress={() => {
+										setAddress({
+											address: profile.billing,
+											type: 'billing',
+										});
+										setShow(false);
+									}}>
+									<Address
+										data={profile.billing}
+										containerStyle={{
+											paddingStart: 20,
+										}}
+									/>
+								</TouchableOpacity>
+							</>
 						)}
 					</View>
 				</View>

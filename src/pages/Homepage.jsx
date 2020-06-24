@@ -33,6 +33,14 @@ export default function Homepage({ navigation, route }) {
 	const [exitApp, setExitApp] = useState(0);
 	const featuredNonVeg = useSelector((state) => state.featuredNonVeg);
 	const featuredVeg = useSelector((state) => state.featuredVeg);
+	const featuredPork = useSelector((state) => state.featuredPork);
+	const featuredSeaFood = useSelector((state) => state.featuredSeaFood);
+	const featuredIceCream = useSelector((state) => state.featuredIceCream);
+	const featuredCheeseAndCream = useSelector(
+		(state) => state.featuredCheeseAndCream
+	);
+	const featuredWonderEggs = useSelector((state) => state.featuredWonderEggs);
+	const featuredMithun = useSelector((state) => state.featuredMithun);
 
 	// useEffect(() => {
 	// 	const backHandler = BackHandler.addEventListener(
@@ -86,26 +94,12 @@ export default function Homepage({ navigation, route }) {
 		return comparison * -1; // Multiplying it with -1 reverses the sorting order
 	};
 
-	const fetchLocations = (zones) => {
-		API.get('shipping/zones/1/locations').then((res) => {
-			const shipping = {
-				zones: zones,
-				locations: res.data,
-			};
-
-			dispatch({ type: Actions.SHIPPING_ZONES, payload: shipping });
-		});
-		setLoading(false);
-	};
-
 	const categoriesData = useSelector((state) => state.categories);
-	const products = useSelector((state) => state.products);
-	const featuredProducts = products.filter((item) => item.featured === true);
 	const simpleCategories = categoriesData.filter(
 		(category) => category.display === 'default'
 	);
 
-	// console.log(categoriesData);
+	console.log(locationData);
 	return (
 		<View style={{ flex: 1 }}>
 			<ScrollView
@@ -122,8 +116,7 @@ export default function Homepage({ navigation, route }) {
 				<View style={{ alignItems: 'center' }}>
 					<View
 						style={{
-							width: wp(100),
-							paddingHorizontal: 16,
+							width: wp(90),
 							flexDirection: 'row',
 							alignItems: 'center',
 							paddingTop: 16,
@@ -140,26 +133,39 @@ export default function Homepage({ navigation, route }) {
 						{locationData.locationAvailable ? (
 							<Text
 								style={{
-									fontSize: 14,
+									fontSize: 12,
 									fontFamily: Fonts.bold,
 								}}>
 								Deliver To:
 								<Text
 									style={{
-										fontSize: 14,
+										fontSize: 12,
 										fontFamily: Fonts.bold,
 									}}>
 									{' '}
-									{locationData.location}
+									{locationData.location.address_1 +
+										locationData.location.address_2 +
+										locationData.location.city +
+										locationData.location.state +
+										'-' +
+										locationData.location.postcode}
 								</Text>
 							</Text>
 						) : (
 							<Text
 								style={{
-									fontSize: 14,
+									fontSize: 13,
 									fontFamily: Fonts.bold,
 								}}>
-								{locationData.location}
+								{locationData.location.address_1 +
+									', ' +
+									locationData.location.address_2 +
+									', ' +
+									locationData.location.city +
+									', ' +
+									locationData.location.state +
+									' - ' +
+									locationData.location.postcode}
 							</Text>
 						)}
 					</View>
@@ -171,38 +177,52 @@ export default function Homepage({ navigation, route }) {
 					<Carousel />
 					<CategoriesFlatList
 						data={featuredVeg}
-						title={'FEATURED VEG'}
+						title={'POPULAR IN VEG'}
 						containerStyle={styles.flatListStyle}
+						viewAll={false}
 					/>
 					<CategoriesFlatList
 						data={featuredNonVeg}
-						title={'FEATURED NON VEG'}
+						title={'POPULAR IN NON VEG'}
 						containerStyle={styles.flatListStyle}
-					/>
-					<CategoriesFlatList
-						data={products}
-						title={'All Products'}
-						itemParentContainerStyle={{
-							width: '50%',
-							alignItems: 'center',
-						}}
-						flatListProps={{
-							horizontal: false,
-							numColumns: 2,
-							initialNumToRender: 10,
-						}}
 						viewAll={false}
 					/>
-					{/* <CategoriesFlatList
-						data={NonVegProducts}
-						title={'Popular in Non-Veg'}
+					<CategoriesFlatList
+						data={featuredPork}
+						title={'POPULAR IN PORK'}
 						containerStyle={styles.flatListStyle}
+						viewAll={false}
 					/>
 					<CategoriesFlatList
-						data={NonVegProducts}
-						title={'Trending Products'}
+						data={featuredSeaFood}
+						title={'POPULAR IN SEA FOOD'}
 						containerStyle={styles.flatListStyle}
-					/> */}
+						viewAll={false}
+					/>
+					<CategoriesFlatList
+						data={featuredIceCream}
+						title={'POPULAR IN ICE CREAM'}
+						containerStyle={styles.flatListStyle}
+						viewAll={false}
+					/>
+					<CategoriesFlatList
+						data={featuredCheeseAndCream}
+						title={'POPULAR IN CHEESE AND CREAMS'}
+						containerStyle={styles.flatListStyle}
+						viewAll={false}
+					/>
+					<CategoriesFlatList
+						data={featuredWonderEggs}
+						title={'POPULAR IN WONDER EGGS'}
+						containerStyle={styles.flatListStyle}
+						viewAll={false}
+					/>
+					<CategoriesFlatList
+						data={featuredMithun}
+						title={'POPULAR IN MITHUN'}
+						containerStyle={styles.flatListStyle}
+						viewAll={false}
+					/>
 				</View>
 			</ScrollView>
 		</View>

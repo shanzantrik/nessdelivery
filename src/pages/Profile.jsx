@@ -121,8 +121,9 @@ export default function Profile({ route }) {
 				// });
 				// navigation.dispatch(resetAction);
 
-				navigation.navigate('Login');
+				navigation.navigate('Location');
 				dispatch({ type: Actions.LOGOUT });
+				dispatch({ type: Actions.CLEAR_CART });
 			}
 		} catch (error) {
 			console.log(error);
