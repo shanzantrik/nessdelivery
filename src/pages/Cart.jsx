@@ -17,6 +17,7 @@ import Actions from '../redux/Actions';
 export default function Card({ navigation }) {
 	const dispatch = useDispatch();
 	const cartData = useSelector((state) => state.cart);
+	const profile = useSelector((state) => state.profile);
 	useEffect(() => {
 		setCart(cartData);
 	}, [cartData]);
@@ -134,16 +135,18 @@ export default function Card({ navigation }) {
 								: item.weight}
 						</Text>
 					</View>
-					<View>
-						{item.selected.on_sale && (
-							<Text style={styles.oldPrice}>
-								₹ {Math.round(item.regular_price)}
+					{profile.role !== 'LFB Role' && (
+						<View>
+							{item.selected.on_sale && (
+								<Text style={styles.oldPrice}>
+									₹ {Math.round(item.regular_price)}
+								</Text>
+							)}
+							<Text style={styles.price}>
+								MRP: ₹ {Math.round(item.price)}
 							</Text>
-						)}
-						<Text style={styles.price}>
-							MRP: ₹ {Math.round(item.price)}
-						</Text>
-					</View>
+						</View>
+					)}
 					<View
 						style={{
 							position: 'absolute',
@@ -184,24 +187,26 @@ export default function Card({ navigation }) {
 						bottom: 0,
 						backgroundColor: '#36474f',
 					}}>
-					<View>
-						<Text
-							style={{
-								fontSize: 14,
-								fontFamily: Fonts.primary,
-								color: Colors.white,
-							}}>
-							₹ {cart.total}
-						</Text>
-						<Text
-							style={{
-								fontSize: 14,
-								fontFamily: Fonts.primary,
-								color: '#90c336',
-							}}>
-							Saved ₹ 20
-						</Text>
-					</View>
+					{profile.role !== 'LFB Role' && (
+						<View>
+							<Text
+								style={{
+									fontSize: 14,
+									fontFamily: Fonts.primary,
+									color: Colors.white,
+								}}>
+								₹ {cart.total}
+							</Text>
+							<Text
+								style={{
+									fontSize: 14,
+									fontFamily: Fonts.primary,
+									color: '#90c336',
+								}}>
+								Saved: ₹ 20
+							</Text>
+						</View>
+					)}
 					<TouchableOpacity
 						activeOpacity={0.6}
 						onPress={() => navigation.navigate('Payment')}>

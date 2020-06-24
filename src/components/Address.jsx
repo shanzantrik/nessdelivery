@@ -6,6 +6,7 @@ import {
 	Modal,
 	StyleSheet,
 	TouchableOpacity,
+	ViewPropTypes,
 } from 'react-native';
 import { Fonts, Colors } from '../constants';
 import PropTypes from 'prop-types';
@@ -64,9 +65,9 @@ export default function Address({ data, containerStyle }) {
 	);
 }
 
-const ViewPropTypes = RNViewPropTypes || View.propTypes;
+// const ViewPropTypes = RNViewPropTypes || View.propTypes;
 
 Address.propTypes = {
 	data: PropTypes.array.isRequired,
-	containerStyle: ViewPropTypes,
+	containerStyle: ViewPropTypes.style,
 };

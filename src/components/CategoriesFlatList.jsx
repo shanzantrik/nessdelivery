@@ -11,6 +11,8 @@ import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { Header, CategoryItem } from './index';
 import PropTypes from 'prop-types';
 import { Shadow } from '../constants';
+import { useNavigation } from '@react-navigation/native';
+import { useSelector } from 'react-redux/lib/hooks/useSelector';
 
 export default function CategoriesFlatList({
 	data,
@@ -24,22 +26,29 @@ export default function CategoriesFlatList({
 	navigateTo,
 	ListFooterComponent,
 }) {
-	const _renderCircularItem = ({ item, index }) => {
-		return (
-			<CategoryItem
-				key={item.name + index}
-				item={item}
-				containerStyle={[
-					styles.circularContainerStyle,
-					itemContainerStyle,
-				]}
-				backgroundColor={item.backgroundColor}
-				imageContainerStyle={styles.circularImageStyle}
-				parentContainerStyle={itemParentContainerStyle}
-				navigateTo={navigateTo}
-			/>
-		);
-	};
+	const navigation = useNavigation();
+	const profile = useSelector((state) => state.profile);
+	const RenderCircularItem = React.memo(
+		({ item, index }) => {
+			return (
+				<CategoryItem
+					key={item.name + index}
+					item={item}
+					containerStyle={[
+						styles.circularContainerStyle,
+						itemContainerStyle,
+					]}
+					backgroundColor={item.backgroundColor}
+					imageContainerStyle={styles.circularImageStyle}
+					parentContainerStyle={itemParentContainerStyle}
+					navigateTo={navigateTo}
+					navigation={navigation}
+					profile={profile}
+				/>
+			);
+		},
+		(prevProps, nextProps) => false
+	);
 	const _keyExtractor = (item, index) => item.id.toString();
 	return (
 		<View style={[{ width: wp(100) }, containerStyle]}>
@@ -48,11 +57,12 @@ export default function CategoriesFlatList({
 				style={styles.container}
 				contentContainerStyle={contentContainerStyle}
 				data={data}
-				renderItem={_renderCircularItem}
+				renderItem={(object) => <RenderCircularItem {...object} />}
 				keyExtractor={_keyExtractor}
 				showsHorizontalScrollIndicator={false}
-				initialNumToRender={20}
+				initialNumToRender={10}
 				removeClippedSubviews={true}
+				maxToRenderPerBatch={10}
 				horizontal
 				ListFooterComponent={ListFooterComponent}
 				{...flatListProps}

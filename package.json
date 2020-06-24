@@ -82,6 +82,7 @@
 		"babel-plugin-react-native-classname-to-style": "^1.2.2",
 		"babel-plugin-react-native-platform-specific-extensions": "^1.1.1",
 		"babel-plugin-react-native-stylename-to-style": "^0.13.0",
+		"babel-plugin-transform-remove-console": "^6.9.4",
 		"eslint": "^7.3.0",
 		"eslint-config-prettier": "^6.11.0",
 		"jest": "^26.0.1",

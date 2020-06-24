@@ -137,7 +137,7 @@ function SplashScreen({ navigation }) {
 						});
 						dispatch({
 							type: Actions.CAROUSEL,
-							payload: values[1].data.sort(compare),
+							payload: values[1].data,
 						});
 						dispatch({
 							type: Actions.PAYMENTS,
@@ -147,7 +147,7 @@ function SplashScreen({ navigation }) {
 						});
 						dispatch({
 							type: Actions.COUPONS,
-							payload: values[3].data.sort(compare),
+							payload: values[3].data,
 						});
 						dispatch({
 							type: Actions.SHIPPING_ZONES,
@@ -159,35 +159,35 @@ function SplashScreen({ navigation }) {
 						});
 						dispatch({
 							type: Actions.FEATURED_NON_VEG,
-							payload: values[6].data.sort(compare),
+							payload: values[6].data,
 						});
 						dispatch({
 							type: Actions.FEATURED_VEG,
-							payload: values[7].data.sort(compare),
+							payload: values[7].data,
 						});
 						dispatch({
 							type: Actions.FEATURED_PORK,
-							payload: values[8].data.sort(compare),
+							payload: values[8].data,
 						});
 						dispatch({
 							type: Actions.FEATURED_SEA_FOOD,
-							payload: values[9].data.sort(compare),
+							payload: values[9].data,
 						});
 						dispatch({
 							type: Actions.FEATURED_ICE_CREAM,
-							payload: values[10].data.sort(compare),
+							payload: values[10].data,
 						});
 						dispatch({
 							type: Actions.FEATURED_CHEESE_AND_CREAMS,
-							payload: values[11].data.sort(compare),
+							payload: values[11].data,
 						});
 						dispatch({
 							type: Actions.FEATURED_WONDER_EGGS,
-							payload: values[12].data.sort(compare),
+							payload: values[12].data,
 						});
 						dispatch({
 							type: Actions.FEATURED_MITHUN,
-							payload: values[13].data.sort(compare),
+							payload: values[13].data,
 						});
 
 						GetSubCategoriesData(values[0]);

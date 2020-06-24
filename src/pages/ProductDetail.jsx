@@ -19,7 +19,7 @@ import {
 import FastImage from 'react-native-fast-image';
 import { SharedElement } from 'react-navigation-shared-element';
 import API from '../API';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 export default function ProductDetail({ navigation, route }) {
 	const {
@@ -28,6 +28,8 @@ export default function ProductDetail({ navigation, route }) {
 		changeQuantity,
 		relatedProductsData,
 	} = route.params;
+
+	const profile = useSelector((state) => state.profile);
 
 	const dispatch = useDispatch();
 
@@ -118,68 +120,79 @@ export default function ProductDetail({ navigation, route }) {
 								{itemName}
 							</Text>
 						</View>
-						<View
-							style={{
-								flexDirection: 'row',
-								width: '60%',
-								alignItems: 'center',
-								justifyContent: 'space-between',
-								marginTop: 4,
-							}}>
-							<Text
-								style={{
-									fontSize: 16,
-									fontFamily: Fonts.bold,
-								}}>
-								MRP: ₹ {price}
-							</Text>
-							<View
-								style={
-									item.sale_price
-										? {
-												flexDirection: 'row',
-												alignItems: 'center',
-										  }
-										: { display: 'none' }
-								}>
-								<Text
-									style={{
-										fontSize: 13,
-										fontFamily: Fonts.semiBold,
-										color: '#ff0000e6',
-										textDecorationLine: 'line-through',
-										marginEnd: 20,
-									}}>
-									₹ {regularPrice}
-								</Text>
+						{profile.role !== 'LFB Role' && (
+							<>
 								<View
 									style={{
-										backgroundColor: '#eb5c5e',
-										borderTopStartRadius: 5,
-										borderBottomEndRadius: 5,
+										flexDirection: 'row',
+										width: '60%',
+										alignItems: 'center',
+										justifyContent: 'space-between',
+										marginTop: 4,
 									}}>
 									<Text
 										style={{
-											marginHorizontal: 10,
-											marginVertical: 2,
-											color: Colors.white,
+											fontSize: 16,
+											fontFamily: Fonts.bold,
 										}}>
-										₹{' '}
-										{parseInt(item.regular_price, 10) -
-											parseInt(item.sale_price, 10)}{' '}
-										off
+										MRP: ₹ {price}
 									</Text>
+									<View
+										style={
+											item.sale_price
+												? {
+														flexDirection: 'row',
+														alignItems: 'center',
+												  }
+												: { display: 'none' }
+										}>
+										<Text
+											style={{
+												fontSize: 13,
+												fontFamily: Fonts.semiBold,
+												color: '#ff0000e6',
+												textDecorationLine:
+													'line-through',
+												marginEnd: 20,
+											}}>
+											₹ {regularPrice}
+										</Text>
+										<View
+											style={{
+												backgroundColor: '#eb5c5e',
+												borderTopStartRadius: 5,
+												borderBottomEndRadius: 5,
+											}}>
+											<Text
+												style={{
+													marginHorizontal: 10,
+													marginVertical: 2,
+													color: Colors.white,
+												}}>
+												₹{' '}
+												{parseInt(
+													item.regular_price,
+													10
+												) -
+													parseInt(
+														item.sale_price,
+														10
+													)}{' '}
+												off
+											</Text>
+										</View>
+									</View>
 								</View>
-							</View>
-						</View>
-						<Text
-							style={{
-								fontSize: 12,
-								fontFamily: Fonts.semiBold,
-								color: 'gray',
-							}}>
-							(Inclusive of all taxes)
-						</Text>
+								<Text
+									style={{
+										fontSize: 12,
+										fontFamily: Fonts.semiBold,
+										color: 'gray',
+									}}>
+									(Inclusive of all taxes)
+								</Text>
+							</>
+						)}
 					</View>
 					<View
 						style={{
@@ -304,11 +317,11 @@ export default function ProductDetail({ navigation, route }) {
 							{item.description.replace(/(<([^>]+)>)/gi, '')}
 						</Text>
 					</View>
-					{relatedProducts.current.length !== 0 && (
+					{relatedProducts.length !== 0 && (
 						<View style={{ marginTop: 20, marginBottom: 30 }}>
 							<CategoriesFlatList
 								title={'Related Products'}
-								data={relatedProducts.current}
+								data={relatedProducts}
 								viewAll={false}
 								navigateTo={'RelatedProductDetail'}
 							/>

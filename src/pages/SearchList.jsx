@@ -4,75 +4,25 @@ import {
 	Text,
 	StyleSheet,
 	FlatList,
-	TouchableOpacity,
-	Easing,
-	TouchableWithoutFeedback,
-	ToastAndroid,
-	Modal,
 	ActivityIndicator,
 } from 'react-native';
-import {
-	widthPercentageToDP as wp,
-	heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
-import { SharedElement } from 'react-native-shared-element';
-import { Colors, Fonts, Shadow } from '../constants';
-import { AddToCart, Search } from '../components';
-import Icon from 'react-native-vector-icons/FontAwesome5';
-import { Picker } from '@react-native-community/picker';
-import Animated from 'react-native-reanimated';
+import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
+import { Colors, Fonts } from '../constants';
+import { AddToCart, Search, ProductItem } from '../components';
 import API from '../API';
-import { useDispatch } from 'react-redux';
-import Actions from '../redux/Actions';
-import FastImage from 'react-native-fast-image';
-import { useSelector } from 'react-redux';
-import { OptimizedFlatList } from 'react-native-optimized-flatlist';
 import Axios from 'axios';
 
 export default function SearchList({ navigation, route }) {
-	// const { data } = route.params;
-
-	const dispatch = useDispatch();
-
-	const searchCategory = useSelector((state) => state.searchCategory);
-	const products = useSelector((state) => state.products);
-	const [searchText, setSearchText] = useState('');
-
 	const [searchProducts, setSearchProducts] = useState([]);
 	const [loading, setLoading] = useState(false);
-	const [loadingMore, setLoadingMore] = useState(false);
 
 	var timer = useRef(null);
 	var cancelToken = useRef(null);
 	const currentPage = useRef(1);
-
-	// const searchList = [];
-	// products.forEach((element) => {
-	// 	if (
-	// 		element.name
-	// 			.toString()
-	// 			.toLowerCase()
-	// 			.includes(searchText.toLowerCase())
-	// 	) {
-	// 		if (searchCategory.id !== -1) {
-	// 			const categoryContains = element.categories.find(
-	// 				(item) => item.id === searchCategory.id
-	// 			);
-	// 			if (categoryContains) {
-	// 				searchList.push(element);
-	// 			}
-	// 		} else {
-	// 			searchList.push(element);
-	// 		}
-	// 	}
-	// });
-	// setLoading(false);
-	// console.log(searchList);
-
-	// setSearchProducts(searchList);
+	const searchText = useRef('');
 
 	const setSearchValue = async (val) => {
-		setSearchText(val);
+		searchText.current = val;
 		if (val !== undefined) {
 			clearTimeout(timer.current);
 			timer.current = setTimeout(async () => {
@@ -97,263 +47,8 @@ export default function SearchList({ navigation, route }) {
 					console.log(error);
 				}
 				setLoading(false);
-			}, 1000);
+			}, 800);
 		}
-	};
-
-	const ProductItem = ({ item, index }) => {
-		const relatedProducts = useRef([]);
-		const cartData = useSelector((state) => state.cart);
-		useEffect(() => {
-			setFirstTimeCart();
-		}, [setFirstTimeCart]);
-
-		const setFirstTimeCart = useCallback(async () => {
-			setCart(cartData);
-			const cartItem = cartData.addedItems.find(
-				(val) => val.id === item.id
-			);
-			if (cartItem) {
-				setCount(cartItem.quantity);
-				btnToggle(true);
-			} else {
-				setCount(0);
-				btnToggle(false);
-			}
-
-			getRelatedProds();
-		}, []);
-
-		const getRelatedProds = async () => {
-			if (item.related_ids.length !== 0) {
-				const relatedProds = [];
-				Promise.all(
-					item.related_ids.map((product_id) => {
-						return API.get(`products/${product_id}`);
-					})
-				)
-					.then((res) => {
-						res.map((data) => {
-							relatedProds.push(data.data);
-						});
-						relatedProducts.current = relatedProds;
-					})
-					.catch((error) => {
-						console.error(error);
-						ToastAndroid.show(
-							'Error getting related products',
-							ToastAndroid.LONG
-						);
-					});
-			}
-		};
-
-		useEffect(() => {
-			const cartItem = cartData.addedItems.find(
-				(val) => val.id === item.id
-			);
-			if (cartItem) {
-				setCount(cartItem.quantity);
-			} else {
-				setCount(0);
-				btnToggle(false);
-			}
-		}, [cartData, cart, item.id, btnEnabled]);
-
-		const [cart, setCart] = useState(cartData);
-
-		const [count, setCount] = useState(0);
-		const [btnEnabled, btnToggle] = useState(count !== 0);
-
-		const [price, setPrice] = useState(
-			item.type === 'variable'
-				? item.product_variations[0].on_sale
-					? item.product_variations[0].regular_price
-					: item.product_variations[0].sale_price
-				: item.price
-		);
-		const countTimer = new Animated.Value(10);
-		const [selectedQuantity, setSelectedQuantity] = useState(
-			item.type === 'variable' ? item.product_variations[0] : item
-		);
-
-		const changeQuantity = (val) => {
-			setSelectedQuantity(val);
-			setPrice(val.on_sale ? val.sale_price : val.regular_price);
-		};
-
-		const navigateToProductDetail = () => {
-			navigation.navigate('ProductDetail', {
-				item: item,
-				type: item.type,
-				selected: selectedQuantity,
-				changeQuantity: changeQuantity,
-				relatedProductsData: relatedProducts,
-			});
-		};
-
-		const countAnimation = () => {
-			Animated.timing(countAnimation, {
-				toValue: 0,
-				duration: 500,
-				easing: Easing.ease,
-			}).start();
-		};
-
-		const cartAction = (action) => {
-			dispatch({
-				type: action,
-				payload: {
-					...item,
-					brand: item.brands[0].name,
-					image: item.images[0].src,
-					price: price,
-					selected: selectedQuantity,
-					quantity: count,
-				},
-			});
-		};
-
-		const AddButton = () => {
-			if (btnEnabled) {
-				return (
-					<Animated.View style={styles.itemCounterContainer}>
-						<TouchableOpacity
-							style={{
-								flex: 1,
-							}}
-							onPress={() => {
-								if (count === 1) {
-									btnToggle(!btnEnabled);
-									cartAction(Actions.REMOVE_FROM_CART);
-								} else {
-									cartAction(Actions.SUB_QUANTITY);
-								}
-							}}>
-							<View style={styles.countContainer}>
-								<Text style={styles.count}>−</Text>
-							</View>
-						</TouchableOpacity>
-						<Animated.View style={styles.countTextContainer}>
-							<Animated.Text style={styles.countText}>
-								{count}
-							</Animated.Text>
-						</Animated.View>
-						<TouchableOpacity
-							style={{
-								flex: 1,
-							}}
-							onPress={() => {
-								cartAction(Actions.ADD_QUANTITY);
-							}}>
-							<Animated.View style={styles.countContainer}>
-								<Text style={styles.count}>+</Text>
-							</Animated.View>
-						</TouchableOpacity>
-					</Animated.View>
-				);
-			} else {
-				return (
-					<TouchableOpacity
-						onPress={() => {
-							btnToggle(!btnEnabled);
-							cartAction(Actions.ADD_TO_CART);
-						}}>
-						<View style={styles.addBtnContainer}>
-							<Text style={styles.addBtnText}>Add</Text>
-						</View>
-					</TouchableOpacity>
-				);
-			}
-		};
-
-		return (
-			<View style={styles.cardContainer} key={index}>
-				<TouchableWithoutFeedback onPress={navigateToProductDetail}>
-					<View
-						style={{
-							width: '30%',
-							margin: 5,
-							alignItems: 'center',
-							justifyContent: 'center',
-						}}>
-						<SharedElement id={`item.${item.id}.photo`}>
-							<FastImage
-								source={{ uri: item?.images[0]?.src }}
-								style={styles.image}
-							/>
-						</SharedElement>
-					</View>
-				</TouchableWithoutFeedback>
-				<View
-					style={{
-						width: '70%',
-					}}>
-					<TouchableWithoutFeedback onPress={navigateToProductDetail}>
-						<View>
-							<Text style={styles.brand}>
-								{item?.brands[0]?.name}
-							</Text>
-							<Text style={styles.title}>{item.name}</Text>
-						</View>
-					</TouchableWithoutFeedback>
-					{item.type === 'variable' ? (
-						<View style={styles.pickerContainer}>
-							<Picker
-								selectedValue={selectedQuantity}
-								onValueChange={(value) => changeQuantity(value)}
-								mode="dropdown"
-								style={styles.picker}
-								itemStyle={styles.pickerItem}>
-								{item.product_variations.map((variation) => {
-									return (
-										<Picker.Item
-											label={variation.attributes[0].option.replace(
-												'-',
-												'.'
-											)}
-											value={variation}
-											itemStyle={{
-												textTransform: 'capitalize',
-											}}
-										/>
-									);
-								})}
-							</Picker>
-						</View>
-					) : (
-						<View>
-							<Text>{item.weight}</Text>
-						</View>
-					)}
-					<View style={!item.sale_price && { marginTop: 20 }}>
-						{item.sale_price !== '' ||
-							(item.on_sale && (
-								<Text
-									style={[
-										styles.oldPrice,
-										!item.sale_price && { display: 'none' },
-									]}>
-									₹ {item.price}
-								</Text>
-							))}
-						<Text style={styles.price}>MRP: ₹ {price}</Text>
-					</View>
-					<View
-						style={{
-							position: 'absolute',
-							right: 10,
-							top: 0,
-							height: '100%',
-							alignItems: 'flex-end',
-							justifyContent: 'flex-end',
-							marginHorizontal: 10,
-						}}>
-						<AddButton />
-					</View>
-				</View>
-			</View>
-		);
 	};
 
 	return (
@@ -365,6 +60,7 @@ export default function SearchList({ navigation, route }) {
 					renderItem={(object) => <ProductItem {...object} />}
 					keyExtractor={(item, index) => item.id.toString()}
 					contentContainerStyle={styles.flatListContainer}
+					initialNumToRender={10}
 					ItemSeparatorComponent={(leadingItem, section) => (
 						<View
 							style={{
@@ -434,7 +130,7 @@ const styles = StyleSheet.create({
 		textTransform: 'capitalize',
 	},
 	flatListContainer: {
-		paddingBottom: 90,
+		paddingBottom: 70,
 	},
 	image: {
 		height: 100,

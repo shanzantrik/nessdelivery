@@ -259,6 +259,11 @@ function HomeStackNavigation({ navigation }) {
 						}}
 					/>
 					<HomeStack.Screen
+						name="Login"
+						component={Login}
+						options={{ headerShown: false }}
+					/>
+					<HomeStack.Screen
 						name="Homepage"
 						component={HomePage}
 						options={{

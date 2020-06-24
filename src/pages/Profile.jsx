@@ -103,25 +103,7 @@ export default function Profile({ route }) {
 				}
 			);
 			if (res.status === 200) {
-				// const resetAction = StackActions.reset({
-				// 	index: 1,
-				// 	actions: [
-				// 		CommonActions.navigate({ routeName: 'Login' }),
-				// 		CommonActions.navigate({ routeName: 'Signup' }),
-				// 	],
-				// });
-				// navigation.dispatch(resetAction);
-				// const resetAction = CommonActions.reset({
-				// 	index: 0,
-				// 	actions: [
-				// 		CommonActions.navigate({
-				// 			routeName: 'Login',
-				// 		}),
-				// 	],
-				// });
-				// navigation.dispatch(resetAction);
-
-				navigation.navigate('Location');
+				navigation.navigate('Login');
 				dispatch({ type: Actions.LOGOUT });
 				dispatch({ type: Actions.CLEAR_CART });
 			}
@@ -130,61 +112,6 @@ export default function Profile({ route }) {
 			Alert.alert('Some error occurred', 'Unable to logout');
 		}
 	};
-
-	// const [current, setCurrent] = useState();
-
-	// const RenderPack = ({ index, item }) => {
-	// 	const [selected] = useState(current.id === item.id);
-	// 	return (
-	// 		<TouchableOpacity onPress={() => setCurrent(item)}>
-	// 			<View
-	// 				style={{
-	// 					flexDirection: 'row',
-	// 					alignItems: 'center',
-	// 					borderColor: selected ? '#69c1d3' : Colors.black,
-	// 					borderWidth: 1,
-	// 					borderRadius: 7,
-	// 					padding: 20,
-	// 					marginBottom: index !== payments.length - 1 ? 20 : 0,
-	// 					backgroundColor: Colors.white,
-	// 				}}>
-	// 				<View
-	// 					style={{
-	// 						height: 24,
-	// 						width: 24,
-	// 						borderRadius: 12,
-	// 						borderColor: selected ? '#69c1d3' : '#000000',
-	// 						borderWidth: 2,
-	// 						alignItems: 'center',
-	// 						justifyContent: 'center',
-	// 					}}>
-	// 					{selected ? (
-	// 						<View
-	// 							style={{
-	// 								width: 14,
-	// 								height: 14,
-	// 								borderRadius: 7,
-	// 								backgroundColor: '#69c1d3',
-	// 							}}
-	// 						/>
-	// 					) : null}
-	// 				</View>
-	// 				<View>
-	// 					<Text
-	// 						style={{
-	// 							fontSize: 14,
-	// 							fontFamily: Fonts.semiBold,
-	// 							marginHorizontal: 10,
-	// 							color: Colors.black,
-	// 							textAlign: 'center',
-	// 						}}>
-	// 						{item.title}
-	// 					</Text>
-	// 				</View>
-	// 			</View>
-	// 		</TouchableOpacity>
-	// 	);
-	// };
 
 	return (
 		<View style={{ flex: 1, backgroundColor: Colors.white }}>

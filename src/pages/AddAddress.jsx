@@ -7,7 +7,6 @@ import {
 	Alert,
 	Modal,
 	ActivityIndicator,
-	Image,
 	ToastAndroid,
 	Platform,
 } from 'react-native';
@@ -23,6 +22,7 @@ import API from '../API';
 import Geolocation from 'react-native-geolocation-service';
 import Geocoder from 'react-native-geocoding';
 import { check, PERMISSIONS, RESULTS, request } from 'react-native-permissions';
+import FastImage from 'react-native-fast-image';
 
 export default function AddAddress({ navigation, route }) {
 	let data, type, setAddress;
@@ -51,12 +51,12 @@ export default function AddAddress({ navigation, route }) {
 		});
 
 		var i = 1;
-		while (arr === undefined && i <= json.results.length) {
+		while (arr === undefined && i < json.results.length) {
 			arr = json.results[i++].address_components.find((item) => {
 				return item.types.includes(addressType);
 			});
 		}
-		
+
 		if (arr === undefined) {
 			return '';
 		} else {
@@ -108,7 +108,8 @@ export default function AddAddress({ navigation, route }) {
 				console.warn(error);
 				setLoading(false);
 				console.log('Set Loading to False --> Error in Geocoding API');
-			});
+			})
+			.finally(() => setLoading(false));
 	};
 
 	const checkGeofencing = async () => {
@@ -175,6 +176,7 @@ export default function AddAddress({ navigation, route }) {
 							'Location permission is required\n\nPlease enable it by going into app settings',
 							ToastAndroid.LONG
 						);
+						setLoading(false);
 						console.log('Set Loading to False');
 						break;
 				}
@@ -182,8 +184,7 @@ export default function AddAddress({ navigation, route }) {
 			.catch((error) => {
 				console.log(error);
 				console.log('Set Loading to False');
-			})
-			.finally(() => setLoading(false));
+			});
 	};
 
 	const requestLocationPermission = () => {
@@ -316,7 +317,7 @@ export default function AddAddress({ navigation, route }) {
 								height: 30,
 								marginEnd: 10,
 							}}>
-							<Image
+							<FastImage
 								source={require('../assets/others/location_icon.png')}
 								style={{
 									width: '100%',
@@ -361,6 +362,7 @@ export default function AddAddress({ navigation, route }) {
 						keyboardType={'email-address'}
 						value={firstName}
 						onChangeText={(val) => setFirstName(val)}
+						on
 					/>
 				</View>
 				<View style={styles.inputContainer}>
@@ -441,7 +443,7 @@ export default function AddAddress({ navigation, route }) {
 
 const styles = StyleSheet.create({
 	container: {
-		height: hp(50),
+		flex: 1,
 		alignItems: 'center',
 	},
 	emailContainer: {

@@ -14,17 +14,21 @@ function CarouselComponent({ containerStyle }) {
 	const sliderWidth = wp(100),
 		itemWidth = wp(100);
 	const [activeSlide, setActiveSlide] = useState(1);
-	const _renderItem = ({ item, index }) => {
-		return (
-			<View>
-				<FastImage
-					source={{ uri: item.source_url }}
-					style={styles.image}
-					resizeMode={FastImage.resizeMode.contain}
-				/>
-			</View>
-		);
-	};
+	const RenderCarousel = React.memo(
+		({ item, index }) => {
+			return (
+				<View>
+					<FastImage
+						source={{ uri: item.source_url }}
+						style={styles.image}
+						resizeMode={FastImage.resizeMode.contain}
+					/>
+				</View>
+			);
+		},
+		(prevProps, nextProps) =>
+			prevProps.item.source_url === nextProps.item.source_url
+	);
 
 	return (
 		<View style={[styles.container, containerStyle]}>
@@ -32,7 +36,7 @@ function CarouselComponent({ containerStyle }) {
 				<Carousel
 					ref={(c) => (_carousel = c)}
 					data={data}
-					renderItem={_renderItem}
+					renderItem={(object) => <RenderCarousel {...object} />}
 					sliderWidth={sliderWidth}
 					itemWidth={itemWidth}
 					firstItem={activeSlide}

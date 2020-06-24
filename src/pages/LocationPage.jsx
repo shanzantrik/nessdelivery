@@ -76,7 +76,7 @@ export default function LocationPage({ navigation }) {
 		});
 
 		var i = 1;
-		while (arr === undefined && i <= json.results.length) {
+		while (arr === undefined && i < json.results.length) {
 			arr = json.results[i++].address_components.find((item) => {
 				return item.types.includes(addressType);
 			});
@@ -118,6 +118,21 @@ export default function LocationPage({ navigation }) {
 					},
 				});
 
+				console.log({
+					location: {
+						first_name: '',
+						last_name: '',
+						company: '',
+						address_1: getAddress('route', json),
+						address_2: getAddress('sublocality', json),
+						city: getAddress('administrative_area_level_2', json),
+						state: getAddress('administrative_area_level_1', json),
+						country: getAddress('country', json),
+						postcode: getAddress('postal_code', json),
+					},
+					locationAvailale: true,
+				});
+
 				navigateToHomepage();
 			})
 
@@ -125,6 +140,10 @@ export default function LocationPage({ navigation }) {
 				console.warn(error);
 				setLoading(false);
 				console.log('Set Loading to False --> Error in Geocoding API');
+				ToastAndroid.show(
+					'Some Error Occurred',
+					'The location was not fetched.'
+				);
 			});
 	};
 
@@ -137,67 +156,69 @@ export default function LocationPage({ navigation }) {
 					lng: position.coords.longitude,
 				};
 
-				// Getting the Latitude from the location json
-				GeoFencing.containsLocation(
-					point,
-					GEOFENCE.features[0].geometry.coordinates
-				)
-					.then(() => {
-						console.log("Welcome to Nes's Frozen Delivery");
-						ToastAndroid.show(
-							"Welcome to Nes's Frozen Delivery",
-							ToastAndroid.LONG
-						);
+				getLocationName(point.lat, point.lng);
 
-						getLocationName(point.lat, point.lng);
-					})
-					.catch(() => {
-						console.log(
-							'Your location is not within the delivery area\n\nPlease check back later'
-						);
-						ToastAndroid.show(
-							'Your location is not within the delivery area\n\nPlease check back later',
-							ToastAndroid.LONG
-						);
+				// // Getting the Latitude from the location json
+				// GeoFencing.containsLocation(
+				// 	point,
+				// 	GEOFENCE.features[0].geometry.coordinates
+				// )
+				// 	.then(() => {
+				// 		console.log("Welcome to Nes's Frozen Delivery");
+				// 		ToastAndroid.show(
+				// 			"Welcome to Nes's Frozen Delivery",
+				// 			ToastAndroid.LONG
+				// 		);
 
-						dispatch({
-							type: Actions.LOCATION,
-							payload: {
-								location: {
-									first_name: '',
-									last_name: '',
-									company: '',
-									address_1: getAddress(
-										'route',
-										locationJSON
-									),
-									address_2: getAddress(
-										'sublocality',
-										locationJSON
-									),
-									city: getAddress(
-										'administrative_area_level_2',
-										locationJSON
-									),
-									state: getAddress(
-										'administrative_area_level_1',
-										locationJSON
-									),
-									country: getAddress(
-										'country',
-										locationJSON
-									),
-									postcode: getAddress(
-										'postal_code',
-										locationJSON
-									),
-								},
-								locationAvailale: true,
-							},
-						});
+				// 		getLocationName(point.lat, point.lng);
+				// 	})
+				// 	.catch(() => {
+				// 		console.log(
+				// 			'Your location is not within the delivery area\n\nPlease check back later'
+				// 		);
+				// 		ToastAndroid.show(
+				// 			'Your location is not within the delivery area\n\nPlease check back later',
+				// 			ToastAndroid.LONG
+				// 		);
 
-						navigateToHomepage();
-					});
+				// 		dispatch({
+				// 			type: Actions.LOCATION,
+				// 			payload: {
+				// 				location: {
+				// 					first_name: '',
+				// 					last_name: '',
+				// 					company: '',
+				// 					address_1: getAddress(
+				// 						'route',
+				// 						locationJSON
+				// 					),
+				// 					address_2: getAddress(
+				// 						'sublocality',
+				// 						locationJSON
+				// 					),
+				// 					city: getAddress(
+				// 						'administrative_area_level_2',
+				// 						locationJSON
+				// 					),
+				// 					state: getAddress(
+				// 						'administrative_area_level_1',
+				// 						locationJSON
+				// 					),
+				// 					country: getAddress(
+				// 						'country',
+				// 						locationJSON
+				// 					),
+				// 					postcode: getAddress(
+				// 						'postal_code',
+				// 						locationJSON
+				// 					),
+				// 				},
+				// 				locationAvailale: true,
+				// 			},
+				// 		});
+
+				// 		navigateToHomepage();
+				// 	});
 			},
 			(error) => {
 				Alert.alert('Some Error Occurred', error.message);

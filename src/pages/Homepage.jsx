@@ -36,8 +36,8 @@ export default function Homepage({ navigation, route }) {
 	const featuredPork = useSelector((state) => state.featuredPork);
 	const featuredSeaFood = useSelector((state) => state.featuredSeaFood);
 	const featuredIceCream = useSelector((state) => state.featuredIceCream);
-	const featuredCheeseAndCream = useSelector(
-		(state) => state.featuredCheeseAndCream
+	const featuredCheeseAndCreams = useSelector(
+		(state) => state.featuredCheeseAndCreams
 	);
 	const featuredWonderEggs = useSelector((state) => state.featuredWonderEggs);
 	const featuredMithun = useSelector((state) => state.featuredMithun);
@@ -183,7 +183,7 @@ export default function Homepage({ navigation, route }) {
 					/>
 					<CategoriesFlatList
 						data={featuredNonVeg}
-						title={'POPULAR IN NON VEG'}
+						title={'POPULAR IN CHICKEN'}
 						containerStyle={styles.flatListStyle}
 						viewAll={false}
 					/>
@@ -206,7 +206,7 @@ export default function Homepage({ navigation, route }) {
 						viewAll={false}
 					/>
 					<CategoriesFlatList
-						data={featuredCheeseAndCream}
+						data={featuredCheeseAndCreams}
 						title={'POPULAR IN CHEESE AND CREAMS'}
 						containerStyle={styles.flatListStyle}
 						viewAll={false}

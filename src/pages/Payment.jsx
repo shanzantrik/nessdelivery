@@ -388,217 +388,222 @@ export default function Payment({ navigation }) {
 	return (
 		<View style={{ flex: 1 }}>
 			<ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
-				<View>
-					<View>
-						<View style={styles.cardContainer}>
+				<>
+					{profile.role !== 'LFB Role' && (
+						<>
+							<View>
+								<View style={styles.cardContainer}>
+									<View
+										style={{
+											flexDirection: 'row',
+											alignItems: 'center',
+											justifyContent: 'center',
+										}}>
+										<View
+											style={{
+												width: 25,
+												height: 25,
+												alignItems: 'center',
+												justifyContent: 'center',
+												borderColor: Colors.greenText,
+												borderWidth: 1,
+												borderRadius: 12,
+												marginEnd: 10,
+											}}>
+											<Icon
+												name="percent"
+												style={{
+													margin: 5,
+													fontSize: 12,
+													fontFamily: Fonts.semiBold,
+													textAlign: 'center',
+													color: Colors.greenText,
+												}}
+											/>
+										</View>
+										<Text
+											style={{
+												fontSize: 14,
+												fontFamily: Fonts.semiBold,
+												color: Colors.greenText,
+											}}>
+											Vouchers Available
+										</Text>
+									</View>
+									<TouchableOpacity
+										onPress={() =>
+											navigation.navigate('CouponsPage', {
+												applyCoupon: setAndApplyCoupon,
+											})
+										}>
+										<View>
+											<Text
+												style={{
+													fontSize: 14,
+													fontFamily: Fonts.semiBold,
+													color: '#ea5f62',
+												}}>
+												View
+											</Text>
+										</View>
+									</TouchableOpacity>
+								</View>
+								<Input
+									placeholder={'Enter Coupon'}
+									value={coupon}
+									onChangeText={(val) => setCoupon(val)}
+									inputContainerStyle={{
+										flexDirection: 'row',
+										alignItems: 'center',
+										justifyContent: 'space-between',
+										marginHorizontal: 20,
+										backgroundColor: Colors.white,
+										borderRadius: 8,
+										borderBottomWidth: 0,
+									}}
+									containerStyle={{
+										paddingHorizontal: 0,
+									}}
+									inputStyle={{
+										fontSize: 14,
+										paddingStart: 10,
+									}}
+									rightIcon={
+										<TouchableOpacity
+											onPress={() => applyCoupon(coupon)}
+											style={{
+												height: '80%',
+												aspectRatio: 1,
+												marginEnd: 10,
+												alignItems: 'center',
+												justifyContent: 'center',
+												display:
+													coupon.length === 0
+														? 'none'
+														: 'flex',
+											}}>
+											<Icon
+												name="check"
+												style={{
+													height: '80%',
+													aspectRatio: 1,
+													borderRadius: 25,
+													borderColor: Colors.black,
+													borderWidth: 1,
+													textAlign: 'center',
+													textAlignVertical: 'center',
+												}}
+											/>
+										</TouchableOpacity>
+									}
+								/>
+							</View>
 							<View
 								style={{
-									flexDirection: 'row',
-									alignItems: 'center',
-									justifyContent: 'center',
+									backgroundColor: Colors.white,
+									marginHorizontal: 20,
+									borderRadius: 8,
+									paddingVertical: 10,
 								}}>
-								<View
-									style={{
-										width: 25,
-										height: 25,
-										alignItems: 'center',
-										justifyContent: 'center',
-										borderColor: Colors.greenText,
-										borderWidth: 1,
-										borderRadius: 12,
-										marginEnd: 10,
-									}}>
-									<Icon
-										name="percent"
+								<View style={styles.basketItem}>
+									<Text
 										style={{
-											margin: 5,
-											fontSize: 12,
-											fontFamily: Fonts.semiBold,
-											textAlign: 'center',
-											color: Colors.greenText,
-										}}
-									/>
+											fontSize: 14,
+											fontFamily: Fonts.primary,
+										}}>
+										Basket Value
+									</Text>
+									<Text
+										style={{
+											fontSize: 14,
+											fontFamily: Fonts.primary,
+										}}>
+										₹ {cart.total}
+									</Text>
 								</View>
-								<Text
-									style={{
-										fontSize: 14,
-										fontFamily: Fonts.semiBold,
-										color: Colors.greenText,
-									}}>
-									Vouchers Available
-								</Text>
-							</View>
-							<TouchableOpacity
-								onPress={() =>
-									navigation.navigate('CouponsPage', {
-										applyCoupon: setAndApplyCoupon,
-									})
-								}>
-								<View>
+								<View style={styles.basketItem}>
+									<Text
+										style={{
+											fontSize: 14,
+											fontFamily: Fonts.primary,
+										}}>
+										Delivery Charge
+									</Text>
+									<Text
+										style={{
+											fontSize: 14,
+											fontFamily: Fonts.primary,
+										}}>
+										₹ 50
+									</Text>
+								</View>
+								{convinienceCharge !== 0 && (
+									<View style={styles.basketItem}>
+										<Text
+											style={{
+												fontSize: 14,
+												fontFamily: Fonts.semiBold,
+											}}>
+											Convinience Charge (3%)
+										</Text>
+										<Text
+											style={{
+												fontSize: 14,
+												fontFamily: Fonts.semiBold,
+											}}>
+											₹ {convinienceCharge}
+										</Text>
+									</View>
+								)}
+								<View style={styles.basketItem}>
 									<Text
 										style={{
 											fontSize: 14,
 											fontFamily: Fonts.semiBold,
-											color: '#ea5f62',
 										}}>
-										View
+										Total Amount Payable
+									</Text>
+									<Text
+										style={{
+											fontSize: 14,
+											fontFamily: Fonts.semiBold,
+										}}>
+										₹ {totalAmount}
 									</Text>
 								</View>
-							</TouchableOpacity>
-						</View>
-						<Input
-							placeholder={'Enter Coupon'}
-							value={coupon}
-							onChangeText={(val) => setCoupon(val)}
-							inputContainerStyle={{
-								flexDirection: 'row',
-								alignItems: 'center',
-								justifyContent: 'space-between',
-								marginHorizontal: 20,
-								backgroundColor: Colors.white,
-								borderRadius: 8,
-								borderBottomWidth: 0,
-							}}
-							containerStyle={{
-								paddingHorizontal: 0,
-							}}
-							inputStyle={{
-								fontSize: 14,
-								paddingStart: 10,
-							}}
-							rightIcon={
-								<TouchableOpacity
-									onPress={() => applyCoupon(coupon)}
-									style={{
-										height: '80%',
-										aspectRatio: 1,
-										marginEnd: 10,
-										alignItems: 'center',
-										justifyContent: 'center',
-										display:
-											coupon.length === 0
-												? 'none'
-												: 'flex',
-									}}>
-									<Icon
-										name="check"
-										style={{
-											height: '80%',
-											aspectRatio: 1,
-											borderRadius: 25,
-											borderColor: Colors.black,
-											borderWidth: 1,
-											textAlign: 'center',
-											textAlignVertical: 'center',
-										}}
-									/>
-								</TouchableOpacity>
-							}
-						/>
-					</View>
-					<View
-						style={{
-							backgroundColor: Colors.white,
-							marginHorizontal: 20,
-							borderRadius: 8,
-							paddingVertical: 10,
-						}}>
-						<View style={styles.basketItem}>
-							<Text
-								style={{
-									fontSize: 14,
-									fontFamily: Fonts.primary,
-								}}>
-								Basket Value
-							</Text>
-							<Text
-								style={{
-									fontSize: 14,
-									fontFamily: Fonts.primary,
-								}}>
-								₹ {cart.total}
-							</Text>
-						</View>
-						<View style={styles.basketItem}>
-							<Text
-								style={{
-									fontSize: 14,
-									fontFamily: Fonts.primary,
-								}}>
-								Delivery Charge
-							</Text>
-							<Text
-								style={{
-									fontSize: 14,
-									fontFamily: Fonts.primary,
-								}}>
-								₹ 50
-							</Text>
-						</View>
-						{convinienceCharge !== 0 && (
-							<View style={styles.basketItem}>
-								<Text
-									style={{
-										fontSize: 14,
-										fontFamily: Fonts.semiBold,
-									}}>
-									Convinience Charge (3%)
-								</Text>
-								<Text
-									style={{
-										fontSize: 14,
-										fontFamily: Fonts.semiBold,
-									}}>
-									₹ {convinienceCharge}
-								</Text>
+								{saving !== 0 && (
+									<View
+										style={[
+											styles.basketItem,
+											{
+												backgroundColor:
+													Colors.greenBackground,
+												marginHorizontal: 10,
+												paddingHorizontal: 5,
+												borderRadius: 6,
+											},
+										]}>
+										<Text
+											style={{
+												fontSize: 14,
+												fontFamily: Fonts.semiBold,
+												color: Colors.greenText,
+											}}>
+											Total Savings
+										</Text>
+										<Text
+											style={{
+												fontSize: 14,
+												fontFamily: Fonts.semiBold,
+												color: Colors.greenText,
+											}}>
+											₹ {saving}
+										</Text>
+									</View>
+								)}
 							</View>
-						)}
-						<View style={styles.basketItem}>
-							<Text
-								style={{
-									fontSize: 14,
-									fontFamily: Fonts.semiBold,
-								}}>
-								Total Amount Payable
-							</Text>
-							<Text
-								style={{
-									fontSize: 14,
-									fontFamily: Fonts.semiBold,
-								}}>
-								₹ {totalAmount}
-							</Text>
-						</View>
-						{saving !== 0 && (
-							<View
-								style={[
-									styles.basketItem,
-									{
-										backgroundColor: Colors.greenBackground,
-										marginHorizontal: 10,
-										paddingHorizontal: 5,
-										borderRadius: 6,
-									},
-								]}>
-								<Text
-									style={{
-										fontSize: 14,
-										fontFamily: Fonts.semiBold,
-										color: Colors.greenText,
-									}}>
-									Total Savings
-								</Text>
-								<Text
-									style={{
-										fontSize: 14,
-										fontFamily: Fonts.semiBold,
-										color: Colors.greenText,
-									}}>
-									₹ {saving}
-								</Text>
-							</View>
-						)}
-					</View>
+						</>
+					)}
 					<View
 						style={{
 							marginHorizontal: 20,
@@ -739,7 +744,7 @@ export default function Payment({ navigation }) {
 							</Text>
 						</View>
 					</TouchableOpacity>
-				</View>
+				</>
 			</ScrollView>
 			<Modal
 				style={StyleSheet.absoluteFill}
